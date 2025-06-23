@@ -17,7 +17,7 @@
     *   支持从单个文件自动拆分数据集。
     *   支持使用用户预先划分好的训练/验证/测试集。
     *   支持纯特征数据，无需SMILES，可作为通用机器学习框架使用。
-*   **强大的特征工程**：
+*   **集成的特征工程**：
     *   无缝集成多种分子特征生成方法（RDKit指纹、描述符）。
     *   内置支持先进的预训练模型（Uni-Mol, ChemBERTa, MolT5等）生成分子嵌入。
     *   能够组合动态生成的特征和用户提供的预计算特征。
@@ -284,34 +284,34 @@ output/
 
 本项目的代码结构清晰，遵循模块化的设计原则：
 
-*   **`main.py`**: :classical_building: 项目的唯一入口。它负责解析配置文件路径并启动核心流程。
+*   **`main.py`**: 项目的唯一入口。它负责解析配置文件路径并启动核心流程。
 
-*   **`config.yaml`**: :gear: 实验的“设计蓝图”。用户在这里定义所有实验参数，实现代码与配置的分离。
+*   **`config.yaml`**: 实验的“设计蓝图”。用户在这里定义所有实验参数，实现代码与配置的分离。
 
-*   **`core/`**: :brain: 项目的核心大脑。
+*   **`core/`**: 项目的核心大脑。
     *   `config_loader.py`: 负责加载和验证 `config.yaml` 文件。
     *   `run_manager.py`: 实验的总调度中心。它根据配置，依次调用数据处理、拆分、预处理和模型训练等模块。
     *   `trainer_setup.py`: 负责具体的模型训练循环。它为每个指定的模型设置优化器，并调用它们进行训练和评估。
 
-*   **`optimizers/`**: :wrench: 模型优化器。
+*   **`optimizers/`**: 模型优化器。
     *   `base_optimizer.py`: 定义了所有优化器的抽象基类，统一了 `optimize`, `fit`, `predict` 等接口。
     *   `sklearn_optimizer.py`: 实现了对所有 Scikit-learn 兼容模型的超参数优化。
     *   `ann_optimizer.py`: 专门为基于 PyTorch 的人工神经网络（ANN）模型实现的优化器。
 
-*   **`utils/`**: :toolbox: 通用工具箱。
+*   **`utils/`**: 通用工具箱。
     *   `feature_generator.py`: 强大的特征生成统一接口，可以调用各种后端模块生成特征。
     *   `mol_fp_features.py`: RDKit 特征计算的后端。
     *   `transformer_embeddings.py`, `unimol_embedding.py`: 分子嵌入模型的后端。
     *   `io.py`: 负责所有文件I/O操作，如保存模型、记录日志、写入预测结果。
     *   `data.py`, `metrics.py`: 提供数据处理和性能评估的辅助函数。
 
-*   **`models/`**: :bricks: 模型定义。
+*   **`models/`**: 模型定义。
     *   `ann.py`: 定义了 PyTorch ANN 模型的网络结构。
     *   `sklearn_models.py`: 集中管理所有从 Scikit-learn 及其生态（XGBoost, LightGBM等）导入的模型类。
 
 ---
 
-## :wrench: 自定义与扩展
+##  自定义与扩展
 
 本框架具有良好的扩展性。例如，要添加一个新模型或新特征：
 
