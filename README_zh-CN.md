@@ -8,6 +8,8 @@
 
 ---
 
+<p align="center">   <a href="README.md">English</a> </p>
+
 ## :sparkles: 核心功能
 
 *   **配置驱动**：整个实验流程由一个独立的 `config.yaml` 文件控制，无需修改任何代码。
