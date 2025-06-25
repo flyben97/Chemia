@@ -96,9 +96,19 @@ def run_all_models_on_data(X_train_main, y_train, X_val, y_val, X_test, y_test,
         )
         
         model_runtime = time.time() - model_start_time
-        save_model_artifact(optimizer.best_model_, f"{model_name}_model", model_dir, is_pytorch_model=is_ann, console=console)
+        
+        # --- MODIFICATION: Pass model_name to the saving function ---
+        save_model_artifact(
+            optimizer.best_model_, 
+            f"{model_name}_model", 
+            model_dir, 
+            model_name=model_name, # Pass the model name
+            is_pytorch_model=is_ann, 
+            console=console
+        )
+        
         save_hyperparameters(best_params, model_name, model_dir, console=console)
-        # 传递 config 字典而不是 args 对象
+        
         log_results(model_name, best_params, best_score, metrics, model_dir, task_type,
                     best_trial_fold_scores, console, experiment_run_name, model_runtime,
                     config, data_shapes=data_shapes)

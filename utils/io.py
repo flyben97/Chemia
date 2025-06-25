@@ -8,6 +8,8 @@ import pandas as pd
 import json 
 from rich.console import Console
 import textwrap
+import re
+from rdkit.Chem import Descriptors  # <<< FIX: Import the Descriptors module
 
 default_console = Console()
 
@@ -21,27 +23,23 @@ CRAFT_BANNER = r"""
 """
 
 def _format_config_to_str(config_dict: dict) -> str:
-    """
-    Formats a configuration dictionary into a readable string for logging.
-    This function flattens the nested dictionary for clarity.
-    """
     if not isinstance(config_dict, dict):
         return ""
     
+    clean_config = config_dict.copy()
+    if '_internal_feature_names' in clean_config:
+        del clean_config['_internal_feature_names'] # Don't log the huge list of names
+
     try:
-        # Flatten the nested dictionary for a cleaner log display
-        # e.g., data: {smiles_col: 'SMILES'} becomes 'data_smiles_col: SMILES'
-        flat_config = pd.json_normalize(config_dict, sep='.').to_dict(orient='records')[0]
+        flat_config = pd.json_normalize(clean_config, sep='.').to_dict(orient='records')[0]
     except (IndexError, TypeError):
-        # Fallback for empty or non-standard dict
-        flat_config = config_dict
+        flat_config = clean_config
 
     parts = []
     for key, value in flat_config.items():
         if value is None:
             continue
         if isinstance(value, list):
-            # For lists, just show the key and number of items or the items themselves if short
             if len(value) > 3:
                 parts.append(f"{key}=[{len(value)} items]")
             else:
@@ -50,6 +48,46 @@ def _format_config_to_str(config_dict: dict) -> str:
             parts.append(f"{key}={value}")
     
     return ", ".join(parts)
+
+def _summarize_feature_order(feature_names: list) -> str:
+    """ Summarizes the feature list into a readable string. """
+    if not feature_names:
+        return "N/A"
+    
+    # Use regex to find prefixes like "morgan_", "rdkit_", "chemberta_", etc.
+    # Also handles descriptors that don't have a '_' separator.
+    try:
+        prefixes = [re.match(r'^([a-zA-Z0-9]+)(_|\d|$)', name).group(1) for name in feature_names]
+    except (AttributeError, TypeError):
+        # Fallback for unexpected feature names
+        return "Unable to summarize feature order."
+
+    summary_parts = []
+    current_prefix = None
+    count = 0
+    
+    # Get a set of known descriptor names for faster lookup
+    descriptor_names_set = {name.lower() for name, func in Descriptors._descList}
+
+    for prefix in prefixes:
+        # Normalize descriptor names
+        if prefix.lower() in descriptor_names_set or prefix == "Num": # "Num" is a common start for some descriptors
+             prefix_normalized = "rdkit_descriptors"
+        else:
+             prefix_normalized = prefix
+
+        if prefix_normalized != current_prefix:
+            if current_prefix is not None:
+                summary_parts.append(f"{current_prefix} ({count} features)")
+            current_prefix = prefix_normalized
+            count = 1
+        else:
+            count += 1
+            
+    if current_prefix is not None:
+        summary_parts.append(f"{current_prefix} ({count} features)")
+        
+    return " -> ".join(summary_parts)
 
 
 def ensure_experiment_directories(base_output_dir, experiment_run_name, console=None):
@@ -67,14 +105,36 @@ def ensure_model_specific_directory(models_base_dir, model_name_short, console=N
     os.makedirs(model_dir, exist_ok=True)
     return model_dir
 
-def save_model_artifact(model_object, model_artifact_name, model_specific_output_dir, is_pytorch_model=False, console=None):
+def save_model_artifact(model_object, model_artifact_name, model_specific_output_dir, 
+                        model_name: str, is_pytorch_model: bool = False, console=None):
+    """
+    Saves a model artifact, with special handling for different model types.
+    - CatBoost models are saved in their native .cbm format.
+    - XGBoost models are saved in their native .json format.
+    - PyTorch models are saved as .pth state dictionaries.
+    - All other models are saved using joblib.
+    """
     if console is None: console = default_console
-    if is_pytorch_model:
+    
+    model_name_lower = model_name.lower()
+    
+    if model_name_lower == 'catboost':
+        # Use CatBoost's native saving method
+        model_path = os.path.join(model_specific_output_dir, f"{model_artifact_name}.cbm")
+        model_object.save_model(model_path, format='cbm')
+    elif model_name_lower == 'xgboost':
+        # Use XGBoost's native saving method
+        model_path = os.path.join(model_specific_output_dir, f"{model_artifact_name}.json")
+        model_object.save_model(model_path)
+    elif is_pytorch_model:
+        # PyTorch model saving
         model_path = os.path.join(model_specific_output_dir, f"{model_artifact_name}.pth")
         torch.save(model_object.state_dict(), model_path)
     else: 
+        # Default to joblib for other scikit-learn compatible models
         model_path = os.path.join(model_specific_output_dir, f"{model_artifact_name}.joblib")
         joblib.dump(model_object, model_path)
+        
     console.print(f"  [green]✓ Saved model artifact[/green] '{model_artifact_name}' to [dim]{model_path}[/dim]")
     return model_path
 
@@ -168,6 +228,12 @@ def log_results(model_name_short, best_params, best_score, metrics_dict,
     log_content.append(f"{'Model Trained:':<25} {model_name_short.upper()}")
     log_content.append(f"{'Task Type:':<25} {task_type}")
 
+    if config and '_internal_feature_names' in config:
+        feature_names = config['_internal_feature_names']
+        feature_summary_str = _summarize_feature_order(feature_names)
+        wrapped_feat_str = textwrap.fill(feature_summary_str, width=86, initial_indent=' ' * 27, subsequent_indent=' ' * 27).strip()
+        log_content.append(f"{'Feature Concatenation:':<25} {wrapped_feat_str}")
+        
     if data_shapes:
         log_content.append("\n" + "--- Data & Split Information ---")
         train_shape = data_shapes.get('train', ('N/A', 'N/A'))
@@ -246,6 +312,13 @@ def log_experiment_summary(run_base_dir, experiment_run_name, config, total_dura
         config_str = _format_config_to_str(config)
         wrapped_config = textwrap.fill(config_str, width=86, initial_indent=' ' * 27, subsequent_indent=' ' * 27).strip()
         log_content.append(f"{'Run Configuration:':<25} {wrapped_config}")
+    
+    if config and '_internal_feature_names' in config:
+        feature_names = config['_internal_feature_names']
+        feature_summary_str = _summarize_feature_order(feature_names)
+        wrapped_feat_str = textwrap.fill(feature_summary_str, width=86, initial_indent=' ' * 27, subsequent_indent=' ' * 27).strip()
+        log_content.append(f"{'Feature Concatenation:':<25} {wrapped_feat_str}")
+
     log_content.extend(["\n" + "="*88, "  MODEL PERFORMANCE SUMMARY", "="*88])
 
     if not all_results:
@@ -348,7 +421,6 @@ def save_data_splits_csv(data_splits_dir, dataset_name_prefix,
     return csv_paths
 
 def load_data_splits_csv(csv_dir, dataset_name_prefix, console=None):
-    # ... (此函数是读取，通常不需要修改，但为了稳健可以加上 encoding) ...
     if console is None:
         console = default_console
     data_dict = {}
@@ -379,7 +451,6 @@ def load_data_splits_csv(csv_dir, dataset_name_prefix, console=None):
 
     le_classes_path = os.path.join(csv_dir, f"{dataset_name_prefix}_label_encoder_classes.txt")
     if os.path.exists(le_classes_path):
-        # --- 关键修正 5：为 label encoder classes 文件读取添加 encoding ---
         with open(le_classes_path, 'r', encoding='utf-8') as f:
             classes = [line.strip() for line in f]
         data_dict['label_encoder_classes'] = np.array(classes)
@@ -389,7 +460,6 @@ def load_data_splits_csv(csv_dir, dataset_name_prefix, console=None):
         console.print(f"    [dim]Label encoder classes file not found at {le_classes_path}.[/dim]")
     return data_dict
 
-# ... (load_scaler 和 load_label_encoder 是二进制文件，不需要 encoding)
 def load_scaler(scaler_filepath, console=None):
     if console is None: console = default_console
     if scaler_filepath and os.path.exists(scaler_filepath): 
@@ -407,4 +477,3 @@ def load_label_encoder(le_filepath, console=None):
         return label_encoder
     console.print(f"  [yellow]Label encoder file not found at {le_filepath}.[/yellow]")
     return None
-

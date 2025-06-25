@@ -1,0 +1,4 @@
+{
+    "n_neighbors": 6,
+    "weights": "uniform"
+}

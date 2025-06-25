@@ -16,7 +16,7 @@
 
 
 # --- 1. 实验基本设置 ---
-experiment_name: "Prediction_Demo" # 实验名称，将用于创建输出文件夹
+experiment_name: "ET30" # 实验名称，将用于创建输出文件夹
 task_type: "regression"            # 任务类型: "regression", "binary_classification", or "multiclass_classification"
 
 # --- 2. 数据源配置 ---
@@ -35,9 +35,9 @@ data:
   # --- 模式1: single_file ---
   # (当 source_mode: "single_file" 时使用此配置)
   single_file_config:
-    main_file_path: "data/demo_dataset.csv" # 包含SMILES和目标值的主数据文件
-    smiles_col: "SMILES"                 # SMILES列的名称
-    target_col: "RT"    # 目标列的名称，在化学任务中，通常可以是Yield, energy, Activity等
+    main_file_path: "data/ET30_standardized_cleaned.csv" # 包含SMILES和目标值的主数据文件
+    smiles_col: "Standardized_SMILES"                 # SMILES列的名称
+    target_col: "ET30"    # 目标列的名称，在化学任务中，通常可以是Yield, energy, Activity等
 
     # (可选) 如果预计算的特征与SMILES在同一个文件里
     precomputed_features:
@@ -108,7 +108,7 @@ split_config:
     train_size: 0.8
     valid_size: 0.1
     test_size: 0.1
-    random_state: 0
+    random_state: 42
 
   # 当 split_mode 为 "cross_validation" 时使用
   cross_validation:
@@ -121,15 +121,16 @@ training:
   # 要训练的模型列表。
   # 可用: xgb, lgbm, rf, cat, hgb, dt, knn, svr, ridge, ann, adab, lr, svc, krr
   models_to_run:
-    - "xgb"
-    # - "lgbm"
+    # - "xgb"
+    # - "cat"
     # - "rf"
-    # - "ann"
+    - "ann"
+    - "svr"
   
   # Optuna 超参数优化的试验次数
   # 当数据量较大时，建议设置为较少的实验轮数
   # 当数据量较小时，可以增加试验轮数以获得更好的超参数。
-  n_trials: 50
+  n_trials: 100
   
   # HPO策略:
   # - 如果 split_mode 是 cross_validation，程序会自动使用 CV 进行 HPO。

@@ -1,0 +1,428 @@
+Name of the Molecule,SMILES,ET30,Standardized_SMILES
+Tetramethylsilane,C[Si](C)(C)C,31.1,C[Si](C)(C)C
+2-Methylbutane,CCC(C)C,30.8,CCC(C)C
+n-pentane,CCCCC,30.9,CCCCC
+n-hexane,CCCCCC,30.9,CCCCCC
+1-hexene,CCCCC=C,32.4,C=CCCCC
+1-hexyne,C#CCCCC,34.3,C#CCCCC
+n-heptane,CCCCCCC,30.9,CCCCCCC
+n-octane,CCCCCCCC,31,CCCCCCCC
+n-nonane,CCCCCCCCC,30.8,CCCCCCCCC
+n-decane,CCCCCCCCCC,30.8,CCCCCCCCCC
+n-dodecane,CCCCCCCCCCCC,31,CCCCCCCCCCCC
+cyclohexane,C1CCCCC1,30.8,C1CCCCC1
+cyclohexene,C1CCCC=C1,32.2,C1=CCCCC1
+cis-decahydronaphthalene,C12CCCCC1CCCC2,31.2,C1CCC2CCCCC2C1
+"1,2,3,4-tetrahydronaphthalene",C1(CCCC2)=C2C=CC=C1,33.5,c1ccc2c(c1)CCCC2
+vinyl-benzene,C=CC1=CC=CC=C1,34.8,C=Cc1ccccc1
+1-iodobutane,CCCCI,34.9,CCCCI
+1-iodopropane,CCCI,35.7,CCCI
+1-bromobutane,CCCCBr,36.6,CCCCBr
+1-bromopropane,CCCBr,36.9,CCCBr
+3-chloro-1-propyne,C#CCCl,41.7,C#CCCl
+dibromomethane,BrC(Br)([H])[H],39.4,BrCBr
+diiodomethane,IC(I)([H])[H],36.5,ICI
+trichloromethane,ClC(Cl)(Cl)[H],39.1,ClC(Cl)Cl
+tribromomethane,BrC(Br)(Br)[H],37.7,BrC(Br)Br
+tetrachloromethane,ClC(Cl)(Cl)Cl,32.4,ClC(Cl)(Cl)Cl
+bromoethane,CCBr,37.8,CCBr
+"1,1-dichloroethane",CC(Cl)Cl,39.4,CC(Cl)Cl
+"1,2-dichloroethane",ClCCCl,41.3,ClCCCl
+"1,2-dibromoethane",BrCCBr,38.3,BrCCBr
+"1,1,1-trichloroethane",CC(Cl)(Cl)Cl,36.2,CC(Cl)(Cl)Cl
+"1,1,2-trichloroethane",ClC(Cl)CCl,40.3,ClCC(Cl)Cl
+"1,1,1-trichlorotriflouroethane",ClC(Cl)(Cl)C(F)(F)F,33.8,FC(F)(F)C(Cl)(Cl)Cl
+pentachloroethane,ClC(Cl)(Cl)C(Cl)Cl,36.7,ClC(Cl)C(Cl)(Cl)Cl
+"1,1-dichloroethene",C=C(Cl)Cl,37,C=C(Cl)Cl
+"(E)-1,2-dichloroethene",Cl/C=C/Cl,34.2,ClC=CCl
+"(Z)-1,2-dichloroethene",Cl/C=C\Cl,42.1,ClC=CCl
+trichloroethene,Cl/C(Cl)=C\Cl,35.9,ClC=C(Cl)Cl
+tetrachloroethene,Cl/C(Cl)=C(Cl)\Cl,31.8,ClC(Cl)=C(Cl)Cl
+1-chloropropane,CCCCl,37.4,CCCCl
+"1-chloro-3,3,3-trifluoropropane",ClCCC(F)(F)F,40.7,FC(F)(F)CCCl
+"2,2-dichloropropane",CC(Cl)(Cl)C,37.9,CC(C)(Cl)Cl
+"1,2-dichlorohexafluoropropane",FC(Cl)(F)C(F)(Cl)C(F)(F)F,33.6,FC(F)(F)C(F)(Cl)C(F)(F)Cl
+"1,2,3-trichloropropane",ClCC(Cl)CCl,40.4,ClCC(Cl)CCl
+hexachloropropene,ClC(Cl)(Cl)/C(Cl)=C(Cl)\Cl,32.8,ClC(Cl)=C(Cl)C(Cl)(Cl)Cl
+"1,4-dichlorobutane",ClCCCCCl,39.7,ClCCCCCl
+"hexachloro-1,3-butadiene",Cl/C(Cl)=C(Cl)\C(Cl)=C(Cl)/Cl,32.1,ClC(Cl)=C(Cl)C(Cl)=C(Cl)Cl
+chlorocyclohexane,ClC1CCCCC1,36.2,ClC1CCCCC1
+"1,10-dichlorodecane",ClCCCCCCCCCCCl,36.7,ClCCCCCCCCCCCl
+diphenylmethane,C1(CC2=CC=CC=C2)=CC=CC=C1,34.4,c1ccc(Cc2ccccc2)cc1
+"2,3,4,5,6-pentafluorotoluene",CC1=C(F)C(F)=C(F)C(F)=C1F,35.9,Cc1c(F)c(F)c(F)c(F)c1F
+benzene,C1=CC=CC=C1,34.3,c1ccccc1
+toluene,CC1=CC=CC=C1,33.9,Cc1ccccc1
+trifluoromethyl benzene,FC(F)(F)C1=CC=CC=C1,38.7,FC(F)(F)c1ccccc1
+p-xylene,CC1=CC=C(C)C=C1,33.1,Cc1ccc(C)cc1
+"1,3,5-trimethyl benzene",CC1=CC(C)=CC(C)=C1,32.9,Cc1cc(C)cc(C)c1
+"1,2,3,4-tetramethylbenzene",CC1=C(C)C(C)=C(C)C=C1,32.9,Cc1ccc(C)c(C)c1C
+phenylacetylene,C#CC1=CC=CC=C1,37.2,C#Cc1ccccc1
+cyclohexyl benzene,C1(C2CCCCC2)=CC=CC=C1,34.2,c1ccc(C2CCCCC2)cc1
+1-methyl naphthalene,CC1=CC=CC2=CC=CC=C21,35.3,Cc1cccc2ccccc12
+"1,2-difluorobenzene",FC1=C(F)C=CC=C1,39.3,Fc1ccccc1F
+"1,4-difluorobenzene",FC1=CC=C(F)C=C1,36.4,Fc1ccc(F)cc1
+"1,3,5-trifluorobenzene",FC1=CC(F)=CC(F)=C1,33.2,Fc1cc(F)cc(F)c1
+pentafluorobenzene,FC1=C(F)C(F)=C(F)C(F)=C1,38.6,Fc1cc(F)c(F)c(F)c1F
+hexafluorobenzene,FC1=C(F)C(F)=C(F)C(F)=C1F,34.2,Fc1c(F)c(F)c(F)c(F)c1F
+chlorobenzene,ClC1=CC=CC=C1,36.8,Clc1ccccc1
+"1,2-dichlorobenzene",ClC1=C(Cl)C=CC=C1,38,Clc1ccccc1Cl
+"1,3-dichlorobenzene",ClC1=CC(Cl)=CC=C1,36.7,Clc1cccc(Cl)c1
+"1,2,4-trichlorobenzene",ClC1=C(Cl)C=C(Cl)C=C1,36.2,Clc1ccc(Cl)c(Cl)c1
+bromobenzene,BrC1=CC=CC=C1,36.6,Brc1ccccc1
+"1,2-dibromobenzene",BrC1=C(Br)C=CC=C1,37.6,Brc1ccccc1Br
+"1,3-dibromobenzene",BrC1=CC(Br)=CC=C1,36.5,Brc1cccc(Br)c1
+iodobenzene,IC1=CC=CC=C1,36.2,Ic1ccccc1
+1-chloronaphthalene,ClC1=CC=CC2=C1C=CC=C2,37,Clc1cccc2ccccc12
+1-iodonaphthalene,IC1=CC=CC2=C1C=CC=C2,36.9,Ic1cccc2ccccc12
+N-methylpyrrole,CN1C=CC=C1,39,Cn1cccc1
+pyrrole,C1=CC=CN1,51,c1cc[nH]c1
+pyridine,C1=CN=CC=C1,40.5,c1ccncc1
+2-picoline,CC1=NC=CC=C1,38.3,Cc1ccccn1
+4-picoline,CC1=CC=NC=C1,39.6,Cc1ccncc1
+"3,4-dimethylpyridine",CC1=C(C)C=NC=C1,38.9,Cc1ccncc1C
+"2,6-dimethylpyridine",CC1=NC(C)=CC=C1,36.9,Cc1cccc(C)n1
+"2,6-di-tert-butylpyridine",CC(C)(C)C1=NC(C(C)(C)C)=CC=C1,34,CC(C)(C)c1cccc(C(C)(C)C)n1
+"2,4,6-trimethylpyridine",CC1=NC(C)=CC(C)=C1,36.4,Cc1cc(C)nc(C)c1
+2-fluoropyridine,FC1=NC=CC=C1,42.4,Fc1ccccn1
+3-bromopyridine,BrC1=CC=CN=C1,39.7,Brc1cccnc1
+"2,6-difluoropyridine",FC1=NC(F)=CC=C1,43.3,Fc1cccc(F)n1
+pentafluoropyridine,FC1=NC(F)=C(F)C(F)=C1F,36.3,Fc1nc(F)c(F)c(F)c1F
+2-cyanopyridine,N#CC1=NC=CC=C1,44.2,N#Cc1ccccn1
+2-bromoethanol,BrCCO,56.1,OCCBr
+2-fluoroethanol,FCCO,56.6,OCCF
+methanol,CO,55.4,CO
+benzylalcohol,OCC1=CC=CC=C1,50.7,OCc1ccccc1
+ethanol,CCO,51.8,CCO
+2-phenylethanol,OCCC1=CC=CC=C1,49.7,OCCc1ccccc1
+2-methoxyethanol,OCCOC,52,COCCO
+2-(n-butoxy)ethanol,OCCOCCCC,50,CCCCOCCO
+2-mercaptoethanol,SCCO,53.6,OCCS
+2-aminoethanol,NCCO,51.8,NCCO
+2-cyanoethanol,OCCC#N,59.3,N#CCCO
+2-chloroethanol,ClCCO,55.1,OCCCl
+"2,2,2-trifluoroethanol",FC(F)(F)CO,59.8,OCC(F)(F)F
+"2,2,2-trichloroethanol",ClC(Cl)(Cl)CO,54.1,OCC(Cl)(Cl)Cl
+1-propanol,CCCO,50.5,CCCO
+"2,2,3,3-tetrafluoro-1-propanol",OCC(F)(F)C(F)F,59.4,OCC(F)(F)C(F)F
+3-phenyl-1-propanol,OCCCC1=CC=CC=C1,48.5,OCCCc1ccccc1
+allyl alcohol,C=CCO,51.9,C=CCO
+propargyl alcohol,C#CCO,55.8,C#CCO
+2-propanol,CC(O)C,48.4,CC(C)O
+"1,1,1,3,3,3-hexafluoro-2-propanol",OC(C(F)(F)F)C(F)(F)F,65.3,OC(C(F)(F)F)C(F)(F)F
+1-methoxy-2-propanol,CC(O)COC,48.6,COCC(C)O
+1-amino-2-propanol,CC(O)CN,50.1,CC(O)CN
+1-butanol,OCCCC,49.7,CCCCO
+2-amino-1-butanol,OCC(N)CC,50.2,CCC(N)CO
+iso-butyl alcohol,CC(C)CO,49.1,CC(C)CO
+tert-butyl alcohol,CC(O)(C)C,43.3,CC(C)(C)O
+1-pentanol,CCCCCO,49.3,CCCCCO
+2-pentanol,CCCC(O)C,46.5,CCCC(C)O
+3-pentanol,CCC(O)CC,45.7,CCC(O)CC
+2-methyl-1-butanol,CCC(C)CO,48,CCC(C)CO
+iso-amyl alcohol,CC(C)CCO,49,CC(C)CCO
+tert-pentyl alcohol,CCC(O)(C)C,41,CCC(C)(C)O
+1-hexanol,CCCCCCO,48.9,CCCCCCO
+3-ethyl-3-pentanol,CCC(CC)(O)CC,38.5,CCC(O)(CC)CC
+"2,4-dimethyl-3-pentanol",CC(C)C(O)C(C)C,40.1,CC(C)C(O)C(C)C
+1-octanol,CCCCCCCCO,48.3,CCCCCCCCO
+1-nonanol,CCCCCCCCCO,47.8,CCCCCCCCCO
+"3-ethyl-2,4-dimethyl-3-pentanol",CC(C)C(O)(CC)C(C)C,37.9,CCC(O)(C(C)C)C(C)C
+1-decanol,CCCCCCCCCCO,48,CCCCCCCCCCO
+1-undecanol,CCCCCCCCCCCO,47.6,CCCCCCCCCCCO
+1-dodecanol,OCCCCCCCCCCCC,47.5,CCCCCCCCCCCCO
+cyclopentanol,OC1CCCC1,47,OC1CCCC1
+cyclohexanol,OC1CCCCC1,47.2,OC1CCCCC1
+furfuryl alcohol,OCC1=CC=CO1,50.3,OCc1ccco1
+tetrahydrofurfuryl alcohol,OCC1CCCO1,50.3,OCC1CCCO1
+glycol,OCCO,56.3,OCCO
+"1,2-propanediol",OC(C)CO,54.1,CC(O)CO
+"1,2,3-propanetriol",OCC(O)CO,57,OCC(O)CO
+"1,2-butanediol",OCC(O)CC,52.6,CCC(O)CO
+"1,3-butanediol",OCCC(O)C,52.8,CC(O)CCO
+"1,4-butanediol",OCCCCO,53.5,OCCCCO
+"2,3-butanediol",CC(O)C(O)C,51.8,CC(O)C(C)O
+"1,5-pentanediol",OCCCCCO,51.9,OCCCCCO
+diethylene glycol,OCCOCCO,53.8,OCCOCCO
+triethylene glycol,OCCOCCOCCO,52.8,OCCOCCOCCO
+tetraethylene glycol,OCCOCCOCCOCCO,52.2,OCCOCCOCCOCCO
+bis(2-hydroxyethyl)sulfane,OCCSCCO,54.5,OCCSCCO
+triethanolamine,OCCN(CCO)CCO,55.4,OCCN(CCO)CCO
+phenol,OC1=CC=CC=C1,54.3,Oc1ccccc1
+o-cresol,OC1=C(C)C=CC=C1,51.9,Cc1ccccc1O
+m-cresol,OC1=CC(C)=CC=C1,56.2,Cc1cccc(O)c1
+p-cresol,OC1=CC=C(C)C=C1,53.3,Cc1ccc(O)cc1
+2-ethyl phenol,OC1=C(CC)C=CC=C1,50.2,CCc1ccccc1O
+3-ethyl phenol,OC1=CC(CC)=CC=C1,51.6,CCc1cccc(O)c1
+4-ethyl phenol,OC1=CC=C(CC)C=C1,50.2,CCc1ccc(O)cc1
+2-isopropyl phenol,OC1=C(C(C)C)C=CC=C1,50.4,CC(C)c1ccccc1O
+2-tert-butyl phenol,OC1=C(C(C)(C)C)C=CC=C1,49.2,CC(C)(C)c1ccccc1O
+4-tert-butyl phenol,OC1=CC=C(C(C)(C)C)C=C1,50.4,CC(C)(C)c1ccc(O)cc1
+"2,3-xylenol",OC1=C(C)C(C)=CC=C1,45.1,Cc1cccc(O)c1C
+"2,4-xylenol",OC1=C(C)C=C(C)C=C1,50.3,Cc1ccc(O)c(C)c1
+"3,5-xylenol",OC1=CC(C)=CC(C)=C1,47.5,Cc1cc(C)cc(O)c1
+carvacrol,OC1=C(C)C=CC(C(C)C)=C1,48.7,Cc1ccc(C(C)C)cc1O
+thymol,OC1=C(C(C)C)C=CC(C)=C1,48.4,Cc1ccc(C(C)C)c(O)c1
+2-tert-butyl-4-methyl,,,
+phenol,OC1=C(C(C)(C)C)C=C(C)C=C1,46.8,Cc1ccc(O)c(C(C)(C)C)c1
+"2,4-di-tert-butyl phenol",OC1=C(C(C)(C)C)C=C(C(C)(C)C)C=C1,46.2,CC(C)(C)c1ccc(O)c(C(C)(C)C)c1
+"2,6-di-tert-butyl phenol",OC1=C(C(C)(C)C)C=CC=C1C(C)(C)C,41.8,CC(C)(C)c1cccc(C(C)(C)C)c1O
+"2,3,5-trimethylphenol",OC1=C(C)C(C)=CC(C)=C1,45.8,Cc1cc(C)c(C)c(O)c1
+"2,3,6-trimethylphenol",OC1=C(C)C(C)=CC=C1C,42.9,Cc1ccc(C)c(O)c1C
+"2,6-di-tert-butyl-4-methylphenol",OC1=C(C(C)(C)C)C=C(C)C=C1C(C)(C)C,41.9,Cc1cc(C(C)(C)C)c(O)c(C(C)(C)C)c1
+4-fluorophenol,OC1=CC=C(F)C=C1,55.5,Oc1ccc(F)cc1
+2-chlorophenol,OC1=C(Cl)C=CC=C1,54.7,Oc1ccccc1Cl
+4-chlorophenol,OC1=CC=C(Cl)C=C1,54.4,Oc1ccc(Cl)cc1
+4-bromophenol,OC1=CC=C(Br)C=C1,52.2,Oc1ccc(Br)cc1
+"2,6-dichlorophenol",OC1=C(Cl)C=CC=C1Cl,46.3,Oc1c(Cl)cccc1Cl
+4-chloro-3-methylphenol,OC1=CC(C)=C(Cl)C=C1,51,Cc1cc(O)ccc1Cl
+4-methoxyphenol,OC1=CC=C(OC)C=C1,45.4,COc1ccc(O)cc1
+"2,6-dimethoxyphenol",OC1=C(OC)C=CC=C1OC,41.8,COc1cccc(OC)c1O
+"3,5-dimethoxyphenol",OC1=CC(OC)=CC(OC)=C1,50.8,COc1cc(O)cc(OC)c1
+3-acetoxyphenol,CC(OC1=CC(O)=CC=C1)=O,53.2,CC(=O)Oc1cccc(O)c1
+methyl salicylate,OC1=C(C(OC)=O)C=CC=C1,45.4,COC(=O)c1ccccc1O
+phenyl salicylate,OC1=C(C(OC2=CC=CC=C2)=O)C=CC=C1,41.9,O=C(Oc1ccccc1)c1ccccc1O
+2-amino phenol,OC1=C(N)C=CC=C1,47.2,Nc1ccccc1O
+3-amino phenol,OC1=CC(N)=CC=C1,47.1,Nc1cccc(O)c1
+2-nitro phenol,OC1=C([N+]([O-])=O)C=CC=C1,44.4,O=[N+]([O-])c1ccccc1O
+4-cyano phenol,OC1=CC=C(C#N)C=C1,52.2,N#Cc1ccc(O)cc1
+di-tert-butyl ether,CC(C)(C)OC(C)(C)C,33.1,CC(C)(C)OC(C)(C)C
+"2,2,5,5-tetramethyltetrahydrofuran",CC1(C)OC(C)(C)CC1,34.3,CC1(C)CCC(C)(C)O1
+di-n-butyl sulfane,CCCCSCCCC,34.4,CCCCSCCCC
+n-butyl methyl ether,CCCCOC,34.8,CCCCOC
+di-iso-propyl sulfane,CC(C)SC(C)C,34.9,CC(C)SC(C)C
+diethyl sulfane,CCSCC,35.7,CCSCC
+pentamethylene sulfane,C1CSCCC1,35.9,C1CCSCC1
+3-methylanisole,COC1=CC(C)=CC=C1,36.4,COc1cccc(C)c1
+dimethyl disulfane,CSSC,37.8,CSSC
+methyl 2-propynyl ether,C#CCOC,39.7,C#CCOC
+2-chloroethyl methyl,,,
+ether,COCCCl,40.4,COCCCl
+diethyl ether,CCOCC,34.5,CCOCC
+bis(2-chloroethyl) ether,ClCCOCCCl,41.7,ClCCOCCCl
+ethyl vinyl ether,CCOC=C,36.2,C=COCC
+diisopropyl ether,CC(C)OC(C)C,34,CC(C)OC(C)C
+di-n-butyl ether,CCCCOCCCC,33,CCCCOCCCC
+tert-amyl methyl ether,CCC(OC)(C)C,34.4,CCC(C)(C)OC
+dimethoxymethane,[H]C(OC)OC,35.8,COCOC
+diethoxymethane,[H]C(OCC)OCC,33.9,CCOCOCC
+"1,2-dimethoxyethane",COCCOC,38.2,COCCOC
+diethylene glycol diethyl,,,
+ether,CCOCCOCCOCC,37.5,CCOCCOCCOCC
+propylene oxide,CC1CO1,39.8,CC1CO1
+epichlorohydrin,ClCC1CO1,44.5,ClCC1CO1
+furan,C1=CC=CO1,36.1,c1ccoc1
+oxolane,C1CCCO1,37.5,C1CCOC1
+tetrahydro-2-methyl furan,CC1CCCO1,36.5,CC1CCCO1
+"tetrahydro-2,5-dimethylfuran",CC1CCC(C)O1,35.1,CC1CCC(C)O1
+thiole,C1=CC=CS1,35.4,c1ccsc1
+thiolane,C1CCCS1,36.7,C1CCSC1
+"1,3-dioxolane",C1COCO1,43.1,C1COCO1
+oxane,C1COCCC1,36.2,C1CCOCC1
+tetrahydro-3-methylpyran,CC1COCCC1,35.5,CC1CCCOC1
+"5-acetyl-5-methyl-1,3-dioxane",CC1(C(C)=O)COCOC1,41.5,CC(=O)C1(C)COCOC1
+"1,4-dioxane",C1COCCO1,36,C1COCCO1
+anisole,COC1=CC=CC=C1,37.1,COc1ccccc1
+thioanisole,CSC1=CC=CC=C1,37,CSc1ccccc1
+phenetole,CCOC1=CC=CC=C1,36.7,CCOc1ccccc1
+veratrole,COC1=C(OC)C=CC=C1,38.4,COc1ccccc1OC
+dibenzyl ether,C1(COCC2=CC=CC=C2)=CC=CC=C1,36.4,c1ccc(COCc2ccccc2)cc1
+diphenyl ether,C1(OC2=CC=CC=C2)=CC=CC=C1,35.3,c1ccc(Oc2ccccc2)cc1
+"2,2,4,4-tetramethyl-3-pentanone",CC(C)(C)C(C(C)(C)C)=O,36.3,CC(C)(C)C(=O)C(C)(C)C
+acetone,CC(C)=O,42.3,CC(C)=O
+"1,1,1-trichloroacetone",O=C(C)C(Cl)(Cl)Cl,45.9,CC(=O)C(Cl)(Cl)Cl
+2-butanone,O=C(C)CC,41.3,CCC(C)=O
+2-pentanone,O=C(C)CCC,41.1,CCCC(C)=O
+3-pentanone,O=C(CC)CC,39.9,CCC(=O)CC
+isopropyl methyl ketone,CC(C(C)C)=O,40.9,CC(=O)C(C)C
+2-hexanone,CC(CCCC)=O,40.1,CCCCC(C)=O
+isobutyl methyl ketone,CC(CC(C)C)=O,39.4,CC(=O)CC(C)C
+tert-butyl methyl ketone,CC(C(C)(C)C)=O,39,CC(=O)C(C)(C)C
+4-heptanone,O=C(CCC)CCC,38.9,CCCC(=O)CCC
+diisopropyl ketone,O=C(C(C)C)C(C)C,38.6,CC(C)C(=O)C(C)C
+5-nonanone,O=C(CCCC)CCCC,37.5,CCCCC(=O)CCCC
+cyclopentanone,O=C1CCCC1,40,O=C1CCCC1
+acetophenone,CC(C1=CC=CC=C1)=O,40.6,CC(=O)c1ccccc1
+acetylacetone,CC(CC(C)=O)=O,49.2,CC(=O)CC(C)=O
+formic acid,[H]C(O)=O,54.3,O=CO
+acetic acid,CC(O)=O,51.7,CC(=O)O
+propionic acid,OC(CC)=O,50.5,CCC(=O)O
+"methyl cis,cis-9,12-octadecadienoate",COC(CCCCCCC/C=C/C/C=C/CCCCC)=O,34.6,CCCCCC=CCC=CCCCCCCCC(=O)OC
+methyl dodecanoate,COC(CCCCCCCCCCC)=O,35,CCCCCCCCCCCC(=O)OC
+methyl decanoate,COC(CCCCCCCCC)=O,35.2,CCCCCCCCCC(=O)OC
+methyl octanoate,COC(CCCCCCC)=O,35.6,CCCCCCCC(=O)OC
+methyl hexanoate,COC(CCCCC)=O,36.3,CCCCCC(=O)OC
+methyl butanoate,COC(CCC)=O,37.2,CCCC(=O)OC
+ethyl propanoate,CCC(OCC)=O,37.3,CCOC(=O)CC
+methyl propanoate,COC(CC)=O,37.8,CCC(=O)OC
+methyl triflouroacetate,COC(C(F)(F)F)=O,41.8,COC(=O)C(F)(F)F
+ethyl propynoate,C#CC(OCC)=O,45.4,C#CC(=O)OCC
+methyl formate,[H]C(OC)=O,41.4,COC=O
+ethyl forrmate,[H]C(OCC)=O,40.9,CCOC=O
+methyl acetate,CC(OC)=O,38.7,COC(C)=O
+methyl trichloroacetate,O=C(OC)C(Cl)(Cl)Cl,39.6,COC(=O)C(Cl)(Cl)Cl
+ethyl acetate,CC(OCC)=O,38,CCOC(C)=O
+ethyl chloroacetate,O=C(OCC)CCl,39,CCOC(=O)CCl
+ethyl trichloroacetate,O=C(OCC)C(Cl)(Cl)Cl,38.7,CCOC(=O)C(Cl)(Cl)Cl
+vinyl acetate,CC(OC=C)=O,38,C=COC(C)=O
+n-propyl acetate,CC(OCCC)=O,37.5,CCCOC(C)=O
+n-butyl acetate,CC(OCCCC)=O,38.5,CCCCOC(C)=O
+methyl acrylate,O=C(OC)C=C,38.8,C=CC(=O)OC
+methyl methacrylate,O=C(OC)C(C)=C,37.9,C=C(C)C(=O)OC
+4-butyrolactone,O=C1OCCC1,44.1,O=C1CCCO1
+dimethyl carbonate,O=C(OC)OC,38.8,COC(=O)OC
+diethyl carbonate,O=C(OCC)OCC,36.7,CCOC(=O)OCC
+propylene carbonate,O=C1OCC(C)O1,46,CC1COC(=O)O1
+triacetin,CC(OCC(OC(C)=O)COC(C)=O)=O,39.7,CC(=O)OCC(COC(C)=O)OC(C)=O
+dimethyl phthalate,O=C(OC)C1=CC=CC=C1C(OC)=O,40.7,COC(=O)c1ccccc1C(=O)OC
+di-n-butyl phthalate,O=C(OCCCC)C1=CC=CC=C1C(OCCCC)=O,39.5,CCCCOC(=O)c1ccccc1C(=O)OCCCC
+ethyl acetoacetate,CC(CC(OCC)=O)=O,49.4,CCOC(=O)CC(C)=O
+ethyl lactate,O=C(OCC)C(O)C,51.1,CCOC(=O)C(C)O
+pyrrolidin-2-one,O=C1CCCN1,47.9,O=C1CCCN1
+N-methylpropionamide,CNC(CC)=O,51.5,CCC(=O)NC
+"1,1,3,3-tetraethylurea",O=C(N(CC)CC)N(CC)CC,39,CCN(CC)C(=O)N(CC)CC
+n-dodecanenitrile,CCCCCCCCCCCC#N,40.1,CCCCCCCCCCCC#N
+n-undecanenitrile,CCCCCCCCCCC#N,40.3,CCCCCCCCCCC#N
+trimethylacetonitrile,CC(C)(C)C#N,40.5,CC(C)(C)C#N
+n-hexanenitrile,CCCCCC#N,41.4,CCCCCC#N
+n-pentanenitrile,CCCCC#N,41.8,CCCCC#N
+chloroacetonitrile,ClCC#N,46.4,N#CCCl
+2-methyl-2-nitropropane,CC(C)(C)[N+]([O-])=O,40.7,CC(C)(C)[N+](=O)[O-]
+2-nitropropane,CC(C)[N+]([O-])=O,42,CC(C)[N+](=O)[O-]
+1-methylpiperidine,CN1CCCCC1,32.6,CN1CCCCC1
+"N,N,-dimethylcyclohexylamine",CN(C)C1CCCCC1,32.7,CN(C)C1CCCCC1
+diisopropylamine,CC(C)NC(C)C,33.7,CC(C)NC(C)C
+N-methylcyclohexylamine,CNC1CCCCC1,34.7,CNC1CCCCC1
+N-methylmorpholine,CN1CCOCC1,35.9,CN1CCOCC1
+cyclohexylamine,NC1CCCCC1,36.5,NC1CCCCC1
+N-benzyl-methylamine,CNCC1=CC=CC=C1,36.8,CNCc1ccccc1
+n-butylamine,CCCCN,37.6,CCCCN
+allylamine,C=CCN,38.8,C=CCN
+propargylamine,C#CCN,41,C#CCN
+formamide,NC([H])=O,55.9,NC=O
+DMF,O=C([H])N(C)C,43.2,CN(C)C=O
+N-methylformanilide,CN(C=O)C1=CC=CC=C1,40.8,CN(C=O)c1ccccc1
+N-methyl acetamide,CC(NC)=O,52.1,CNC(C)=O
+"N,N-dimethylacetamide",CC(N(C)C)=O,42.9,CC(=O)N(C)C
+"N,N-diethylacetamide",CC(N(CC)CC)=O,41.4,CCN(CC)C(C)=O
+1-methylpyrrolidin-2-one,O=C1N(C)CCC1,42.2,CN1CCCC1=O
+1-methylpyrrolidin-2-,,,
+thione,S=C1N(C)CCC1,42.8,CN1CCCC1=S
+1-ethylpyrrolidin-2-one,O=C1N(CC)CCC1,41.6,CCN1CCCC1=O
+"N,N-dimethylcyanamide",CN(C#N)C,43.8,CN(C)C#N
+"N,N-diisopropylcyanamide",N#CN(C(C)C)C(C)C,42,CC(C)N(C#N)C(C)C
+N-cyanopyrrolidine,N#CN1CCCC1,42.6,N#CN1CCCC1
+N-cyanopiperidine,N#CN1CCCCC1,42.1,N#CN1CCCCC1
+n-cyanomorpholine,N#CN1CCOCC1,42.8,N#CN1CCOCC1
+"1,1,3,3-tetramethyl urea",O=C(N(C)C)N(C)C,40.9,CN(C)C(=O)N(C)C
+"1,1,3,3-tetramethylguanidine",N=C(N(C)C)N(C)C,39.3,CN(C)C(=N)N(C)C
+dimethylethylurea,O=C(N(C)C)NCC,42.5,CCNC(=O)N(C)C
+dimethyl propylene urea,O=C1N(C)CCCN1C,42.1,CN1CCCN(C)C1=O
+acetonitrile,CC#N,45.6,CC#N
+trichloroacetonitrile,N#CC(Cl)(Cl)Cl,40,N#CC(Cl)(Cl)Cl
+propanenitrile,N#CCC,43.6,CCC#N
+3-methoxypropanenitrile,N#CCCOC,44.4,COCCC#N
+acrylonitrile,C=CC#N,46.7,C=CC#N
+phenylacetonitrile,N#CCC1=CC=CC=C1,42.7,N#CCc1ccccc1
+benzonitrile,N#CC1=CC=CC=C1,41.5,N#Cc1ccccc1
+nitromethane,C[N+]([O-])=O,46.3,C[N+](=O)[O-]
+nitroethane,CC[N+]([O-])=O,43.7,CC[N+](=O)[O-]
+nitrocyclohexane,O=[N+](C1CCCCC1)[O-],39.6,O=[N+]([O-])C1CCCCC1
+nitrobenzene,O=[N+](C1=CC=CC=C1)[O-],41.2,O=[N+]([O-])c1ccccc1
+tert-butylamine,NC(C)(C)C,36.5,CC(C)(C)N
+"1,2-diaminoethane",NCCN,42,NCCN
+diethylamine,CCNCC,35.5,CCNCC
+triethylamine,CCN(CC)CC,32.1,CCN(CC)CC
+tris(n-butyl)amine,CCCCN(CCCC)CCCC,32.1,CCCCN(CCCC)CCCC
+piperidine,C1CNCCC1,36.3,C1CCNCC1
+morpholine,C1CNCCO1,41,C1COCCN1
+aniline,NC1=CC=CC=C1,44.4,Nc1ccccc1
+"N,N-dimethylaniline",CN(C)C1=CC=CC=C1,36.6,CN(C)c1ccccc1
+trimethyl phosphate,O=P(OC)(OC)OC,43.5,COP(=O)(OC)OC
+triethyl phosphate,O=P(OCC)(OCC)OCC,41.2,CCOP(=O)(OCC)OCC
+tri-n-propyl phosphate,O=P(OCCC)(OCCC)OCCC,40.5,CCCOP(=O)(OCCC)OCCC
+tri-n-butyl phosphate,O=P(OCCCC)(OCCCC)OCCCC,38.9,CCCCOP(=O)(OCCCC)OCCCC
+hexamethylphosphuric,,,
+acid triamide,O=P(N(C)C)(N(C)C)N(C)C,40.9,CN(C)P(=O)(N(C)C)N(C)C
+hexamethylphosphorothio,,,
+ic acid triamide,S=P(N(C)C)(N(C)C)N(C)C,39.5,CN(C)P(=S)(N(C)C)N(C)C
+methylphosphonic acid,,,
+bis(dimethylamide),O=P(N(C)C)(C)N(C)C,42.3,CN(C)P(C)(=O)N(C)C
+carbon disulfide,S=C=S,32.8,S=C=S
+dimethyl sulfoxide,CS(C)=O,45.1,CS(C)=O
+methyl(methylthio)methyl,,,
+sulfoxide,CS(CSC)=O,44,CSCS(C)=O
+3-methyl sulfolane,O=S1(CC(C)CC1)=O,43,CC1CCS(=O)(=O)C1
+"N,N,N,N-tetraethylsulfamide",CCN(CC)S(N(CC)CC)(=O)=O,41,CCN(CC)S(=O)(=O)N(CC)CC
+diethylsulfite,O=S(OCC)OCC,41.5,CCOS(=O)OCC
+dimethylsulfite,O=S(OC)OC,42.3,COS(=O)OC
+tetramethylene sulfoxide,O=S1CCCC1,43.6,O=S1CCCC1
+ethylene sulfite,O=S1OCCO1,45.3,O=S1OCCO1
+dimcarb,C[NH2+]C.CN(C)C([O-])=O,57.2,CN(C)C(=O)[O-].C[NH2+]C
+dimethyl ammonium,,,
+chloride,C[NH2+]C.[Cl-],60.3,C[NH2+]C.[Cl-]
+ethylammonium chloride,[NH3+]CC.[Cl-],62.3,CC[NH3+].[Cl-]
+ethylammonium nitrate,[NH3+]CC.[O-][N+]([O-])=O,61.6,CC[NH3+].O=[N+]([O-])[O-]
+n-propylammonium,,,
+nitrate,[NH3+]CCC.[O-][N+]([O-])=O,60.6,CCC[NH3+].O=[N+]([O-])[O-]
+di-n-propylammonium,,,
+thiocyanate,CCC[NH2+]CCC.N#C[S-],63.3,CCC[NH2+]CCC.N#C[S-]
+sec-butylammonium,,,
+thiocyanate,[NH3+]C(CC)C.N#C[S-],61.6,CCC(C)[NH3+].N#C[S-]
+tetra-n-butylammonium,,,
+bromide,CCCC[N+](CCCC)(CCCC)CCCC.[Br-],43.3,CCCC[N+](CCCC)(CCCC)CCCC.[Br-]
+tetra-n-butylphosphonium,,,
+chloride,CCCC[P+](CCCC)(CCCC)CCCC.[Cl-],43,CCCC[P+](CCCC)(CCCC)CCCC.[Cl-]
+tetra-n-butylphosphonium,,,
+bromide,CCCC[P+](CCCC)(CCCC)CCCC.[Br-],43.5,CCCC[P+](CCCC)(CCCC)CCCC.[Br-]
+Perhydrofluorene,C12CCCCC1CC3C2CCCC3,31.2,C1CCC2C(C1)CC1CCCCC12
+Quadricyclane,C12C3C4C1C4CC23,31.9,C1C2C3C2C2C1C32
+"1,5-Cyclooctadiene",C1=C\CC/C=C\CC/1,32.4,C1=CCCC=CCC1
+"trans,trans,cis-1,5,9-Cyclododecatriene",C1=C/CC/C=C\CC/C=C/CC/1,32.5,C1=CCCC=CCCC=CCC1
+"1,4-Cyclohexadiene",C1=CCC=CC1,32.7,C1=CCC=CC1
+"1,3,5,7-Cyclooctatetraene",C1=C\C=C/C=C\C=C/1,33.3,C1=CC=CC=CC=C1
+1-Nonyne,C#CCCCCCCC,33.7,C#CCCCCCCC
+1-Phenyl-1-propyne,CC#CC1=CC=CC=C1,35.6,CC#Cc1ccccc1
+"6,6-Dimethylfulvene",C/C(C)=C1C=CC=C\1,36,CC(C)=C1C=CC=C1
+dichloromethane,ClC(Cl)([H])[H],40.7,ClCCl
+trichloroflouromethane,ClC(Cl)(F)Cl,33.2,FC(Cl)(Cl)Cl
+bromotrichloromethane,ClC(Cl)(Br)Cl,34.9,ClC(Cl)(Cl)Br
+"1,1,2-trichlorotriflouroethane",ClC(Cl)(F)C(F)(F)Cl,33.2,FC(F)(Cl)C(F)(Cl)Cl
+"1,3-dichloropropane",ClCCCCl,40.2,ClCCCCl
+"1,2-dibromopropane",CC(Br)CBr,39.1,CC(Br)CBr
+"1,2-dichlorohexafluorocyclobutane",ClC1(F)C(F)(F)C(F)(F)C1(Cl)F,33.3,FC1(F)C(F)(F)C(F)(Cl)C1(F)Cl
+fluorobenzene,FC1=CC=CC=C1,37,Fc1ccccc1
+"2,5-dibromo-1-methylbenzene",BrC1=CC=C(Br)C=C1C,34.7,Cc1cc(Br)ccc1Br
+2-chloropyridine,ClC1=NC=CC=C1,41.9,Clc1ccccn1
+quinoline,C1(C=CC=C2)=C2N=CC=C1,39.4,c1ccc2ncccc2c1
+2-phenoxyethanol,OCCOC1=CC=CC=C1,51.5,OCCOc1ccccc1
+1-phenylethanol,OC(C)C1=CC=CC=C1,46.7,CC(O)c1ccccc1
+2-ethoxyethanol,OCCOCC,51,CCOCCO
+2-butanol,CC(O)CC,47.1,CCC(C)O
+1-heptanol,CCCCCCCO,48.5,CCCCCCCO
+"1,3-propanediol",OCCCO,54.9,OCCCO
+"3,4-xylenol",OC1=CC(C)=C(C)C=C1,47.2,Cc1ccc(O)cc1C
+dimethyl sulfane,CSC,36.8,CSC
+Di-n-propyl ether,CCCOCCC,34,CCCOCCC
+tert-butyl methyl ether,CC(C)(C)OC,34.5,COC(C)(C)C
+diglyme,COCCOCCOC,38.6,COCCOCCOC
+triglyme,COCCOCCOCCOC,38.9,COCCOCCOCCOC
+diisobutyl ketone,O=C(CC(C)C)CC(C)C,38,CC(C)CC(=O)CC(C)C
+cyclohexanone,O=C1CCCCC1,40.1,O=C1CCCCC1
+methyl cis-9-,,,
+octadecanoate,COC(CCCCCCC/C=C/CCCCCCCC)=O,34.5,CCCCCCCCC=CCCCCCCCC(=O)OC
+methyl pentanoate,COC(CCCC)=O,36.6,CCCCC(=O)OC
+ethyl-2-butynoate,O=C(C#CC)OCC,40.1,CC#CC(=O)OCC
+ethylene carbonate,O=C1OCCO1,48.6,O=C1OCCO1
+ethyl benzoate,CCOC(C1=CC=CC=C1)=O,38,CCOC(=O)c1ccccc1
+1-formylpiperidine,O=CN1CCCCC1,41.7,O=CN1CCCCC1
+"N,N-diethylformamide",O=CN(CC)CC,41.8,CCN(C=O)CC
+"N,N-Dimethylpropionamide",CN(C)C(CC)=O,41.8,CCC(=O)N(C)C
+N-(tert-butyl)benzylamine,CC(C)(C)NCC1=CC=CC=C1,34.9,CC(C)(C)NCc1ccccc1
+N-methylformamide,O=C([H])NC,54.1,CNC=O
+"N,N-dimethylthioformamide",S=C([H])N(C)C,44,CN(C)C=S
+1-cyclohexylpyrrolidin-2-,,,
+one,O=C1N(C2CCCCC2)CCC1,40.4,O=C1CCCN1C1CCCCC1
+pyrrolidine,C1CCNC1,39.1,C1CCNC1
+sulfolane,O=S1(CCCC1)=O,44.1,O=S1(=O)CCCC1
+n-butylammonium,,,
+thiocyanate,[NH3+]CCCC.N#C[S-],61.4,CCCC[NH3+].N#C[S-]

@@ -1,0 +1,5 @@
+{
+    "max_depth": 21,
+    "min_samples_split": 12,
+    "criterion": "absolute_error"
+}

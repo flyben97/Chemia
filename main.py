@@ -16,7 +16,7 @@ def main():
     parser.add_argument(
         '--config', 
         type=str, 
-        default="config.yaml", 
+        default="config_multicolumn.yaml", 
         help="Path to the experiment configuration YAML file."
     )
     args = parser.parse_args()

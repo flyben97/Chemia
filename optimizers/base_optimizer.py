@@ -85,7 +85,15 @@ class BaseOptimizer(ABC):
                 self.console.print(f"[dim]{log_message}[/dim]")
             else:
                 print(log_message)
-        study.optimize(lambda trial: self.objective(trial, X_train, y_train, X_val, y_val), n_trials=self.n_trials, n_jobs=-1, callbacks=[progress_callback])
+        
+        # --- MODIFICATION: Removed n_jobs=-1 for stability testing ---
+        study.optimize(
+            lambda trial: self.objective(trial, X_train, y_train, X_val, y_val),
+            n_trials=self.n_trials,
+            callbacks=[progress_callback]
+        )
+        # -----------------------------------------------------------
+
         if study.best_trial is None:
             log_message_best_trial = "Warning: Optuna study did not find a best trial. Defaulting parameters."
             if hasattr(self, 'console') and self.console is not None: self.console.print(f"[yellow]{log_message_best_trial}[/yellow]")

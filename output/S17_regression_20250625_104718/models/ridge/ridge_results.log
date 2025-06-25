@@ -1,0 +1,70 @@
+
+   ██████╗ ██████╗   █████╗ ███████╗████████╗
+  ██╔════╝ ██╔══██╗ ██╔══██╗██╔════╝╚══██╔══╝
+  ██║      ██████╔╝███████║█████╗     ██║   
+  ██║      ██╔══██╗██╔══██║██╔══╝     ██║   
+  ╚██████╗ ██║  ██║██║  ██║██║        ██║   
+   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝        ╚═╝   
+
+Chemical Representation and Analysis for Functional Targets (CRAFT) - v1.1.1
+
+========================================================================================
+Log Generated:            2025-06-25 10:49:49
+Experiment Run Name:      S17_regression_20250625_104718
+Run Configuration:        experiment_name=S17, task_type=regression,
+                           split_mode=train_valid_test, data.source_mode=single_file, 
+                           data.single_file_config.main_file_path=data/reactions_with_
+                           features.csv,
+                           data.single_file_config.smiles_col=['Reactant1',
+                           'Reactant2', 'Ligand'],
+                           data.single_file_config.target_col=ee, data.single_file_con
+                           fig.precomputed_features.feature_columns=4:39,
+                           training.models_to_run=[11 items], training.n_trials=100,
+                           training.quiet_optuna=True,
+                           features.per_smiles_col_generators.Reactant1=[{'type':
+                           'maccs'}],
+                           features.per_smiles_col_generators.Reactant2=[{'type':
+                           'maccs'}],
+                           features.per_smiles_col_generators.Ligand=[{'type':
+                           'maccs'}], features.scaling=True,
+                           split_config.train_valid_test.train_size=0.9,
+                           split_config.train_valid_test.valid_size=0.05,
+                           split_config.train_valid_test.test_size=0.05,
+                           split_config.train_valid_test.random_state=42
+----------------------------------------------------------------------------------------
+Model Trained:            RIDGE
+Task Type:                regression
+Feature Concatenation:    Temp (1 features) -> catalyst (12 features) -> base (9
+                           features) -> solvent (13 features) -> maccs (501 features)
+
+--- Data & Split Information ---
+Training Set Dimensions:  20 samples x 536 features
+Validation Set Dimensions: 2 samples x 536 features
+HPO Method:               Hold-out Validation
+Test Set Dimensions:      2 samples x 536 features
+========================================================================================
+
+--- Hyperparameter Optimization (Optuna) ---
+Best HPO Score (R²): 0.9301
+  Scores from individual CV folds: [0.9301]
+
+Best Hyperparameters Found:
+{
+    "alpha": 1.0012153511296509e-05
+}
+
+========================================================================================
+
+--- Final Model Performance ---
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     1.0000      |     0.9301      |     0.8877      |
+| RMSE                      |     0.0000      |     3.3041      |     13.4063     |
+| MAE                       |     0.0000      |     3.0915      |     9.9339      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+========================================================================================
+
+Model-Specific Runtime (HPO, Fit, Eval): 0.31 seconds
+
+*** End of CRAFT Log for this Model ***

@@ -76,9 +76,9 @@ features:
       nBits: 1024
       radius: 2
     - type: "rdkit_descriptors"
-    - type: "unimol"
-      model_version: "v2"
-      model_size: "84m"
+    # - type: "unimol"
+    #   model_version: "v2"
+    #   model_size: "84m"
       
   # Whether to apply StandardScaler to the final feature matrix.
   scaling: true
@@ -107,7 +107,7 @@ training:
   # List of models to run.
   # Available: xgb, lgbm, rf, cat, hgb, dt, knn, svr, ridge, ann, adab, lr, svc, krr
   models_to_run:
-    - "xgb"
+    - "cat"
     # - "lgbm"
     # - "rf"
     # - "ann"

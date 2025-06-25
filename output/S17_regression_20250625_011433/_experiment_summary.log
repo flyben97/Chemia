@@ -1,0 +1,273 @@
+
+   ██████╗ ██████╗   █████╗ ███████╗████████╗
+  ██╔════╝ ██╔══██╗ ██╔══██╗██╔════╝╚══██╔══╝
+  ██║      ██████╔╝███████║█████╗     ██║   
+  ██║      ██╔══██╗██╔══██║██╔══╝     ██║   
+  ╚██████╗ ██║  ██║██║  ██║██║        ██║   
+   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝        ╚═╝   
+
+Chemical Representation and Analysis for Functional Targets (CRAFT) - v1.1.1
+
+========================================================================================
+  EXPERIMENT RUN SUMMARY
+========================================================================================
+Experiment Name:          S17_regression_20250625_011433
+Run Started:              2025-06-25 01:14:33
+Total Runtime:            0d 0h 11m 29s
+Run Configuration:        experiment_name=S17, task_type=regression,
+                           split_mode=train_valid_test, data.source_mode=single_file, 
+                           data.single_file_config.main_file_path=data/reactions_with_
+                           features.csv,
+                           data.single_file_config.smiles_col=['Reactant1',
+                           'Reactant2', 'Ligand'],
+                           data.single_file_config.target_col=ee, data.single_file_con
+                           fig.precomputed_features.feature_columns=4:39,
+                           training.models_to_run=[11 items], training.n_trials=100,
+                           training.quiet_optuna=True,
+                           features.per_smiles_col_generators.Reactant1=[{'type':
+                           'maccs'}],
+                           features.per_smiles_col_generators.Reactant2=[{'type':
+                           'maccs'}],
+                           features.per_smiles_col_generators.Ligand=[{'type':
+                           'maccs'}, {'type': 'unimol', 'model_version': 'v2',
+                           'model_size': '84m'}], features.scaling=True,
+                           split_config.train_valid_test.train_size=0.9,
+                           split_config.train_valid_test.valid_size=0.05,
+                           split_config.train_valid_test.test_size=0.05,
+                           split_config.train_valid_test.random_state=42
+Feature Concatenation:    Temp (1 features) -> catalyst (12 features) -> base (9
+                           features) -> solvent (13 features) -> maccs (501 features)
+                           -> unimol (768 features)
+
+========================================================================================
+  MODEL PERFORMANCE SUMMARY
+========================================================================================
+
+----- Model: SVR -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.8458
+Best Hyperparameters:
+{
+  "C": 534.1638330462414,
+  "epsilon": 0.2442304985571411,
+  "kernel": "rbf",
+  "gamma": 0.00010027526851536836
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.2126      |     0.8458      |     0.9943      |
+| RMSE                      |     39.7337     |     4.9080      |     3.0280      |
+| MAE                       |     9.7088      |     4.8853      |     2.4888      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: CATBOOST -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.9770
+Best Hyperparameters:
+{
+  "iterations": 500,
+  "depth": 8,
+  "learning_rate": 0.015349084165593786,
+  "l2_leaf_reg": 1.6663556680734257,
+  "od_wait": 40
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.9955      |     0.9770      |     0.6858      |
+| RMSE                      |     2.9879      |     1.8954      |     22.4212     |
+| MAE                       |     1.9805      |     1.6429      |     16.4410     |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: LGBM -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): -1.0650
+Best Hyperparameters:
+{
+  "n_estimators": 300,
+  "learning_rate": 0.0018408992080552514,
+  "num_leaves": 24,
+  "min_child_samples": 45,
+  "subsample": 0.8404460046972835,
+  "colsample_bytree": 0.8832290311184181,
+  "reg_alpha": 0.01083858126934475,
+  "reg_lambda": 0.44447541666908114
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.0000      |     -1.0650     |     -0.1722     |
+| RMSE                      |     44.7766     |     17.9627     |     43.3077     |
+| MAE                       |     30.3600     |     12.9000     |     40.0000     |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: RANDOMFOREST -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.9683
+Best Hyperparameters:
+{
+  "n_estimators": 300,
+  "max_depth": 8,
+  "max_features": 0.6,
+  "min_samples_split": 9,
+  "min_samples_leaf": 1,
+  "criterion": "absolute_error"
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.6983      |     0.9683      |     0.8763      |
+| RMSE                      |     24.5941     |     2.2247      |     14.0658     |
+| MAE                       |     10.5448     |     1.9408      |     10.4508     |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: XGBOOST -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.9408
+Best Hyperparameters:
+{
+  "n_estimators": 800,
+  "learning_rate": 0.19666420526042575,
+  "max_depth": 5,
+  "min_child_weight": 3,
+  "gamma": 0.33073182190246475,
+  "subsample": 0.8102065386519144,
+  "colsample_bytree": 0.7530282556164811,
+  "reg_alpha": 0.0018854514231436293,
+  "reg_lambda": 0.20522215540979882
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.9999      |     0.9408      |     0.8089      |
+| RMSE                      |     0.3753      |     3.0422      |     17.4860     |
+| MAE                       |     0.2645      |     2.9023      |     13.7372     |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: HISTGRADIENTBOOSTING -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): -1.0650
+Best Hyperparameters:
+{
+  "max_iter": 200,
+  "max_depth": 8,
+  "learning_rate": 0.0023102018878452934,
+  "l2_regularization": 5.415244119402541e-06,
+  "n_iter_no_change": 20
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.0000      |     -1.0650     |     -0.1722     |
+| RMSE                      |     44.7766     |     17.9627     |     43.3077     |
+| MAE                       |     30.3600     |     12.9000     |     40.0000     |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: KNEIGHBORS -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.8920
+Best Hyperparameters:
+{
+  "n_neighbors": 12,
+  "weights": "uniform"
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.0856      |     0.8920      |     0.2806      |
+| RMSE                      |     42.8177     |     4.1083      |     33.9271     |
+| MAE                       |     22.3333     |     3.2917      |     25.7917     |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: KERNELRIDGE -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.8253
+Best Hyperparameters:
+{
+  "alpha": 0.3217238823312572,
+  "kernel": "rbf",
+  "gamma": 0.0014812254086025646
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.8184      |     0.8253      |     0.9657      |
+| RMSE                      |     19.0811     |     5.2245      |     7.4089      |
+| MAE                       |     11.7805     |     4.2334      |     5.5076      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: DECISIONTREE -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.2672
+Best Hyperparameters:
+{
+  "max_depth": 21,
+  "min_samples_split": 12,
+  "criterion": "absolute_error"
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.6280      |     0.2672      |     0.9747      |
+| RMSE                      |     27.3112     |     10.7005     |     6.3640      |
+| MAE                       |     9.1000      |     8.5000      |     4.5000      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: RIDGE -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.0832
+Best Hyperparameters:
+{
+  "alpha": 99.50405345030272
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.7973      |     0.0832      |     0.9647      |
+| RMSE                      |     20.1597     |     11.9684     |     7.5149      |
+| MAE                       |     10.4610     |     11.7068     |     5.8710      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: ADABOOST -----
+Task Type: regression
+Data Dimensions: Train=(20, 1304), Val=(2, 1304), Test=(2, 1304)
+Best HPO Score (R²): 0.8028
+Best Hyperparameters:
+{
+  "n_estimators": 61,
+  "learning_rate": 0.5205060020017485,
+  "loss": "exponential"
+}
+
+Final Metrics:
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.9937      |     0.8028      |     0.8938      |
+| RMSE                      |     3.5483      |     5.5505      |     13.0384     |
+| MAE                       |     2.6937      |     5.4123      |     11.0000     |
+|---------------------------|-----------------|-----------------|-----------------|
+
+
+========================================================================================
+*** End of Summary Log ***
