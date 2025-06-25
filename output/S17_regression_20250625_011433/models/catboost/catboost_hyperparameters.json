@@ -1,7 +1,0 @@
-{
-    "iterations": 500,
-    "depth": 8,
-    "learning_rate": 0.015349084165593786,
-    "l2_leaf_reg": 1.6663556680734257,
-    "od_wait": 40
-}

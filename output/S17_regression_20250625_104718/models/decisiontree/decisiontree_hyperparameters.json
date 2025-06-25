@@ -1,5 +1,0 @@
-{
-    "max_depth": 1,
-    "min_samples_split": 4,
-    "criterion": "friedman_mse"
-}

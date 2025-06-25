@@ -1,7 +1,0 @@
-2025-06-25 01:14:35 | unimol_tools/models/unimolv2.py | 161 | INFO | Uni-Mol Tools | Loading pretrained weights from /home/flybenben/miniconda3/envs/unimol/lib/python3.10/site-packages/unimol_tools/weights/modelzoo/84M/checkpoint.pt
-2025-06-25 01:14:35 | unimol_tools/data/conformer.py | 437 | INFO | Uni-Mol Tools | Start generating conformers...
-0it [00:00, ?it/s]1it [00:00,  2.20it/s]22it [00:00, 51.49it/s]24it [00:00, 42.62it/s]
-2025-06-25 01:14:36 | unimol_tools/data/conformer.py | 452 | INFO | Uni-Mol Tools | Succeeded in generating conformers for 100.00% of molecules.
-2025-06-25 01:14:36 | unimol_tools/data/conformer.py | 469 | INFO | Uni-Mol Tools | Succeeded in generating 3d conformers for 100.00% of molecules.
-2025-06-25 01:14:36 | unimol_tools/tasks/trainer.py | 103 | INFO | Uni-Mol Tools | Using CPU.
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:03<00:00,  3.19s/it]100%|██████████| 1/1 [00:03<00:00,  3.19s/it]
