@@ -1,0 +1,138 @@
+# ===================================================================
+#              CRAFT - Training with Rich Feature Engineering
+# ===================================================================
+# Configuration that demonstrates extensive feature generation
+# including molecular descriptors, fingerprints, and precomputed features.
+# ===================================================================
+
+experiment_name: "Training_With_Rich_Features"
+task_type: "regression"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/reactions_with_features.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "yield"
+    precomputed_features:
+      feature_columns: "5:"  # Include columns 5 onwards as features
+
+# --- Training Configuration ---
+training:
+  models_to_run:
+    - "xgb"           # XGBoost
+    - "lgbm"          # LightGBM
+    - "catboost"      # CatBoost
+    - "rf"            # Random Forest
+    - "gpr"           # Gaussian Process Regression
+    - "ann"           # Neural Network
+  
+  n_trials: 25
+  quiet_optuna: true
+
+# --- Rich Feature Engineering ---
+features:
+  per_smiles_col_generators:
+    Catalyst: 
+      - type: "morgan"
+        radius: 2
+        nBits: 2048
+      - type: "morgan"
+        radius: 3
+        nBits: 1024
+      - type: "maccs"
+      - type: "rdkit_descriptors"
+    Reactant1: 
+      - type: "morgan"
+        radius: 2
+        nBits: 2048
+      - type: "maccs"
+      - type: "rdkit_descriptors"
+    Reactant2: 
+      - type: "morgan"
+        radius: 2
+        nBits: 2048
+      - type: "maccs"
+      - type: "rdkit_descriptors"
+  
+  scaling: true
+  
+  # Advanced feature engineering options
+  feature_selection:
+    enabled: true
+    method: "variance_threshold"
+    threshold: 0.01
+    
+  dimensionality_reduction:
+    enabled: false  # Can be enabled for very high-dimensional data
+    method: "pca"
+    n_components: 0.95
+
+# --- Data Splitting Strategy ---
+split_mode: "cross_validation"
+split_config:
+  cross_validation:
+    n_splits: 5
+    test_size_for_cv: 0.2
+    random_state: 42
+    shuffle: true
+
+# --- Evaluation Metrics ---
+evaluation:
+  primary_metric: "r2"
+  additional_metrics:
+    - "rmse"
+    - "mae"
+    - "mape"
+    - "explained_variance"
+
+# --- Model-specific Settings ---
+model_specific_configs:
+  ann:
+    hidden_layers: [256, 128, 64, 32]
+    dropout_rate: 0.2
+    learning_rate: 0.001
+    batch_normalization: true
+    
+  gpr:
+    optimize_restarts: 5
+    kernel: "rbf"
+    
+  xgb:
+    early_stopping_rounds: 30
+    max_depth: 8
+    
+  lgbm:
+    early_stopping_rounds: 30
+    num_leaves: 63
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_feature_importance: true
+  save_cv_predictions: true
+  save_hyperparameters: true
+  save_feature_names: true
+  generate_model_comparison: true
+
+# --- Advanced Analysis ---
+advanced:
+  feature_analysis:
+    permutation_importance: true
+    feature_correlation_analysis: true
+    
+  model_interpretation:
+    save_partial_dependence: true
+    save_learning_curves: true
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42
+  memory_efficient: true
+  
+  early_stopping:
+    enabled: true
+    patience: 25
+    min_delta: 0.0005 

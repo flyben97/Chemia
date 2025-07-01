@@ -1,0 +1,119 @@
+# ===================================================================
+#            CRAFT - Classification Training with K-Fold CV
+# ===================================================================
+# Configuration for classification model training using 5-fold 
+# cross-validation with stratified sampling.
+# ===================================================================
+
+experiment_name: "Classification_5Fold_CV"
+task_type: "classification"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/classification_reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "reaction_class"
+    precomputed_features:
+      feature_columns: null
+
+# --- Training Configuration ---
+training:
+  models_to_run:
+    - "xgb"           # XGBoost Classifier
+    - "lgbm"          # LightGBM Classifier
+    - "catboost"      # CatBoost Classifier
+    - "rf"            # Random Forest Classifier
+    - "ann"           # Neural Network Classifier
+    - "svc"           # Support Vector Classifier
+    - "adaboost"      # AdaBoost Classifier
+  
+  n_trials: 15
+  quiet_optuna: true
+
+# --- Feature Engineering ---
+features:
+  per_smiles_col_generators:
+    Catalyst: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+      - type: "maccs"
+    Reactant1: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant2: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+  
+  scaling: true
+
+# --- Cross-Validation Strategy ---
+split_mode: "cross_validation"
+split_config:
+  cross_validation:
+    n_splits: 5
+    test_size_for_cv: 0.2
+    random_state: 42
+    shuffle: true
+    stratify: true  # Stratified sampling for balanced folds
+
+# --- Evaluation Metrics ---
+evaluation:
+  primary_metric: "f1"
+  additional_metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "auc"
+    - "f1_macro"
+    - "f1_micro"
+  
+  cv_reporting:
+    show_fold_details: true
+    show_std: true
+    confidence_interval: 0.95
+
+# --- Model-specific Settings ---
+model_specific_configs:
+  ann:
+    hidden_layers: [128, 64]
+    dropout_rate: 0.3
+    learning_rate: 0.001
+    epochs: 100
+    early_stopping_patience: 15
+    
+  xgb:
+    early_stopping_rounds: 20
+    eval_metric: "logloss"
+    
+  lgbm:
+    early_stopping_rounds: 20
+    metric: "multi_logloss"
+    
+  catboost:
+    early_stopping_rounds: 20
+    eval_metric: "MultiClass"
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_feature_importance: true
+  save_cv_predictions: true
+  save_hyperparameters: true
+  save_confusion_matrix: true
+  save_classification_report: true
+  generate_model_comparison: true
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42
+  
+  early_stopping:
+    enabled: true
+    patience: 20
+    min_delta: 0.001 

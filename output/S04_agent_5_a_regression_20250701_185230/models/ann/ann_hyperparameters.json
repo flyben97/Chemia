@@ -1,0 +1,12 @@
+{
+    "dropout_rate": 0.47089597268355077,
+    "weight_decay": 1.129059573387675e-06,
+    "learning_rate": 0.006430609835520862,
+    "epochs": 3602,
+    "patience": 50,
+    "n_layers": 4,
+    "n_units_l0": 712,
+    "n_units_l1": 592,
+    "n_units_l2": 480,
+    "n_units_l3": 256
+}

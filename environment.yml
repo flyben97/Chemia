@@ -1,0 +1,66 @@
+name: craft
+channels:
+  - conda-forge
+  - pytorch
+  - pyg
+  - defaults
+
+dependencies:
+  # Python
+  - python>=3.8
+
+  # Core scientific computing
+  - numpy>=1.21.0
+  - pandas>=1.3.0
+  - scipy>=1.7.0
+
+  # Machine learning core
+  - scikit-learn>=1.0.2
+
+  # PyTorch ecosystem (for neural networks and GNNs)
+  # NOTE: Please install PyTorch manually based on your system configuration
+  # Visit: https://pytorch.org/get-started/locally/
+  # Recommended installation via conda:
+  # conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+  # conda install pyg -c pyg
+  # 
+  # For CPU only:
+  # conda install pytorch torchvision torchaudio cpuonly -c pytorch
+
+  # Chemical informatics
+  - rdkit>=2022.03.1
+
+  # Data processing
+  - pyyaml>=6.0
+  - joblib>=1.1.0
+  - tqdm>=4.62.0
+
+  # Visualization (optional)
+  - matplotlib>=3.5.0
+  - seaborn>=0.11.0
+
+  # Development tools (optional)
+  - jupyter>=1.0.0
+  - jupyterlab>=3.0.0
+
+  # Pip dependencies (packages not available in conda)
+  - pip
+  - pip:
+    - xgboost>=1.6.0
+    - lightgbm>=3.3.0
+    - catboost>=1.0.4
+    - optuna>=3.0.0
+    - rich>=12.0.0
+    
+    # Optional visualization
+    - plotly>=5.0.0
+    
+    # Optional development tools
+    - pytest>=7.0.0
+    - pytest-cov>=3.0.0
+    - flake8>=4.0.0
+    - black>=22.0.0
+
+# Alternative CPU-only environment (uncomment if you don't have GPU)
+# For CPU-only installation, replace pytorch-cuda with:
+# - cpuonly

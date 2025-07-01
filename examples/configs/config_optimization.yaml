@@ -1,0 +1,73 @@
+# ===================================================================
+#           CRAFT - Reaction Optimization Configuration v1.4
+# ===================================================================
+
+# --- 1. Source Model & Artifacts ---
+mode: "custom_artifacts" # 'run_directory' or 'custom_artifacts'
+
+custom_artifacts_mode:
+  base_dir: "test"
+  model_filename: "xgboost_model.json"
+  training_config_filename: "run_config.json"
+  scaler_filename: "processed_dataset_scaler.joblib"
+  encoder_filename: null
+
+# ===================================================================
+#                      2. REACTION COMPONENTS
+#         mode: 'search' (optimize this) or 'fixed' (keep this constant)
+# ===================================================================
+reaction_components:
+  # --- SMILES-based components (features are generated, not pre-computed) ---
+  Reactant1:
+    mode: "fixed"
+    value: 'O=C(OC)CCC#C'
+
+  Reactant2:
+    mode: "fixed"
+    value: 'O=P(C1=CC=CC=C1)(C2=CC=CC=C2)C(Br)CCC'
+
+  Ligand:
+    mode: "search" # We are searching for the best ligand
+    file: 'data/ligand_space.csv'
+    display_col: 'SMILES'
+    sep: '\t'
+
+  # --- Pre-computed feature-based components ---
+  # These components contribute columns to the feature vector.
+  catalyst:
+    mode: "fixed"
+    index: 1 # Fix to the first catalyst in the CSV
+    file: 'data/catalysts_space.csv'
+    display_col: 'Compound'
+    is_feature_source: True      # <--- KEY: Mark as a feature source
+    feature_slice: "2:"          # <--- KEY: Define how to slice features
+
+  base:
+    mode: "fixed"
+    index: 1 # Fix to a specific base
+    file: 'data/base_space.csv'
+    display_col: 'Base'
+    is_feature_source: True      # <--- KEY: Mark as a feature source
+    feature_slice: "2:"          # <--- KEY: Define how to slice features
+
+  solvent:
+    mode: "fixed"
+    index: 1 # Fix to a specific solvent
+    file: 'data/solvent_space.csv'
+    display_col: 'Name'
+    is_feature_source: True      # <--- KEY: Mark as a feature source
+    feature_slice: "3:"          # <--- KEY: Define how to slice features
+  
+  temperature:
+    mode: "fixed"
+    value: 50 # This component is a direct value, not from a file
+    # It does not need is_feature_source or feature_slice as it's a single value.
+
+# ===================================================================
+#                      3. OPTIMIZATION PARAMETERS
+# ===================================================================
+bayesian_optimization:
+  init_points: 10
+  n_iter: 40
+  random_state: 42
+  top_k_results: 10

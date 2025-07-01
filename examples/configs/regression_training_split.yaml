@@ -1,0 +1,106 @@
+# ===================================================================
+#          CRAFT - Regression Training with Train/Valid/Test Split
+# ===================================================================
+# Configuration for regression model training using explicit
+# train/validation/test split for development and evaluation.
+# ===================================================================
+
+experiment_name: "Regression_Train_Valid_Test"
+task_type: "regression"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "yield"
+    precomputed_features:
+      feature_columns: null
+
+# --- Training Configuration ---
+training:
+  models_to_run:
+    - "xgb"           # XGBoost
+    - "lgbm"          # LightGBM
+    - "catboost"      # CatBoost
+    - "rf"            # Random Forest
+    - "ann"           # Neural Network
+    - "gpr"           # Gaussian Process Regression
+  
+  n_trials: 20
+  quiet_optuna: true
+
+# --- Feature Engineering ---
+features:
+  per_smiles_col_generators:
+    Catalyst: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+      - type: "rdkit_descriptors"
+    Reactant1: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant2: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+  
+  scaling: true
+
+# --- Data Splitting Strategy ---
+split_mode: "train_valid_test_split"
+split_config:
+  train_valid_test_split:
+    test_size: 0.2      # 20% for test
+    valid_size: 0.15    # 15% for validation
+    random_state: 42
+    shuffle: true
+
+# --- Evaluation Metrics ---
+evaluation:
+  primary_metric: "r2"
+  additional_metrics:
+    - "rmse"
+    - "mae"
+    - "mape"
+
+# --- Model-specific Settings ---
+model_specific_configs:
+  ann:
+    hidden_layers: [128, 64, 32]
+    dropout_rate: 0.2
+    learning_rate: 0.001
+    epochs: 100
+    early_stopping_patience: 10
+    
+  xgb:
+    early_stopping_rounds: 20
+    eval_metric: "rmse"
+    
+  lgbm:
+    early_stopping_rounds: 20
+    metric: "rmse"
+    
+  catboost:
+    early_stopping_rounds: 20
+    eval_metric: "RMSE"
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_feature_importance: true
+  save_hyperparameters: true
+  save_validation_curves: true
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42
+  
+  early_stopping:
+    enabled: true
+    patience: 15
+    min_delta: 0.001 

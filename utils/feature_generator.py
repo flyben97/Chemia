@@ -13,7 +13,7 @@ _console = Console()
 
 def _get_rdkit_features(smiles_list: List[str], config: Dict[str, Any]) -> pd.DataFrame:
     """Helper to calculate RDKit fingerprints/descriptors."""
-    from .mol_fp_features import calculate_molecular_features as calculate_rdkit_features_single
+    from .mol_fp_features import calculate_molecular_features
 
     fp_type = config.get('type')
     descriptors = "all" if config.get('descriptors', False) else False
@@ -27,7 +27,17 @@ def _get_rdkit_features(smiles_list: List[str], config: Dict[str, Any]) -> pd.Da
         desc_name_parts.append("RDKit Descriptors")
     desc_name = " & ".join(desc_name_parts)
 
-    _console.log(f"Calculating RDKit features: type='{fp_type}', descriptors={descriptors}, nBits={nBits}, radius={radius}...")
+    # Create appropriate log message based on fingerprint type
+    if fp_type == 'maccs':
+        _console.log(f"Calculating RDKit features: type='{fp_type}', descriptors={descriptors} (MACCS: fixed 166 bits)...")
+    elif fp_type == 'morgan':
+        _console.log(f"Calculating RDKit features: type='{fp_type}', descriptors={descriptors}, nBits={nBits}, radius={radius}...")
+    elif fp_type in ['rdkit', 'atompair', 'torsion']:
+        _console.log(f"Calculating RDKit features: type='{fp_type}', descriptors={descriptors}, nBits={nBits}...")
+    elif fp_type is None and descriptors:
+        _console.log(f"Calculating RDKit descriptors only...")
+    else:
+        _console.log(f"Calculating RDKit features: type='{fp_type}', descriptors={descriptors}...")
 
     all_features_rows = []
     feature_columns = None
@@ -37,7 +47,7 @@ def _get_rdkit_features(smiles_list: List[str], config: Dict[str, Any]) -> pd.Da
     # Determine feature columns and length from the first valid SMILES
     for smiles in smiles_list:
         if pd.notna(smiles) and smiles:
-            first_valid_df = calculate_rdkit_features_single(smiles, fp_type, descriptors, radius, nBits)
+            first_valid_df = calculate_molecular_features(smiles, fp_type=fp_type, descriptors=descriptors, radius=radius, nBits=nBits)  # type: ignore
             if first_valid_df is not None:
                 feature_columns = first_valid_df.columns
                 feature_length = len(feature_columns)
@@ -55,7 +65,7 @@ def _get_rdkit_features(smiles_list: List[str], config: Dict[str, Any]) -> pd.Da
             failed_smiles.append(str(smiles)) 
             continue
         
-        features_df = calculate_rdkit_features_single(smiles, fp_type, descriptors, radius, nBits)
+        features_df = calculate_molecular_features(smiles, fp_type=fp_type, descriptors=descriptors, radius=radius, nBits=nBits)  # type: ignore
         
         if features_df is None or features_df.shape[1] != feature_length:
             all_features_rows.append(zero_row)
@@ -146,11 +156,12 @@ def generate_features(smiles_list: List[str], feature_configs: List[Dict[str, An
         _console.log("[red]Error: No features were generated. Returning empty DataFrame.[/red]")
         return pd.DataFrame()
 
-    _console.log("Concatenating all feature sets...")
+    import logging
+    logging.info("Concatenating all feature sets...")
     
     final_df = pd.concat(all_feature_dfs, axis=1)
 
-    _console.log(f"Generated final feature matrix with shape: {final_df.shape}")
+    logging.info(f"Generated final feature matrix with shape: {final_df.shape}")
     return final_df
 
 
@@ -190,16 +201,19 @@ def calculate_features_from_smiles(
     
     # We call the internal 'generate_features' function, which is already robust.
     # We wrap the config in a list because that's what generate_features expects.
-    _console.print(f"\n[bold blue]---> Calculating features of type: '{feature_type}'[/bold blue]")
     
     # Ensure the directory for logs exists.
     import os
     os.makedirs(output_dir_for_logs, exist_ok=True)
     
+    # Reduce console output for internal use
+    import logging
+    logging.info(f"Calculating features of type: '{feature_type}'")
+    
     features_df = generate_features(smiles_list, [config], output_dir=output_dir_for_logs)
     
     if features_df.empty:
-        _console.print(f"[bold red]Calculation failed for feature type '{feature_type}'.[/bold red]")
+        logging.error(f"Calculation failed for feature type '{feature_type}'")
         return None
         
     return features_df

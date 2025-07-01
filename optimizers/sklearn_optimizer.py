@@ -1,5 +1,4 @@
-# train_valid_test/optimizers/sklearn_optimizer.py
-# ... (imports and __init__ remain the same) ...
+# optimizers/sklearn_optimizer.py
 from .base_optimizer import BaseOptimizer
 from models.sklearn_models import (
     XGBoostRegressor, CatBoostRegressor, AdaBoostRegressor, DecisionTreeRegressor,
@@ -7,35 +6,50 @@ from models.sklearn_models import (
     LGBMRegressor, RandomForestRegressor, Ridge, SVR, 
     XGBoostClassifier, CatBoostClassifier, AdaBoostClassifier, DecisionTreeClassifier,
     HistGradientBoostingClassifier, KNeighborsClassifier, LogisticRegression, 
-    LGBMClassifier, RandomForestClassifier, SVC 
+    LGBMClassifier, RandomForestClassifier, SVC,
+    # New algorithms
+    GBDTRegressor, GBDTClassifier, ExtraTreesRegressor, ExtraTreesClassifier,
+    ElasticNet, Lasso, BayesianRidge, SGDRegressor, SGDClassifier,
+    GPRegressor, GPClassifier
 )
-from sklearn.metrics import r2_score, f1_score
+from sklearn.metrics import r2_score, f1_score, mean_squared_error, mean_absolute_error, accuracy_score, precision_score, recall_score
 from sklearn.model_selection import KFold, StratifiedKFold
 import numpy as np
 import lightgbm 
 import xgboost as xgb 
 import warnings 
 import os
+from typing import Optional, Dict, Union
 
 class SklearnOptimizer(BaseOptimizer):
+    model_run_output_dir: Optional[str]
+    
     def __init__(self, model_name, n_trials=100, random_state=42, cv=None, 
                  task_type='regression', num_classes=None):
         
         self.model_name_orig = model_name 
         self.task_type = task_type
         self.num_classes = num_classes
+        self.hpo_trained_model = None  # Store model trained during HPO for train_valid_test mode
 
         regressor_classes = {
             'xgboost': XGBoostRegressor, 'catboost': CatBoostRegressor, 'adaboost': AdaBoostRegressor,
             'decisiontree': DecisionTreeRegressor, 'histgradientboosting': HistGradientBoostingRegressor,
             'kneighbors': KNeighborsRegressor, 'kernelridge': KernelRidge, 'lgbm': LGBMRegressor,
-            'randomforest': RandomForestRegressor, 'ridge': Ridge, 'svr': SVR
+            'randomforest': RandomForestRegressor, 'ridge': Ridge, 'svr': SVR,
+            # New algorithms
+            'gbdt': GBDTRegressor, 'extratrees': ExtraTreesRegressor, 'elasticnet': ElasticNet,
+            'lasso': Lasso, 'bayesianridge': BayesianRidge, 'sgd': SGDRegressor,
+            'gpr': GPRegressor
         }
         classifier_classes = {
             'xgboost': XGBoostClassifier, 'catboost': CatBoostClassifier, 'adaboost': AdaBoostClassifier,
             'decisiontree': DecisionTreeClassifier, 'histgradientboosting': HistGradientBoostingClassifier,
             'kneighbors': KNeighborsClassifier, 'logisticregression': LogisticRegression, 
-            'lgbm': LGBMClassifier, 'randomforest': RandomForestClassifier, 'svc': SVC 
+            'lgbm': LGBMClassifier, 'randomforest': RandomForestClassifier, 'svc': SVC,
+            # New algorithms 
+            'gbdt': GBDTClassifier, 'extratrees': ExtraTreesClassifier, 'sgd': SGDClassifier,
+            'gpc': GPClassifier
         }
 
         self.model_name_for_params = model_name 
@@ -57,8 +71,6 @@ class SklearnOptimizer(BaseOptimizer):
             raise ValueError(f"Unsupported model_name '{self.model_name_orig}' for task_type '{task_type}'. "
                              f"Effective name for params: '{self.model_name_for_params}'")
         
-        # 您可以替换 sklearn_optimizer.py 中的整个 param_grids 字典
-
         param_grids = {
             'xgboost': { 
                 'n_estimators': {'type': 'categorical', 'choices': [100, 300, 500, 800, 1200]},
@@ -68,8 +80,8 @@ class SklearnOptimizer(BaseOptimizer):
                 'gamma': {'type': 'float', 'low': 0, 'high': 0.5}, 
                 'subsample': {'type': 'float', 'low': 0.6, 'high': 1.0}, 
                 'colsample_bytree': {'type': 'float', 'low': 0.6, 'high': 1.0},
-                'reg_alpha': {'type': 'float', 'low': 1e-8, 'high': 1.0, 'log': True},  # <<< ADDED
-                'reg_lambda': {'type': 'float', 'low': 1e-8, 'high': 1.0, 'log': True}, # <<< ADDED
+                'reg_alpha': {'type': 'float', 'low': 1e-8, 'high': 1.0, 'log': True},
+                'reg_lambda': {'type': 'float', 'low': 1e-8, 'high': 1.0, 'log': True},
             },
             'catboost': { 
                 'iterations': {'type': 'categorical', 'choices': [100, 200, 500, 800, 1200]}, 
@@ -101,10 +113,10 @@ class SklearnOptimizer(BaseOptimizer):
                 'n_neighbors': {'type': 'int', 'low': 1, 'high': 20},
                 'weights': {'type': 'categorical', 'choices': ['uniform', 'distance']}
             },
-            'kernelridge': { # This is for regression only
-                'alpha': {'type': 'float', 'low': 1e-3, 'high': 1e2, 'log': True}, # <<< CHANGED (wider range)
+            'kernelridge': {
+                'alpha': {'type': 'float', 'low': 1e-3, 'high': 1e2, 'log': True},
                 'kernel': {'type': 'categorical', 'choices': ['linear', 'rbf', 'poly']},
-                'gamma': {'type': 'float', 'low': 1e-4, 'high': 1e2, 'log': True} # <<< CHANGED (wider range)
+                'gamma': {'type': 'float', 'low': 1e-4, 'high': 1e2, 'log': True}
             },
             'lgbm': { 
                 'n_estimators': {'type': 'categorical', 'choices': [100, 300, 500, 800, 1200]},
@@ -119,30 +131,70 @@ class SklearnOptimizer(BaseOptimizer):
             'randomforest': {
                 'n_estimators': {'type': 'categorical', 'choices': [100, 200, 300, 500]},
                 'max_depth': {'type': 'int', 'low': 5, 'high': 30, 'none_is_valid':True}, 
-                'max_features': {'type': 'categorical', 'choices': ['sqrt', 'log2', 0.6, 0.8]}, # <<< ADDED
+                'max_features': {'type': 'categorical', 'choices': ['sqrt', 'log2', 0.6, 0.8]},
                 'min_samples_split': {'type': 'int', 'low': 2, 'high': 20},
                 'min_samples_leaf': {'type': 'int', 'low': 1, 'high': 10}, 
                 'criterion': {'type': 'categorical', 'choices': ['gini', 'entropy']} if 'classification' in task_type else \
                             {'type': 'categorical', 'choices': ['squared_error', 'absolute_error']}
             },
             'ridge': { 
-                'alpha': {'type': 'float', 'low': 1e-5, 'high': 100, 'log': True} # <<< CHANGED (wider range)
+                'alpha': {'type': 'float', 'low': 1e-5, 'high': 100, 'log': True}
             },
             'svr': { 
-                'C': {'type': 'float', 'low': 1e-2, 'high': 1e3, 'log':True}, # <<< CHANGED (wider range)
+                'C': {'type': 'float', 'low': 1e-2, 'high': 1e3, 'log':True},
                 'epsilon': {'type': 'float', 'low': 0.01, 'high': 0.5, 'log':True},
                 'kernel': {'type': 'categorical', 'choices': ['linear', 'poly', 'rbf']},
-                'gamma': {'type': 'float', 'low': 1e-4, 'high': 1e2, 'log': True} # <<< CHANGED (from categorical to float search)
+                'gamma': {'type': 'float', 'low': 1e-4, 'high': 1e2, 'log': True}
             },
             'logisticregression': {
                 'C': {'type': 'float', 'low': 0.01, 'high': 100.0, 'log': True},
                 'solver': {'type': 'categorical', 'choices': ['liblinear', 'saga']}, 
             },
             'svc': {
-                'C': {'type': 'float', 'low': 1e-2, 'high': 1e3, 'log': True}, # <<< CHANGED (wider range)
+                'C': {'type': 'float', 'low': 1e-2, 'high': 1e3, 'log': True},
                 'kernel': {'type': 'categorical', 'choices': ['linear', 'poly', 'rbf', 'sigmoid']},
-                'gamma': {'type': 'float', 'low': 1e-4, 'high': 1e2, 'log': True}, # <<< CHANGED (from categorical to float search)
+                'gamma': {'type': 'float', 'low': 1e-4, 'high': 1e2, 'log': True},
                 'probability': {'type':'categorical', 'choices':[True]} 
+            },
+            # New algorithms parameter grids
+            'gbdt': {
+                'n_estimators': {'type': 'categorical', 'choices': [100, 200, 300, 500]},
+                'learning_rate': {'type': 'float', 'low': 0.01, 'high': 0.3, 'log': True},
+                'max_depth': {'type': 'int', 'low': 3, 'high': 10},
+                'min_samples_split': {'type': 'int', 'low': 2, 'high': 20},
+                'min_samples_leaf': {'type': 'int', 'low': 1, 'high': 10},
+                'subsample': {'type': 'float', 'low': 0.6, 'high': 1.0}
+            },
+            'extratrees': {
+                'n_estimators': {'type': 'categorical', 'choices': [100, 200, 300, 500]},
+                'max_depth': {'type': 'int', 'low': 5, 'high': 30, 'none_is_valid': True},
+                'min_samples_split': {'type': 'int', 'low': 2, 'high': 20},
+                'min_samples_leaf': {'type': 'int', 'low': 1, 'high': 10},
+                'max_features': {'type': 'categorical', 'choices': ['sqrt', 'log2', 0.6, 0.8]}
+            },
+            'elasticnet': {
+                'alpha': {'type': 'float', 'low': 1e-4, 'high': 10.0, 'log': True},
+                'l1_ratio': {'type': 'float', 'low': 0.1, 'high': 0.9}
+            },
+            'lasso': {
+                'alpha': {'type': 'float', 'low': 1e-4, 'high': 10.0, 'log': True}
+            },
+            'bayesianridge': {
+                'alpha_1': {'type': 'float', 'low': 1e-6, 'high': 1e-2, 'log': True},
+                'alpha_2': {'type': 'float', 'low': 1e-6, 'high': 1e-2, 'log': True},
+                'lambda_1': {'type': 'float', 'low': 1e-6, 'high': 1e-2, 'log': True},
+                'lambda_2': {'type': 'float', 'low': 1e-6, 'high': 1e-2, 'log': True}
+            },
+            'sgd': {
+                'alpha': {'type': 'float', 'low': 1e-5, 'high': 1e-1, 'log': True},
+                'learning_rate': {'type': 'categorical', 'choices': ['constant', 'optimal', 'invscaling', 'adaptive']},
+                'eta0': {'type': 'float', 'low': 0.001, 'high': 1.0, 'log': True}
+            },
+            'gpr': {
+                'alpha': {'type': 'float', 'low': 1e-10, 'high': 1e-1, 'log': True}
+            },
+            'gpc': {
+                'max_iter_predict': {'type': 'int', 'low': 100, 'high': 1000}
             }
         }
         current_param_grid = param_grids.get(self.model_name_for_params, {}) 
@@ -151,6 +203,7 @@ class SklearnOptimizer(BaseOptimizer):
 
         super().__init__(model_class, current_param_grid, n_trials, random_state, cv, task_type, num_classes)
         self.models_without_random_state = ['kneighbors', 'kernelridge', 'ridge', 'svr', 'svc', 'logisticregression']
+        self.model_run_output_dir = None  # Will be set by trainer_setup.py for CatBoost
 
     def _prepare_model_kwargs(self, params_from_trial, for_cv_fold=False): 
 
@@ -166,16 +219,12 @@ class SklearnOptimizer(BaseOptimizer):
             if k in kwargs: del kwargs[k]
 
         if self.model_name_orig == 'catboost':
-            kwargs['verbose'] = 0 # Ensure verbose is 0 if we want to control train_dir
-            if self.model_run_output_dir: # Check if the directory has been set
-                # Create a specific subdir for catboost files to keep model_specific_output_dir cleaner
+            kwargs['verbose'] = 0 
+            if hasattr(self, 'model_run_output_dir') and self.model_run_output_dir:
                 catboost_train_files_dir = os.path.join(self.model_run_output_dir, 'catboost_training_artefacts')
                 os.makedirs(catboost_train_files_dir, exist_ok=True)
                 kwargs['train_dir'] = catboost_train_files_dir
-                # self.console.print(f"[dim]CatBoost train_dir set to: {catboost_train_files_dir}[/dim]") # Optional debug
             else:
-                # Fallback or warning if model_run_output_dir is not set
-                # This means catboost_info will go to CWD
                 self.console.print(f"[yellow]Warning: model_run_output_dir not set for CatBoost. 'catboost_info' may be created in CWD.[/yellow]")
         if self.model_name_orig not in self.models_without_random_state:
              if 'random_state' not in kwargs: 
@@ -221,9 +270,8 @@ class SklearnOptimizer(BaseOptimizer):
             
         return kwargs
 
-
     def objective(self, trial, X_train, y_train, X_val, y_val):
-        self.current_trial_number_for_cleanup = trial.number # Store for _prepare_model_kwargs cleanup
+        self.current_trial_number_for_cleanup = trial.number
 
         params_from_trial = self._suggest_params(trial) 
         
@@ -234,18 +282,13 @@ class SklearnOptimizer(BaseOptimizer):
         if self.model_name_for_params == 'logisticregression':
             solver = params_from_trial.get('solver') 
             valid_penalties_for_solver = []
-            if solver == 'liblinear': 
-                valid_penalties_for_solver = ['l1', 'l2']
-            elif solver == 'saga': 
-                valid_penalties_for_solver = ['l1', 'l2', 'elasticnet', 'none'] 
+            if solver == 'liblinear': valid_penalties_for_solver = ['l1', 'l2']
+            elif solver == 'saga': valid_penalties_for_solver = ['l1', 'l2', 'elasticnet', 'none'] 
             if not valid_penalties_for_solver: 
                 raise ValueError(f"Solver '{solver}' for LogisticRegression is not recognized for penalty selection.")
             
-            # Use a unique name for the conditional penalty suggestion to avoid Optuna conflicts
-            # if this objective function is re-entered for the same trial (e.g. pruner).
             penalty_param_name = f'penalty_for_solver_{solver}_trial_{trial.number}'
             suggested_penalty = trial.suggest_categorical(penalty_param_name, valid_penalties_for_solver)
-            
             params_from_trial['penalty'] = None if suggested_penalty == 'none' else suggested_penalty
 
             if params_from_trial['penalty'] == 'elasticnet' and solver == 'saga':
@@ -257,224 +300,194 @@ class SklearnOptimizer(BaseOptimizer):
         _y_train = y_train.ravel() 
         _y_val = y_val.ravel()
 
-        fold_scores_list = [] # To store scores of each fold for this trial
+        fold_scores_list = []
+        trial_model = None  # Store the model from this trial
 
-        if self.cv is not None and self.cv > 1:
-            model_kwargs = self._prepare_model_kwargs(params_from_trial, for_cv_fold=True)
-            if self.task_type == 'regression':
-                kf = KFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
-            else: 
-                kf = StratifiedKFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
+        # --- MODIFICATION START: Suppress warnings during HPO CV ---
+        with warnings.catch_warnings(): 
+            warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
+            warnings.filterwarnings("ignore", category=FutureWarning) 
             
-            for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X_train, _y_train)):
-                X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
-                y_fold_train, y_fold_val = _y_train[train_idx], _y_train[val_idx]
-                
-                current_model_kwargs_for_fit = model_kwargs.copy() 
-                model = self.model_class(**current_model_kwargs_for_fit) 
-                fit_params = {} 
-                
-                if self.model_name_orig == 'xgboost':
-                    fit_params['eval_set'] = [(X_fold_val, y_fold_val)]
-                    fit_params['verbose'] = False 
-                elif self.model_name_orig == 'lgbm':
-                    lgbm_es_rounds = params_from_trial.get('early_stopping_round', 20) 
-                    if 'early_stopping_round' in current_model_kwargs_for_fit:
-                        del current_model_kwargs_for_fit['early_stopping_round'] 
-                        model = self.model_class(**current_model_kwargs_for_fit) 
-                    fit_params['eval_set'] = [(X_fold_val, y_fold_val)]
-                    fit_params['callbacks'] = [lightgbm.early_stopping(stopping_rounds=lgbm_es_rounds, verbose=False)]
-                elif self.model_name_orig == 'catboost':
-                    fit_params['eval_set'] = [(X_fold_val, y_fold_val)]
-                elif self.model_name_orig == 'histgradientboosting':
-                    fit_params['validation_data'] = (X_fold_val, y_fold_val) 
-
-                try:
-                    with warnings.catch_warnings(): 
-                        warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
-                        warnings.filterwarnings("ignore", category=FutureWarning) 
-                        if self.model_name_orig == 'histgradientboosting' and 'validation_data' in fit_params:
-                            val_data = fit_params.pop('validation_data')
-                            model.fit(X_fold_train, y_fold_train, validation_data=val_data)
-                        else:
-                            model.fit(X_fold_train, y_fold_train, **fit_params)
-                except Exception as e:
-
-                    print(f"Error fitting {self.model_name_orig} (task: {self.task_type}) in CV fold {fold_idx}: {e}")
-                    print(f"  Model class: {self.model_class}, Model_kwargs: {current_model_kwargs_for_fit}, Fit_params: {fit_params}")
-                    # Allow Optuna to prune or handle this trial as failed by returning a bad score.
-                    # If all folds fail for a trial, it will naturally lead to a bad average.
-                    # To make it fail faster, you could raise optuna.TrialPruned() or return float('-inf')
-                    # For now, we record a very bad score for this fold.
-                    fold_scores_list.append(-np.inf if self.task_type == 'regression' else 0.0) 
-                    continue # Continue to next fold or trial
-
-                y_pred_fold = model.predict(X_fold_val)
+            if self.cv is not None and self.cv > 1:
+                model_kwargs = self._prepare_model_kwargs(params_from_trial, for_cv_fold=True)
                 if self.task_type == 'regression':
-                    score = r2_score(y_fold_val, y_pred_fold)
+                    kf = KFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
+                else: 
+                    kf = StratifiedKFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
+                
+                for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X_train, _y_train)):
+                    X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
+                    y_fold_train, y_fold_val = _y_train[train_idx], _y_train[val_idx]
+                    
+                    current_model_kwargs_for_fit = model_kwargs.copy() 
+                    model = self.model_class(**current_model_kwargs_for_fit) 
+                    fit_params = {} 
+                    
+                    if self.model_name_orig == 'xgboost':
+                        fit_params['eval_set'] = [(X_fold_val, y_fold_val)]
+                        fit_params['verbose'] = False 
+                    elif self.model_name_orig == 'lgbm':
+                        lgbm_es_rounds = params_from_trial.get('early_stopping_round', 20) 
+                        if 'early_stopping_round' in current_model_kwargs_for_fit:
+                            del current_model_kwargs_for_fit['early_stopping_round'] 
+                            model = self.model_class(**current_model_kwargs_for_fit) 
+                        fit_params['eval_set'] = [(X_fold_val, y_fold_val)]
+                        fit_params['callbacks'] = [lightgbm.early_stopping(stopping_rounds=lgbm_es_rounds, verbose=False)]
+                    elif self.model_name_orig == 'catboost':
+                        fit_params['eval_set'] = [(X_fold_val, y_fold_val)]
+                    elif self.model_name_orig == 'histgradientboosting':
+                        # HistGradientBoosting uses X_val, y_val instead of validation_data
+                        fit_params['X_val'] = X_fold_val
+                        fit_params['y_val'] = y_fold_val
+
+                    try:
+                        model.fit(X_fold_train, y_fold_train, **fit_params)
+                    except Exception as e:
+                        print(f"Error fitting {self.model_name_orig} (task: {self.task_type}) in CV fold {fold_idx}: {e}")
+                        print(f"  Model class: {self.model_class}, Model_kwargs: {current_model_kwargs_for_fit}, Fit_params: {fit_params}")
+                        fold_scores_list.append(-np.inf if self.task_type == 'regression' else 0.0) 
+                        continue
+
+                    y_pred_fold = model.predict(X_fold_val)
+                    if self.task_type == 'regression':
+                        score = r2_score(y_fold_val, y_pred_fold)
+                    else: 
+                        avg_method = 'binary' if self.task_type == 'binary_classification' else 'weighted'
+                        score = f1_score(y_fold_val, y_pred_fold, average=avg_method, zero_division='warn')
+                    fold_scores_list.append(score)
+                
+                mean_score = np.mean(fold_scores_list) if fold_scores_list else (-np.inf if self.task_type == 'regression' else 0.0)
+
+            else: # No CV path - train on full train set, validate on validation set
+                model_kwargs = self._prepare_model_kwargs(params_from_trial, for_cv_fold=False) 
+                model = self.model_class(**model_kwargs)
+                model.fit(X_train, _y_train) 
+                trial_model = model  # Store this model for potential reuse
+                
+                y_pred = model.predict(X_val)
+                if self.task_type == 'regression':
+                    mean_score = r2_score(_y_val, y_pred)
                 else: 
                     avg_method = 'binary' if self.task_type == 'binary_classification' else 'weighted'
-                    score = f1_score(y_fold_val, y_pred_fold, average=avg_method, zero_division=0)
-                fold_scores_list.append(score)
-            
-            mean_score = np.mean(fold_scores_list) if fold_scores_list else (-np.inf if self.task_type == 'regression' else 0.0)
+                    mean_score = f1_score(_y_val, y_pred, average=avg_method, zero_division='warn')
+                fold_scores_list.append(mean_score)
+        # --- MODIFICATION END ---
 
-        else: # No CV path
-            model_kwargs = self._prepare_model_kwargs(params_from_trial, for_cv_fold=False) 
-            model = self.model_class(**model_kwargs)
-            with warnings.catch_warnings(): 
-                warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
-                warnings.filterwarnings("ignore", category=FutureWarning)
-                model.fit(X_train, _y_train) 
-            y_pred = model.predict(X_val)
-            if self.task_type == 'regression':
-                mean_score = r2_score(_y_val, y_pred)
-            else: 
-                avg_method = 'binary' if self.task_type == 'binary_classification' else 'weighted'
-                mean_score = f1_score(_y_val, y_pred, average=avg_method, zero_division=0)
-            fold_scores_list.append(mean_score) # Store the single validation score as a "fold"
+        # --- FIXED: Store the best trial model for reuse in train_valid_test mode ---
+        if trial_model is not None and (not hasattr(self, '_best_trial_score') or mean_score > self._best_trial_score):
+            self._best_trial_score = mean_score
+            self.hpo_trained_model = trial_model
 
         trial.set_user_attr("fold_scores", fold_scores_list)
-        trial.set_user_attr("mean_fold_score", mean_score) # Also store the mean for clarity if needed later
         return mean_score
 
     def fit(self, X_train, y_train): 
-
-        if self.best_params_ is None:
-            raise ValueError("Optimization has not been run. Call optimize() first.")
+        if self.best_params_ is None: raise ValueError("Optimization has not been run. Call optimize() first.")
         
+        # --- FIXED: Check if we have a model from HPO phase that can be reused ---
+        if self.hpo_trained_model is not None and self.cv is None:
+            # In train_valid_test mode, reuse the model trained during HPO
+            self.best_model_ = self.hpo_trained_model
+            return
+        
+        # Otherwise, train a new model (this happens in CV mode)
         final_params = self.best_params_.copy()
-        # Clean up conditional params that Optuna might have stored with unique names
-        # For LogisticRegression, the main 'penalty' key should be set from the dynamic one
-        # (e.g., 'penalty_liblinear_trial_X')
-        # This is a bit tricky as best_params_ comes directly from Optuna trial.
-        # We might need to reconstruct it carefully or ensure _prepare_model_kwargs is robust.
-        
-        # Let's assume best_params_ from Optuna already contains the correct 'penalty' from the dynamic suggestion.
-        # We will rely on _prepare_model_kwargs to handle potentially extraneous keys if they exist.
-
         model_kwargs_final = self._prepare_model_kwargs(final_params, for_cv_fold=False)
         
-        # Remove specific early stopping params not meant for final init if they were tuned
         if self.model_name_orig == 'xgboost' and 'early_stopping_rounds' in model_kwargs_final:
             del model_kwargs_final['early_stopping_rounds']
         if self.model_name_orig == 'lgbm' and 'early_stopping_round' in model_kwargs_final: 
             del model_kwargs_final['early_stopping_round']
             
         _y_train = y_train.ravel()
-        
         self.best_model_ = self.model_class(**model_kwargs_final)
         
+        # --- MODIFICATION START: Suppress warnings during final fit ---
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
             warnings.filterwarnings("ignore", category=FutureWarning)
-            if self.model_name_orig == 'histgradientboosting' and model_kwargs_final.get('n_iter_no_change') is not None :
-                self.best_model_.fit(X_train, _y_train) 
-            else:
-                self.best_model_.fit(X_train, _y_train)
-
+            self.best_model_.fit(X_train, _y_train)
+        # --- MODIFICATION END ---
 
     def predict(self, X):
-
-        if self.best_model_ is None:
-            raise ValueError("Model has not been fitted. Call fit() first.")
+        if self.best_model_ is None: raise ValueError("Model has not been fitted. Call fit() first.")
+        
+        # --- MODIFICATION START: Suppress warnings during prediction ---
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
             predictions = self.best_model_.predict(X)
+        # --- MODIFICATION END ---
         return predictions
 
     def get_cv_predictions(self, X_train_full_for_cv, y_train_full_for_cv):
-        # ... (get_cv_predictions method remains the same as previous correct version) ...
-        if self.best_params_ is None:
-            raise ValueError("Best parameters not found. Run optimize() first.")
-        if self.cv is None or self.cv < 2: # self.cv is the number of folds for HPO
-            print(f"CV for HPO was not used (self.cv={self.cv}), cannot get OOF CV predictions this way for {self.model_name_orig}.")
+        if self.best_params_ is None: raise ValueError("Best parameters not found. Run optimize() first.")
+        if self.cv is None or self.cv < 2:
+            print(f"CV for HPO was not used, cannot get OOF CV predictions for {self.model_name_orig}.")
             return None
 
-        # Use best_params_ found by Optuna
-        final_params_for_cv = self.best_params_.copy()
-        # Similar cleanup for logistic regression as in fit() method for best_params_
+        params = self.best_params_.copy()
         if self.model_name_for_params == 'logisticregression':
-            solver = final_params_for_cv.get('solver')
-            # Optuna might store the conditional choice directly under the dynamic name.
-            # We need to ensure 'penalty' is the key used by the model.
-            # The self.best_params_ should reflect the actual parameters that led to the best score.
-            # If penalty was suggested as 'penalty_liblinear_trial_X', it should be in best_params_.
-            # We need to map it to 'penalty'.
-            
-            # This logic assumes Optuna stores the dynamic param name in best_params_
-            # (which it does for params suggested within the objective).
-            # We need to clean it up for _prepare_model_kwargs
-            found_dynamic_penalty = False
-            for key in list(final_params_for_cv.keys()): # Iterate over a copy of keys
-                if key.startswith('penalty_for_solver_') and key.endswith(f'_trial_{self.optimize_best_trial_number_placeholder}'): # Placeholder for actual trial number if needed
-                    final_params_for_cv['penalty'] = final_params_for_cv.pop(key)
-                    if final_params_for_cv['penalty'] == 'none':
-                        final_params_for_cv['penalty'] = None
-                    found_dynamic_penalty = True
-                    break 
-            if not found_dynamic_penalty and 'penalty' not in final_params_for_cv :
-                 # This case implies penalty was not dynamically suggested or is missing.
-                 # _prepare_model_kwargs might set a default, or it could error if model requires it.
-                 print(f"Warning: 'penalty' not found in best_params_ for LogisticRegression during get_cv_predictions. Model might use default or error.")
-
-
-        model_kwargs = self._prepare_model_kwargs(final_params_for_cv, for_cv_fold=True) 
+            for key in list(params.keys()):
+                if key.startswith('penalty_for_solver_'):
+                    params['penalty'] = None if params.pop(key) == 'none' else params.get(key)
+                    break
         
-        y_train_full_for_cv_ravel = y_train_full_for_cv.ravel()
-
-        if self.task_type == 'regression':
-            cv_splitter = KFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
-        else:
-            cv_splitter = StratifiedKFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
-
-        oof_preds = np.zeros_like(y_train_full_for_cv_ravel, dtype=float if self.task_type == 'regression' else int)
+        model_kwargs = self._prepare_model_kwargs(params, for_cv_fold=True)
+        y_ravel = y_train_full_for_cv.ravel()
+        kf = StratifiedKFold(n_splits=self.cv, shuffle=True, random_state=self.random_state) if self.task_type != 'regression' else KFold(n_splits=self.cv, shuffle=True, random_state=self.random_state)
+        
+        oof_preds = np.zeros_like(y_ravel, dtype=float)
         oof_probas = None
+        num_classes = self.num_classes if self.num_classes and self.num_classes >= 2 else 2
         if self.task_type != 'regression':
-            num_target_classes = self.num_classes if self.num_classes and self.num_classes >=2 else 2
-            oof_probas = np.zeros((len(y_train_full_for_cv_ravel), num_target_classes), dtype=float)
+            oof_probas = np.zeros((len(y_ravel), num_classes))
+
+        # --- MODIFICATION: Store metrics for each fold ---
+        fold_metrics_list = []
 
         with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
-            warnings.filterwarnings("ignore", category=FutureWarning)
-            
-            for fold_idx, (train_idx, val_idx) in enumerate(cv_splitter.split(X_train_full_for_cv, y_train_full_for_cv_ravel)):
+            warnings.simplefilter("ignore", UserWarning); warnings.simplefilter("ignore", FutureWarning)
+            for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X_train_full_for_cv, y_ravel)):
                 print(f"  Generating predictions for CV OOF fold {fold_idx + 1}/{self.cv}...")
-                X_fold_train, X_fold_val = X_train_full_for_cv[train_idx], X_train_full_for_cv[val_idx]
-                y_fold_train = y_train_full_for_cv_ravel[train_idx]
+                X_train, X_val = X_train_full_for_cv[train_idx], X_train_full_for_cv[val_idx]
+                y_train, y_val = y_ravel[train_idx], y_ravel[val_idx]
 
-                fold_model_kwargs = model_kwargs.copy() # Start with common kwargs
-                fold_model = self.model_class(**fold_model_kwargs)
-                
-                fold_fit_params = {}
-                if self.model_name_orig == 'xgboost':
-                    # XGBoost early stopping rounds is an init param
-                    # eval_set and verbose for fit
-                    fold_fit_params['eval_set'] = [(X_fold_val, y_train_full_for_cv_ravel[val_idx])]
-                    fold_fit_params['verbose'] = False
+                model, fit_params = self.model_class(**model_kwargs.copy()), {}
+                # ... (fit params logic is the same)
+                if self.model_name_orig == 'xgboost': fit_params.update({'eval_set': [(X_val, y_val)], 'verbose': False})
                 elif self.model_name_orig == 'lgbm':
-                    lgbm_es_r = self.best_params_.get('early_stopping_round', 20) 
-                    # Ensure 'early_stopping_round' is not in init_kwargs for LGBM if it was tuned
-                    if 'early_stopping_round' in fold_model_kwargs: del fold_model_kwargs['early_stopping_round']
-                    fold_model = self.model_class(**fold_model_kwargs) # Re-init if needed
-
-                    fold_fit_params['eval_set'] = [(X_fold_val, y_train_full_for_cv_ravel[val_idx])]
-                    fold_fit_params['callbacks'] = [lightgbm.early_stopping(lgbm_es_r, verbose=False)]
-                elif self.model_name_orig == 'catboost':
-                    fold_fit_params['eval_set'] = [(X_fold_val, y_train_full_for_cv_ravel[val_idx])]
-                    # od_wait is init param, verbose=0 also init
-                elif self.model_name_orig == 'histgradientboosting':
-                    fold_model.fit(X_fold_train, y_fold_train, validation_data=(X_fold_val, y_train_full_for_cv_ravel[val_idx]))
-                    oof_preds[val_idx] = fold_model.predict(X_fold_val)
-                    if self.task_type != 'regression' and hasattr(fold_model, 'predict_proba'):
-                        oof_probas[val_idx, :] = fold_model.predict_proba(X_fold_val)
-                    continue 
-
-                fold_model.fit(X_fold_train, y_fold_train, **fold_fit_params)
+                    if 'early_stopping_round' in model_kwargs: model = self.model_class(**{k:v for k,v in model_kwargs.items() if k != 'early_stopping_round'})
+                    fit_params.update({'eval_set': [(X_val, y_val)], 'callbacks': [lightgbm.early_stopping(params.get('early_stopping_round', 20), verbose=False)]})
+                elif self.model_name_orig == 'catboost': fit_params['eval_set'] = [(X_val, y_val)]
                 
-                oof_preds[val_idx] = fold_model.predict(X_fold_val)
-                if self.task_type != 'regression' and hasattr(fold_model, 'predict_proba'):
-                     oof_probas[val_idx, :] = fold_model.predict_proba(X_fold_val)
-            
-        y_true_oof = y_train_full_for_cv_ravel 
-        return {'y_true_oof': y_true_oof, 'y_pred_oof': oof_preds, 'y_proba_oof': oof_probas}
+                if self.model_name_orig == 'histgradientboosting':
+                    model.fit(X_train, y_train, X_val=X_val, y_val=y_val)
+                else:
+                    model.fit(X_train, y_train, **fit_params)
+                
+                y_pred_fold = model.predict(X_val)
+                oof_preds[val_idx] = y_pred_fold
+                if self.task_type != 'regression' and hasattr(model, 'predict_proba') and oof_probas is not None:
+                    try:
+                        proba_preds = model.predict_proba(X_val)
+                        if proba_preds is not None and len(proba_preds) > 0:
+                            oof_probas[val_idx, :] = proba_preds
+                    except Exception as e:
+                        print(f"Warning: Could not get probabilities for fold {fold_idx}: {e}")
+                
+                # --- MODIFICATION: Calculate and store metrics for this fold ---
+                fold_metrics: Dict[str, Union[int, float]] = {'fold': fold_idx + 1}  # type: ignore
+                if self.task_type == 'regression':
+                    fold_metrics['r2'] = float(r2_score(y_val, y_pred_fold))  # type: ignore
+                    fold_metrics['rmse'] = float(np.sqrt(mean_squared_error(y_val, y_pred_fold)))  # type: ignore
+                    fold_metrics['mae'] = float(mean_absolute_error(y_val, y_pred_fold))  # type: ignore
+                else:
+                    avg = 'binary' if self.task_type == 'binary_classification' else 'weighted'
+                    fold_metrics['accuracy'] = float(accuracy_score(y_val, y_pred_fold))  # type: ignore
+                    fold_metrics['f1'] = float(f1_score(y_val, y_pred_fold, average=avg, zero_division='warn'))  # type: ignore
+                    fold_metrics['precision'] = float(precision_score(y_val, y_pred_fold, average=avg, zero_division='warn'))  # type: ignore
+                    fold_metrics['recall'] = float(recall_score(y_val, y_pred_fold, average=avg, zero_division='warn'))  # type: ignore
+                fold_metrics_list.append(fold_metrics)
+        
+        oof_payload = {'y_true_oof': y_ravel, 'y_pred_oof': oof_preds, 'y_proba_oof': oof_probas}
+        return {'oof_preds': oof_payload, 'fold_metrics': fold_metrics_list}

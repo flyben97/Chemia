@@ -1,0 +1,100 @@
+
+   ██████╗ ██████╗   █████╗ ███████╗████████╗
+  ██╔════╝ ██╔══██╗ ██╔══██╗██╔════╝╚══██╔══╝
+  ██║      ██████╔╝███████║█████╗     ██║   
+  ██║      ██╔══██╗██╔══██║██╔══╝     ██║   
+  ╚██████╗ ██║  ██║██║  ██║██║        ██║   
+   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝        ╚═╝   
+
+CRAFT - v1.3.0
+
+========================================================================================
+Log Generated:            2025-06-30 17:18:31
+Experiment Run Name:      E2E_Reaction_Opt_regression_20250630_170931
+Run Configuration:        experiment_name=E2E_Reaction_Opt, task_type=regression,
+                           split_mode=cross_validation, data.source_mode=single_file, 
+                           data.single_file_config.main_file_path=data/reactions_with_
+                           features.csv,
+                           data.single_file_config.smiles_col=['Reactant1',
+                           'Reactant2', 'Ligand'],
+                           data.single_file_config.target_col=ee, data.single_file_con
+                           fig.precomputed_features.feature_columns=5:,
+                           training.models_to_run=[12 items], training.n_trials=100,
+                           training.quiet_optuna=True,
+                           features.per_smiles_col_generators.Reactant1=[{'type':
+                           'maccs'}],
+                           features.per_smiles_col_generators.Reactant2=[{'type':
+                           'maccs'}],
+                           features.per_smiles_col_generators.Ligand=[{'type':
+                           'rdkit_descriptors'}], features.scaling=True,
+                           split_config.cross_validation.n_splits=10,
+                           split_config.cross_validation.test_size_for_cv=0.02,
+                           split_config.cross_validation.random_state=42
+----------------------------------------------------------------------------------------
+Model Trained:            RANDOMFOREST
+Task Type:                regression
+Feature Concatenation:    Temp (1 features) -> catalyst (12 features) -> base (9
+                           features) -> solvent (13 features) -> maccs (334 features)
+                           -> rdkit_descriptors (18 features) -> BCUT2D (8 features)
+                           -> rdkit_descriptors (21 features) -> PEOE (14 features) ->
+                           SMR (10 features) -> SlogP (12 features) ->
+                           rdkit_descriptors (1 features) -> EState (11 features) ->
+                           VSA (10 features) -> rdkit_descriptors (27 features) -> fr
+                           (85 features)
+
+--- Data & Split Information ---
+Training Set Dimensions:  30 samples x 586 features
+HPO Method:               CV HPO
+CV Folds:                 10
+Test Set Dimensions:      1 samples x 586 features
+========================================================================================
+
+--- Hyperparameter Optimization (Optuna) ---
+Best HPO Score (R²): -0.1661
+  Scores from individual HPO folds: [-0.7758, 0.5505, 0.6425, -0.2025, 0.1991, -0.4197, 0.0000, -1.3860, -0.2188, -0.0506]
+
+Best Hyperparameters Found:
+{
+    "n_estimators": 200,
+    "max_depth": 16,
+    "max_features": 0.6,
+    "min_samples_split": 18,
+    "min_samples_leaf": 1,
+    "criterion": "absolute_error"
+}
+
+========================================================================================
+
+--- Cross-Validation Fold Performance (on Training Set) ---
+| Fold   |      R²      |     RMSE     |     MAE      |
+|--------|--------------|--------------|--------------|
+| 1      | -0.7758       | 4.3973       | 3.3092       |
+| 2      | 0.5505       | 7.1163       | 4.7150       |
+| 3      | 0.6425       | 12.7340       | 8.1092       |
+| 4      | -0.2025       | 4.2313       | 3.0633       |
+| 5      | 0.1991       | 33.2152       | 20.3033       |
+| 6      | -0.4197       | 22.4674       | 13.7058       |
+| 7      | 0.0000       | 2.0125       | 2.0125       |
+| 8      | -1.3860       | 109.6900       | 79.5442       |
+| 9      | -0.2188       | 41.6335       | 24.8992       |
+| 10     | -0.0506       | 2.5567       | 2.4092       |
+|--------|--------------|--------------|--------------|
+| MEAN   | -0.1661       | 24.0054       | 16.2071       |
+| STD    | 0.6028       | 33.1181       | 23.6615       |
+|--------|--------------|--------------|--------------|
+
+========================================================================================
+
+--- Final Model Performance (on pre-defined splits) ---
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.6254      |       N/A       |       nan       |
+| RMSE                      |     24.2657     |       N/A       |     0.4425      |
+| MAE                       |     9.7027      |       N/A       |     0.4425      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+========================================================================================
+
+Model-Specific Runtime (HPO, Fit, Eval): 266.19 seconds
+
+*** End of CRAFT Log for this Model ***

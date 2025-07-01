@@ -87,8 +87,23 @@ class BaseOptimizer(ABC):
                 print(log_message)
         
         # --- MODIFICATION: Removed n_jobs=-1 for stability testing ---
+        def safe_objective_wrapper(trial):
+            try:
+                result = self.objective(trial, X_train, y_train, X_val, y_val)
+                if result is None:
+                    return -np.inf if direction == 'maximize' else np.inf
+                elif np.isnan(result):
+                    return -np.inf if direction == 'maximize' else np.inf
+                elif np.isinf(result):
+                    return float(result)  # Keep inf values as they are meaningful for optimization
+                else:
+                    return float(result)
+            except Exception as e:
+                self.console.print(f"[red]Error in objective function for trial {trial.number}: {e}[/red]")
+                return -np.inf if direction == 'maximize' else np.inf
+        
         study.optimize(
-            lambda trial: self.objective(trial, X_train, y_train, X_val, y_val),
+            func=safe_objective_wrapper,
             n_trials=self.n_trials,
             callbacks=[progress_callback]
         )
@@ -138,6 +153,7 @@ class BaseOptimizer(ABC):
             y_train_pred_proba, y_val_pred_proba, y_test_pred_proba = None, None, None
             y_val_pred = None
 
+            # --- MODIFICATION START: Suppress known warnings ---
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
                 
@@ -161,6 +177,7 @@ class BaseOptimizer(ABC):
                                 y_val_pred_proba = self.predict_proba(X_val)
                         except (AttributeError, NotImplementedError) as e:
                             effective_console.print(f"[yellow]Warning: predict_proba call failed for {self.__class__.__name__}: {e}[/yellow]")
+            # --- MODIFICATION END ---
             
             return compute_metrics(y_train_true=y_train, y_train_pred=y_train_pred,
                                 y_test_true=y_test, y_test_pred=y_test_pred,
@@ -182,9 +199,12 @@ class BaseOptimizer(ABC):
             effective_console = self.console
             effective_console.print(f"[yellow]Warning: Model {self.best_model_.__class__.__name__} may not have a predict_proba method or it's not enabled (e.g. SVC with probability=False).[/yellow]")
             raise NotImplementedError(f"The model {self.best_model_.__class__.__name__} does not have a predict_proba method or it's not configured for probabilities.")
+        
+        # --- MODIFICATION START: Suppress known warnings ---
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
             proba = self.best_model_.predict_proba(X)
+        # --- MODIFICATION END ---
         return proba
 
     @abstractmethod

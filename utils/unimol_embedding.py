@@ -97,7 +97,7 @@ def get_unimol_embedding(
 
             # 在退出重定向前，打印成功信息到原始控制台
             sys.stdout = sys.__stdout__
-            print("\n成功生成 Uni-Mol Embedding！")
+            print("Successfully generated Uni-Mol Embeddings!")
 
             return molecule_embedding
 
@@ -105,7 +105,7 @@ def get_unimol_embedding(
             # 在退出重定向前，打印错误信息到原始控制台
             sys.stdout = sys.__stdout__
             sys.stderr = sys.__stderr__
-            print(f"\n在 Uni-Mol 模型初始化或预测过程中发生严重错误: {e}")
+            print(f"\nA critical error occurred during Uni-Mol model initialization or prediction: {e}")
             # 将错误也写入日志文件
             with open(log_filepath, 'a') as f:
                 import traceback
@@ -129,11 +129,12 @@ if __name__ == '__main__':
         print(f"Embedding for Invalid SMILES: {embeddings[2, :5]}")
         
     log_file_path = os.path.join(test_log_dir, "unimol_tools.log")
+    from rich import print as rprint # use rich for colored output
     if os.path.exists(log_file_path):
-        print(f"\n[green]✓ Log file created at: {log_file_path}[/green]")
+        rprint(f"\n[green]✓ Log file created at: {log_file_path}[/green]")
         with open(log_file_path, 'r') as f:
             content = f.read()
-            print("--- Log Content Preview ---")
-            print(content[:500] + "..." if len(content) > 500 else content)
+            rprint("--- Log Content Preview ---")
+            rprint(content[:500] + "..." if len(content) > 500 else content)
     else:
-        print(f"\n[red]❌ Log file not found at: {log_file_path}[/red]")
+        rprint(f"\n[red]❌ Log file not found at: {log_file_path}[/red]")

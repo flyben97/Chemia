@@ -1,0 +1,111 @@
+
+   ██████╗ ██████╗   █████╗ ███████╗████████╗
+  ██╔════╝ ██╔══██╗ ██╔══██╗██╔════╝╚══██╔══╝
+  ██║      ██████╔╝███████║█████╗     ██║   
+  ██║      ██╔══██╗██╔══██║██╔══╝     ██║   
+  ╚██████╗ ██║  ██║██║  ██║██║        ██║   
+   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝        ╚═╝   
+
+CRAFT - v1.3.0
+
+========================================================================================
+Log Generated:            2025-07-01 19:16:53
+Experiment Run Name:      S04_agent_5_a_regression_20250701_190648
+Run Configuration:        experiment_name=S04_agent_5_a, task_type=regression,
+                           split_mode=train_valid_test, data.source_mode=single_file,
+                           data.single_file_config.main_file_path=data/agent5_IB.csv,
+                           data.single_file_config.smiles_col=['SMILES',
+                           'Solvent_1_SMILES', 'Solvent_2_SMILES'],
+                           data.single_file_config.target_col=Left_Time, data.single_f
+                           ile_config.precomputed_features.feature_columns=3:10,
+                           training.models_to_run=['catboost', 'xgb'],
+                           training.n_trials=100, training.quiet_optuna=True,
+                           training.optuna_config.sampler=TPE,
+                           training.optuna_config.pruner=MedianPruner,
+                           training.optuna_config.n_startup_trials=10,
+                           features.per_smiles_col_generators.SMILES=[{'type':
+                           'maccs'}, {'type': 'rdkit_descriptors'}], features.per_smil
+                           es_col_generators.Solvent_1_SMILES=[{'type':
+                           'rdkit_descriptors'}], features.per_smiles_col_generators.S
+                           olvent_2_SMILES=[{'type': 'rdkit_descriptors'}],
+                           features.scaling=True,
+                           split_config.train_valid_test.test_size=0.05,
+                           split_config.train_valid_test.valid_size=0.05,
+                           split_config.train_valid_test.random_state=0,
+                           evaluation.primary_metric=r2,
+                           evaluation.additional_metrics=['rmse', 'mae', 'mape'],
+                           output.save_predictions=True,
+                           output.save_feature_importance=True,
+                           output.save_cv_predictions=True,
+                           output.save_hyperparameters=True,
+                           output.generate_model_comparison=True,
+                           output.save_artifacts=[4 items], computational.n_jobs=-1,
+                           computational.memory_efficient=True,
+                           computational.random_state=42,
+                           advanced.enable_stacking=False,
+                           advanced.feature_analysis.permutation_importance=True,
+                           advanced.feature_analysis.shap_analysis=False, advanced.mod
+                           el_interpretation.save_partial_dependence=False,
+                           advanced.model_interpretation.save_learning_curves=True
+----------------------------------------------------------------------------------------
+Model Trained:            XGBOOST
+Task Type:                regression
+Feature Concatenation:    SR (1 features) -> Flow (1 features) -> IB (1 features) ->
+                           IB3 (1 features) -> IB3N (1 features) -> IBH (1 features)
+                           -> IBU (1 features) -> maccs (167 features) ->
+                           rdkit_descriptors (18 features) -> BCUT2D (8 features) ->
+                           rdkit_descriptors (21 features) -> PEOE (14 features) ->
+                           SMR (10 features) -> SlogP (12 features) ->
+                           rdkit_descriptors (1 features) -> EState (11 features) ->
+                           VSA (10 features) -> rdkit_descriptors (27 features) -> fr
+                           (85 features) -> rdkit_descriptors (18 features) -> BCUT2D
+                           (8 features) -> rdkit_descriptors (21 features) -> PEOE (14
+                           features) -> SMR (10 features) -> SlogP (12 features) ->
+                           rdkit_descriptors (1 features) -> EState (11 features) ->
+                           VSA (10 features) -> rdkit_descriptors (27 features) -> fr
+                           (85 features) -> rdkit_descriptors (18 features) -> BCUT2D
+                           (8 features) -> rdkit_descriptors (21 features) -> PEOE (14
+                           features) -> SMR (10 features) -> SlogP (12 features) ->
+                           rdkit_descriptors (1 features) -> EState (11 features) ->
+                           VSA (10 features) -> rdkit_descriptors (27 features) -> fr
+                           (85 features)
+
+--- Data & Split Information ---
+Training Set Dimensions:  1469 samples x 825 features
+HPO Method:               Hold-out Val HPO
+Validation Set Dimensions: 82 samples x 825 features
+Test Set Dimensions:      82 samples x 825 features
+========================================================================================
+
+--- Hyperparameter Optimization (Optuna) ---
+Best HPO Score (R²): 0.6457
+  Scores from individual HPO folds: [0.6457]
+
+Best Hyperparameters Found:
+{
+    "n_estimators": 1200,
+    "learning_rate": 0.03702845398896802,
+    "max_depth": 4,
+    "min_child_weight": 1,
+    "gamma": 0.34540641483531154,
+    "subsample": 0.8045096940477634,
+    "colsample_bytree": 0.9687276012367627,
+    "reg_alpha": 3.484207981175779e-08,
+    "reg_lambda": 2.0082948018542006e-07
+}
+
+========================================================================================
+
+--- Final Model Performance (on pre-defined splits) ---
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.9935      |     0.6457      |     0.5715      |
+| RMSE                      |     0.8921      |     6.5575      |     6.6104      |
+| MAE                       |     0.6845      |     4.4014      |     4.4385      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+========================================================================================
+
+Model-Specific Runtime (HPO, Fit, Eval): 163.21 seconds
+
+*** End of CRAFT Log for this Model ***

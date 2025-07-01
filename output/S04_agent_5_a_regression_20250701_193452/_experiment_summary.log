@@ -1,0 +1,112 @@
+
+   ██████╗ ██████╗   █████╗ ███████╗████████╗
+  ██╔════╝ ██╔══██╗ ██╔══██╗██╔════╝╚══██╔══╝
+  ██║      ██████╔╝███████║█████╗     ██║   
+  ██║      ██╔══██╗██╔══██║██╔══╝     ██║   
+  ╚██████╗ ██║  ██║██║  ██║██║        ██║   
+   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝        ╚═╝   
+
+CRAFT - v1.3.0
+
+========================================================================================
+  EXPERIMENT RUN SUMMARY
+========================================================================================
+Experiment Name:          S04_agent_5_a_regression_20250701_193452
+Run Started:              2025-07-01 19:34:52
+Total Runtime:            0d 0h 2m 12s
+Run Configuration:        experiment_name=S04_agent_5_a, task_type=regression,
+                           split_mode=cross_validation, data.source_mode=single_file,
+                           data.single_file_config.main_file_path=data/agent5_IB.csv,
+                           data.single_file_config.smiles_col=['SMILES',
+                           'Solvent_1_SMILES', 'Solvent_2_SMILES'],
+                           data.single_file_config.target_col=Left_Time, data.single_f
+                           ile_config.precomputed_features.feature_columns=3:10,
+                           training.models_to_run=['xgb'], training.n_trials=100,
+                           training.quiet_optuna=True,
+                           training.optuna_config.sampler=TPE,
+                           training.optuna_config.pruner=MedianPruner,
+                           training.optuna_config.n_startup_trials=10,
+                           features.per_smiles_col_generators.SMILES=[{'type':
+                           'maccs'}], features.per_smiles_col_generators.Solvent_1_SMI
+                           LES=[{'type': 'rdkit_descriptors'}], features.per_smiles_co
+                           l_generators.Solvent_2_SMILES=[{'type':
+                           'rdkit_descriptors'}], features.scaling=True,
+                           split_config.cross_validation.n_splits=5,
+                           split_config.cross_validation.test_size_for_cv=0.05,
+                           split_config.cross_validation.random_state=42,
+                           split_config.cross_validation.shuffle=True,
+                           evaluation.primary_metric=r2,
+                           evaluation.additional_metrics=['rmse', 'mae', 'mape'],
+                           output.save_predictions=True,
+                           output.save_feature_importance=True,
+                           output.save_cv_predictions=True,
+                           output.save_hyperparameters=True,
+                           output.generate_model_comparison=True,
+                           output.save_artifacts=[4 items], computational.n_jobs=-1,
+                           computational.memory_efficient=True,
+                           computational.random_state=42,
+                           advanced.enable_stacking=False,
+                           advanced.feature_analysis.permutation_importance=True,
+                           advanced.feature_analysis.shap_analysis=False, advanced.mod
+                           el_interpretation.save_partial_dependence=False,
+                           advanced.model_interpretation.save_learning_curves=True
+Feature Concatenation:    SR (1 features) -> Flow (1 features) -> IB (1 features) ->
+                           IB3 (1 features) -> IB3N (1 features) -> IBH (1 features)
+                           -> IBU (1 features) -> maccs (167 features) ->
+                           rdkit_descriptors (18 features) -> BCUT2D (8 features) ->
+                           rdkit_descriptors (21 features) -> PEOE (14 features) ->
+                           SMR (10 features) -> SlogP (12 features) ->
+                           rdkit_descriptors (1 features) -> EState (11 features) ->
+                           VSA (10 features) -> rdkit_descriptors (27 features) -> fr
+                           (85 features) -> rdkit_descriptors (18 features) -> BCUT2D
+                           (8 features) -> rdkit_descriptors (21 features) -> PEOE (14
+                           features) -> SMR (10 features) -> SlogP (12 features) ->
+                           rdkit_descriptors (1 features) -> EState (11 features) ->
+                           VSA (10 features) -> rdkit_descriptors (27 features) -> fr
+                           (85 features)
+
+========================================================================================
+  MODEL PERFORMANCE SUMMARY
+========================================================================================
+
+----- Model: XGBOOST -----
+Task Type: regression
+Data Dimensions: Train=(1551,608), Test=(82,608), HPO on 5-Folds CV
+Best HPO Score (R²): 0.5153
+  - HPO Fold Scores: [0.5397, 0.5240, 0.4324, 0.5309, 0.5493]
+Best Hyperparameters:
+{
+  "n_estimators": 800,
+  "learning_rate": 0.07816535020519198,
+  "max_depth": 6,
+  "min_child_weight": 5,
+  "gamma": 0.13326776236938295,
+  "subsample": 0.9561106592863248,
+  "colsample_bytree": 0.8496244743421982,
+  "reg_alpha": 0.17018234271646257,
+  "reg_lambda": 8.853895471047781e-07
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: 0.5153 (± 0.0473)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.9836      |       N/A       |     0.4954      |
+| RMSE                      |     1.4307      |       N/A       |     5.0463      |
+| MAE                       |     0.6620      |       N/A       |     3.4223      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+========================================================================================
+--- Notes & Known Behaviors ---
+Note on Warnings: 'UserWarning' about 'X does not have valid feature names' is expected when using models like LightGBM.
+This is safely handled by the pipeline and warnings are suppressed for cleaner output.
+
+========================================================================================
+ACKNOWLEDGMENTS: Wuhan University • Tsinghua University • SIOC, CAS • UCAS
+Contributors: Gao, Ben • Wan, Haiyuan • Huang, Huaihai
+========================================================================================
+
+========================================================================================
+*** End of Summary Log ***

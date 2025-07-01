@@ -1,0 +1,101 @@
+# ===================================================================
+#            CRAFT - Regression Training with K-Fold CV
+# ===================================================================
+# Configuration for regression model training using 5-fold 
+# cross-validation for robust model evaluation.
+# ===================================================================
+
+experiment_name: "Regression_5Fold_CV"
+task_type: "regression"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "yield"
+    precomputed_features:
+      feature_columns: null
+
+# --- Training Configuration ---
+training:
+  models_to_run:
+    - "xgb"           # XGBoost
+    - "lgbm"          # LightGBM
+    - "catboost"      # CatBoost
+    - "rf"            # Random Forest
+    - "gpr"           # Gaussian Process Regression
+    - "ridge"         # Ridge Regression
+    - "elasticnet"    # ElasticNet
+    - "svr"           # Support Vector Regression
+  
+  n_trials: 15
+  quiet_optuna: true
+
+# --- Feature Engineering ---
+features:
+  per_smiles_col_generators:
+    Catalyst: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+      - type: "maccs"
+    Reactant1: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant2: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+  
+  scaling: true
+
+# --- Cross-Validation Strategy ---
+split_mode: "cross_validation"
+split_config:
+  cross_validation:
+    n_splits: 5
+    test_size_for_cv: 0.2  # Hold out 20% for final test
+    random_state: 42
+    shuffle: true
+
+# --- Evaluation Metrics ---
+evaluation:
+  primary_metric: "r2"
+  additional_metrics:
+    - "rmse"
+    - "mae"
+    - "mape"
+  
+  cv_reporting:
+    show_fold_details: true
+    show_std: true
+    confidence_interval: 0.95
+
+# --- Model-specific Settings ---
+model_specific_configs:
+  gpr:
+    optimize_restarts: 3
+  
+  xgb:
+    early_stopping_rounds: 20
+    eval_metric: "rmse"
+  
+  lgbm:
+    early_stopping_rounds: 20
+    metric: "rmse"
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_feature_importance: true
+  save_cv_predictions: true
+  save_hyperparameters: true
+  generate_model_comparison: true
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42 

@@ -1,0 +1,57 @@
+# CRAFT: Chemical Reaction Analysis and Feature-based Training
+# Core dependencies for machine learning framework
+
+# Core scientific computing
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# Machine Learning - Core
+scikit-learn>=1.0.2
+
+# Machine Learning - Gradient Boosting
+xgboost>=1.6.0
+lightgbm>=3.3.0
+catboost>=1.0.4
+
+# Deep Learning - PyTorch ecosystem
+# NOTE: Please install PyTorch manually based on your system configuration
+# Visit: https://pytorch.org/get-started/locally/
+# Recommended versions:
+# torch>=1.11.0
+# torch-geometric>=2.0.4
+# torch-cluster>=1.6.0
+# torch-scatter>=2.0.9
+# torch-sparse>=0.6.13
+#
+# Example installation commands:
+# For CPU only: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# For CUDA 11.8: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# For PyG: pip install torch_geometric torch_cluster torch_scatter torch_sparse
+
+# Chemical informatics
+rdkit>=2022.03.1
+
+# Hyperparameter optimization
+optuna>=3.0.0
+
+# Data processing and utilities
+pyyaml>=6.0
+joblib>=1.1.0
+
+# Progress and visualization
+rich>=12.0.0
+tqdm>=4.62.0
+
+# Optional: Enhanced features
+# Uncomment if you want additional features
+# matplotlib>=3.5.0
+# seaborn>=0.11.0
+# plotly>=5.0.0
+# jupyterlab>=3.0.0
+
+# Development and testing (optional)
+# pytest>=7.0.0
+# pytest-cov>=3.0.0
+# flake8>=4.0.0
+# black>=22.0.0

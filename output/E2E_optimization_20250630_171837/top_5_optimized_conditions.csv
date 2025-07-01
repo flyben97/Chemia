@@ -1,0 +1,6 @@
+predicted_ee,Ligand,Catalyst,Base,Solvent,Temperature
+98.4752197265625,N[C@@H](CN1CCCCC1)C(C)C,NiBr2(PPh3)2,NaOMe,N-methyl-2-pyrrolidone,50
+98.4752197265625,N[C@@H](CN1CCCCC1)C(C)C,Ni(ClO4)2_6H2O,LiOtBu,ethyl acetate,40
+98.4752197265625,N[C@@H](CN1CCCCC1)C(C)C,Ni(NO3)2_6H2O,LiOtBu,dimethyl sulfoxide,50
+98.4752197265625,N[C@@H](CN1CCCCC1)C(C)C,NiBr2,LiOtBu,N-methyl-2-pyrrolidone,70
+98.4752197265625,N[C@@H](CN1CCCCC1)C(C)C,Ni(acac)2,KOEt,dimethyl sulfoxide,50

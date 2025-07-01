@@ -1,0 +1,179 @@
+# 化学反应收率预测配置
+# 使用反应图 + 温度特征融合模式
+
+metadata:
+  name: "Chemical Reaction Yield Prediction"
+  description: "Predict reaction yield using molecular graphs + temperature"
+  use_case: "反应收率预测：分子图embedding + 反应温度"
+
+# 数据配置
+data:
+  file_path: "data/reaction_dataset.csv"  # 您的反应数据文件
+  target_column: "yield"                  # 收率列（目标变量）
+  
+  # SMILES 列（反应组分）
+  smiles_columns: 
+    - "catalyst_smiles"      # 催化剂SMILES
+    - "reactant_1_smiles"    # 反应物1 SMILES  
+    - "reactant_2_smiles"    # 反应物2 SMILES
+    # 如果有产物SMILES也可以加入：
+    # - "product_smiles"
+  
+  # 自定义特征列（反应条件）
+  custom_feature_columns:
+    - "temperature"          # 反应温度 (°C)
+    # 可以根据需要添加更多反应条件：
+    # - "pressure"           # 反应压力
+    # - "reaction_time"      # 反应时间
+    # - "catalyst_loading"   # 催化剂用量
+  
+  task_type: "regression"    # 回归任务（预测收率数值）
+  
+  # 分子角色定义（用于反应图构建）
+  molecule_roles:
+    catalyst_smiles: "catalyst"
+    reactant_1_smiles: "reactant"  
+    reactant_2_smiles: "reactant"
+    # product_smiles: "product"
+
+# 数据预处理
+preprocessing:
+  remove_duplicates: true
+  handle_missing: "drop"
+  
+  # 自定义特征预处理
+  normalize_custom_features: true
+  custom_feature_scaling: "standard"  # 标准化温度特征
+
+# 数据分割
+split:
+  method: "random"
+  test_size: 0.2
+  validation_size: 0.2
+  random_state: 42
+
+# 训练配置 - 自定义特征融合模式
+training:
+  models_to_run: ["gcn", "gat", "mpnn"]  # 支持特征融合的GNN模型
+  n_trials: 30                           # 超参数优化试验次数
+  max_epochs: 100
+  early_stopping_patience: 15
+  batch_size: 32
+  cv_folds: 5
+
+# 核心配置：图构建 + 特征融合
+graph_construction:
+  mode: "custom_fusion"                  # 自定义特征融合模式
+  
+  # 融合配置
+  fusion_method: "attention"             # 推荐使用注意力融合
+  # 可选方法: "concatenate", "gated", "transformer"
+  
+  # 维度设置
+  custom_feature_dim: 1                  # 温度特征维度（1维）
+  graph_embed_dim: 128                   # 图embedding维度
+  output_dim: 256                        # 融合后的表示维度
+  
+  # 这种模式将会：
+  # 1. 将各个分子转换为图
+  # 2. 使用GNN提取图embedding (128维)
+  # 3. 处理温度特征 (1维)
+  # 4. 使用注意力机制融合图embedding和温度 
+  # 5. 输出融合后的表示 (256维) 用于收率预测
+
+# 模型特定配置
+model_configs:
+  gcn:
+    hidden_dim: [64, 128, 256]
+    num_layers: [3, 4, 5]
+    dropout_rate: [0.1, 0.2, 0.3]
+    
+    # 融合相关参数
+    fusion_method: ["attention", "concatenate"]
+    
+  gat:
+    hidden_dim: [64, 128, 256]
+    num_layers: [3, 4]
+    num_heads: [4, 8]
+    attention_dropout: [0.1, 0.2]
+    
+    # GAT特别适合注意力融合
+    fusion_method: ["attention"]
+    fusion_attention_heads: [4, 8]
+    
+  mpnn:
+    hidden_dim: [64, 128, 256]
+    num_layers: [3, 4, 5]
+    message_hidden_dim: [64, 128]
+    num_message_steps: [3, 4]
+    
+    fusion_method: ["attention", "gated"]
+
+# 温度特征工程
+custom_features:
+  temperature:
+    type: "continuous"
+    normalization: "standard"           # 标准化处理
+    expected_range: [20, 200]          # 预期温度范围 (°C)
+    # 可选的预处理
+    # log_transform: false             # 是否对数变换
+    # polynomial_features: false       # 是否生成多项式特征
+
+# 评估配置
+evaluation:
+  metrics:
+    regression: ["r2", "rmse", "mae", "mape"]
+  
+  # 融合分析
+  analyze_fusion_weights: true          # 分析融合权重
+  feature_importance: true              # 温度特征重要性分析
+  
+  # 消融研究
+  ablation_study:
+    enabled: true
+    test_graph_only: true              # 测试仅使用图特征的性能
+    test_temperature_only: true        # 测试仅使用温度的性能（基线）
+    compare_fusion_methods: true       # 比较不同融合方法
+
+# 输出配置
+output:
+  base_directory: "results/reaction_yield_prediction"
+  save_models: true
+  save_predictions: true
+  save_fusion_analysis: true           # 保存融合分析结果
+  save_feature_importance: true        # 保存特征重要性分析
+
+# 计算配置
+compute:
+  device: "auto"
+  num_workers: 2
+  pin_memory: true
+
+# 分析和可视化
+analysis:
+  enabled: true
+  
+  # 特征分析
+  temperature_effect_analysis: true     # 分析温度对收率的影响
+  fusion_weight_visualization: true     # 可视化融合权重
+  
+  # 模型解释
+  attention_visualization: true         # 可视化注意力权重
+  prediction_analysis: true            # 预测结果分析
+
+# 使用说明：
+# 
+# 数据格式要求：
+# 您的CSV文件应该包含以下列：
+# - catalyst_smiles: 催化剂SMILES字符串
+# - reactant_1_smiles: 反应物1 SMILES字符串  
+# - reactant_2_smiles: 反应物2 SMILES字符串
+# - temperature: 反应温度（数值，如80.0）
+# - yield: 反应收率（目标变量，如85.5）
+#
+# 示例数据行：
+# catalyst_smiles,reactant_1_smiles,reactant_2_smiles,temperature,yield
+# "CC(C)P(c1ccccc1)c1ccccc1","CC(=O)c1ccccc1","NCc1ccccc1",80.0,85.5
+#
+# 运行命令：
+# python run_training_only.py --config examples/configs/reaction_yield_prediction.yaml 

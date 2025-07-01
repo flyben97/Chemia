@@ -1,0 +1,78 @@
+# ===================================================================
+#      CRAFT - Optimization Only Configuration v1.0
+# ===================================================================
+# This configuration file is for running Bayesian optimization
+# on an already trained model without training new models.
+# ===================================================================
+
+# --- Model Source Configuration ---
+# Specify the location of the pre-trained model and associated files
+model_source:
+  # Path to the directory containing the trained model
+  source_run_dir: "output/E2E_Reaction_Opt_regression_20250630_170931"
+  
+  # Which model to use (short name: xgb, lgbm, gbdt, rf, etc.)
+  model_to_use: "xgb"
+  
+  # Alternative: Direct file paths (use this if source_run_dir doesn't work)
+  # direct_paths:
+  #   model_file: "path/to/model.json"
+  #   scaler_file: "path/to/scaler.joblib" 
+  #   encoder_file: "path/to/encoder.joblib"  # Only for classification
+  #   config_file: "path/to/run_config.json"
+
+# --- Reaction Optimization Configuration ---
+optimization_config:
+  # Fixed components of the reaction (these stay constant during optimization)
+  fixed_components:
+    Reactant1: 'O=C(OC)CCC#C'
+    Reactant2: 'O=P(C1=CC=CC=C1)(C2=CC=CC=C2)C(Br)CCC'
+
+  # Dynamic search space for optimization (these will be varied)
+  reaction_components:
+    Ligand:
+      mode: "search"
+      file: 'data/ligand_space.csv'
+      display_col: 'SMILES'
+      sep: '\t'
+    catalyst:
+      mode: "fixed"
+      file: 'data/catalysts_space.csv'
+      row_index: 6  # 使用第几行 (0-based索引，0表示第1行数据)
+      display_col: 'Compound'
+      is_feature_source: True
+      feature_slice: "2:"
+    base:
+      mode: "fixed"
+      file: 'data/base_space.csv'
+      row_index: 4  # 使用第几行 (0-based索引，0表示第1行数据)
+      display_col: 'Base'
+      is_feature_source: True
+      feature_slice: "2:"
+    solvent:
+      mode: "fixed"
+      file: 'data/solvent_space.csv'
+      row_index: 5  # 使用第几行 (0-based索引，0表示第1行数据)
+      display_col: 'Name'
+      is_feature_source: True
+      feature_slice: "3:"
+    temperature:
+      mode: "fixed"
+      file: 'data/temperature_space.csv'
+      row_index: 4  # 使用第几行 (0-based索引，0表示第1行数据)
+      display_col: 'Temp'
+      is_feature_source: true
+      feature_slice: "1:"
+  
+  # Bayesian optimization parameters
+  bayesian_optimization:
+    init_points: 5      # Number of initial random exploration points
+    n_iter: 20          # Number of optimization iterations
+    random_state: 42     # Random seed for reproducibility
+    top_k_results: 10     # Number of top results to save
+
+# --- Output Configuration ---
+output:
+  # Custom output directory name (optional)
+  # If not specified, will use "optimization_YYYYMMDD_HHMMSS"
+  output_dir_prefix: "optimization_only" 

@@ -1,0 +1,90 @@
+# ===================================================================
+#              CRAFT - Training without Extra Feature Engineering
+# ===================================================================
+# Configuration that uses only basic molecular fingerprints
+# without additional descriptors or complex features.
+# ===================================================================
+
+experiment_name: "Training_Without_Extra_Features"
+task_type: "regression"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "yield"
+    precomputed_features:
+      feature_columns: null  # No precomputed features
+
+# --- Training Configuration ---
+training:
+  models_to_run:
+    - "xgb"           # XGBoost
+    - "lgbm"          # LightGBM
+    - "rf"            # Random Forest
+    - "ridge"         # Ridge Regression
+    - "krr"           # Kernel Ridge Regression
+  
+  n_trials: 15
+  quiet_optuna: true
+
+# --- Minimal Feature Engineering ---
+features:
+  per_smiles_col_generators:
+    Catalyst: 
+      - type: "morgan"    # Only basic Morgan fingerprints
+        radius: 2
+        nBits: 1024
+    Reactant1: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant2: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+  
+  scaling: true
+  
+  # No advanced feature engineering
+  feature_selection:
+    enabled: false
+    
+  dimensionality_reduction:
+    enabled: false
+
+# --- Data Splitting Strategy ---
+split_mode: "train_test_split"
+split_config:
+  train_test_split:
+    test_size: 0.2
+    random_state: 42
+    shuffle: true
+
+# --- Evaluation Metrics ---
+evaluation:
+  primary_metric: "r2"
+  additional_metrics:
+    - "rmse"
+    - "mae"
+
+# --- Model-specific Settings ---
+model_specific_configs:
+  xgb:
+    early_stopping_rounds: 20
+    
+  lgbm:
+    early_stopping_rounds: 20
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_feature_importance: true
+  save_hyperparameters: true
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42 

@@ -1,0 +1,90 @@
+# ===================================================================
+#              CRAFT - Bayesian Optimization Only Configuration
+# ===================================================================
+# Configuration for running Bayesian optimization using a pre-trained
+# model to find optimal reaction conditions.
+# ===================================================================
+
+# --- Source Model & Artifacts ---
+mode: "run_directory"  # Use artifacts from a training run
+
+run_directory_mode:
+  source_run_dir: "output/training_run_20240101_120000"  # Path to training run
+  model_to_use: "xgb"  # Model alias to use for optimization
+
+# Alternative mode using custom artifacts
+# mode: "custom_artifacts"
+# custom_artifacts_mode:
+#   base_dir: "models/my_trained_model"
+#   model_filename: "xgboost_model.json"
+#   training_config_filename: "run_config.json"
+#   scaler_filename: "processed_dataset_scaler.joblib"
+#   encoder_filename: null  # For regression, null for classification
+
+# ===================================================================
+#                    REACTION COMPONENTS CONFIGURATION
+# ===================================================================
+reaction_components:
+  # --- Fixed Components (keep constant during optimization) ---
+  Reactant1:
+    mode: "fixed"
+    value: 'CC(=O)C1=CC=CC=C1'  # Acetophenone
+    
+  Reactant2:
+    mode: "fixed"
+    value: 'NCc1ccccc1'  # Benzylamine
+
+  # --- Search Components (optimize these) ---
+  Catalyst:
+    mode: "search"
+    file: 'data/catalyst_library.csv'
+    display_col: 'SMILES'
+    sep: ','
+    
+  Ligand:
+    mode: "search"
+    file: 'data/ligand_library.csv'
+    display_col: 'SMILES'
+    sep: '\t'
+
+  # --- Feature-based Components ---
+  solvent:
+    mode: "search"
+    file: 'data/solvent_space.csv'
+    display_col: 'Name'
+    is_feature_source: true
+    feature_slice: "2:"
+    
+  base:
+    mode: "search"
+    file: 'data/base_space.csv'
+    display_col: 'Base'
+    is_feature_source: true
+    feature_slice: "2:"
+    
+  temperature:
+    mode: "search"
+    file: 'data/temperature_space.csv'
+    display_col: 'Temp'
+    is_feature_source: true
+    feature_slice: "1:"
+
+# ===================================================================
+#                    BAYESIAN OPTIMIZATION PARAMETERS
+# ===================================================================
+bayesian_optimization:
+  init_points: 15         # Initial random exploration points
+  n_iter: 50              # Number of optimization iterations
+  random_state: 42
+  top_k_results: 10       # Number of top results to save
+  
+  # Acquisition function settings
+  acquisition_function: "ucb"  # "ei", "poi", "ucb"
+  kappa: 2.576  # Exploration parameter for UCB
+  
+  # Optimization bounds (if needed for numerical parameters)
+  bounds: {}
+  
+  # Advanced settings
+  alpha: 1e-6  # Noise parameter
+  normalize_y: false 

@@ -1,0 +1,258 @@
+
+   ██████╗ ██████╗   █████╗ ███████╗████████╗
+  ██╔════╝ ██╔══██╗ ██╔══██╗██╔════╝╚══██╔══╝
+  ██║      ██████╔╝███████║█████╗     ██║   
+  ██║      ██╔══██╗██╔══██║██╔══╝     ██║   
+  ╚██████╗ ██║  ██║██║  ██║██║        ██║   
+   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝        ╚═╝   
+
+CRAFT - v1.3.0
+
+========================================================================================
+  EXPERIMENT RUN SUMMARY
+========================================================================================
+Experiment Name:          E2E_Reaction_Opt_regression_20250630_170931
+Run Started:              2025-06-30 17:09:31
+Total Runtime:            0d 0h 9m 5s
+Run Configuration:        experiment_name=E2E_Reaction_Opt, task_type=regression,
+                           split_mode=cross_validation, data.source_mode=single_file, 
+                           data.single_file_config.main_file_path=data/reactions_with_
+                           features.csv,
+                           data.single_file_config.smiles_col=['Reactant1',
+                           'Reactant2', 'Ligand'],
+                           data.single_file_config.target_col=ee, data.single_file_con
+                           fig.precomputed_features.feature_columns=5:,
+                           training.models_to_run=[12 items], training.n_trials=100,
+                           training.quiet_optuna=True,
+                           features.per_smiles_col_generators.Reactant1=[{'type':
+                           'maccs'}],
+                           features.per_smiles_col_generators.Reactant2=[{'type':
+                           'maccs'}],
+                           features.per_smiles_col_generators.Ligand=[{'type':
+                           'rdkit_descriptors'}], features.scaling=True,
+                           split_config.cross_validation.n_splits=10,
+                           split_config.cross_validation.test_size_for_cv=0.02,
+                           split_config.cross_validation.random_state=42
+Feature Concatenation:    Temp (1 features) -> catalyst (12 features) -> base (9
+                           features) -> solvent (13 features) -> maccs (334 features)
+                           -> rdkit_descriptors (18 features) -> BCUT2D (8 features)
+                           -> rdkit_descriptors (21 features) -> PEOE (14 features) ->
+                           SMR (10 features) -> SlogP (12 features) ->
+                           rdkit_descriptors (1 features) -> EState (11 features) ->
+                           VSA (10 features) -> rdkit_descriptors (27 features) -> fr
+                           (85 features)
+
+========================================================================================
+  MODEL PERFORMANCE SUMMARY
+========================================================================================
+
+----- Model: XGBOOST -----
+Task Type: regression
+Data Dimensions: Train=(30,586), Test=(1,586), HPO on 10-Folds CV
+Best HPO Score (R²): -0.9866
+  - HPO Fold Scores: [0.9356, 0.6147, 0.8884, -12.7306, 0.9558, -0.0039, 0.0000, -0.9233, 0.4459, -0.0485]
+Best Hyperparameters:
+{
+  "n_estimators": 1200,
+  "learning_rate": 0.12327448021640951,
+  "max_depth": 6,
+  "min_child_weight": 3,
+  "gamma": 0.24896103920278248,
+  "subsample": 0.6784590151972076,
+  "colsample_bytree": 0.6216506566638696,
+  "reg_alpha": 0.00013125878013136953,
+  "reg_lambda": 1.2247985254125829e-08
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: -0.9866 (± 4.1679)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.9997      |       N/A       |       nan       |
+| RMSE                      |     0.6399      |       N/A       |     0.5352      |
+| MAE                       |     0.3430      |       N/A       |     0.5352      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: LGBM -----
+Task Type: regression
+Data Dimensions: Train=(30,586), Test=(1,586), HPO on 10-Folds CV
+Best HPO Score (R²): -6.0092
+  - HPO Fold Scores: [-40.0276, -1.3558, 0.2976, -17.9567, 0.3106, -0.0000, 0.0000, -1.3047, 0.6301, -0.6859]
+Best Hyperparameters:
+{
+  "n_estimators": 100,
+  "learning_rate": 0.03814694636424542,
+  "num_leaves": 93,
+  "min_child_samples": 11,
+  "subsample": 0.6386934834415707,
+  "colsample_bytree": 0.9226916770381399,
+  "reg_alpha": 0.018111611176774844,
+  "reg_lambda": 0.3687582756468219
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: -6.0092 (± 13.1999)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.3154      |       N/A       |       nan       |
+| RMSE                      |     32.8029     |       N/A       |     1.4275      |
+| MAE                       |     17.4001     |       N/A       |     1.4275      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: HISTGRADIENTBOOSTING -----
+Task Type: regression
+Data Dimensions: Train=(30,586), Test=(1,586), HPO on 10-Folds CV
+Best HPO Score (R²): -13.1424
+  - HPO Fold Scores: [-42.3784, -1.3259, -0.0012, -19.4951, -0.0673, -0.1115, 0.0000, -1.3047, -0.0510, -66.6887]
+Best Hyperparameters:
+{
+  "max_iter": 200,
+  "max_depth": 8,
+  "learning_rate": 0.0023102018878452934,
+  "l2_regularization": 5.415244119402541e-06,
+  "n_iter_no_change": 20
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: -13.1424 (± 23.3325)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.0000      |       N/A       |       nan       |
+| RMSE                      |     39.6468     |       N/A       |     18.0000     |
+| MAE                       |     26.3333     |       N/A       |     18.0000     |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: RANDOMFOREST -----
+Task Type: regression
+Data Dimensions: Train=(30,586), Test=(1,586), HPO on 10-Folds CV
+Best HPO Score (R²): -0.1661
+  - HPO Fold Scores: [-0.7758, 0.5505, 0.6425, -0.2025, 0.1991, -0.4197, 0.0000, -1.3860, -0.2188, -0.0506]
+Best Hyperparameters:
+{
+  "n_estimators": 200,
+  "max_depth": 16,
+  "max_features": 0.6,
+  "min_samples_split": 18,
+  "min_samples_leaf": 1,
+  "criterion": "absolute_error"
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: -0.1661 (± 0.6028)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.6254      |       N/A       |       nan       |
+| RMSE                      |     24.2657     |       N/A       |     0.4425      |
+| MAE                       |     9.7027      |       N/A       |     0.4425      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: SVR -----
+Task Type: regression
+Data Dimensions: Train=(30,586), Test=(1,586), HPO on 10-Folds CV
+Best HPO Score (R²): -0.1887
+  - HPO Fold Scores: [-1.2028, 0.3558, -0.0120, 0.8625, -0.0736, -0.4023, 0.0000, -1.3821, -0.1230, 0.0909]
+Best Hyperparameters:
+{
+  "C": 14.29332014179254,
+  "epsilon": 0.015602079710137886,
+  "kernel": "rbf",
+  "gamma": 0.0003698299642998578
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: -0.1887 (± 0.6718)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.0246      |       N/A       |       nan       |
+| RMSE                      |     39.1562     |       N/A       |     0.2589      |
+| MAE                       |     15.7387     |       N/A       |     0.2589      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: KNEIGHBORS -----
+Task Type: regression
+Data Dimensions: Train=(30,586), Test=(1,586), HPO on 10-Folds CV
+Best HPO Score (R²): -1.0465
+  - HPO Fold Scores: [-7.8993, 0.8259, 0.0107, -0.4469, 0.2114, -0.3901, 0.0000, -1.4113, 0.0808, -1.4464]
+Best Hyperparameters:
+{
+  "n_neighbors": 18,
+  "weights": "uniform"
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: -1.0465 (± 2.5081)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.0871      |       N/A       |       nan       |
+| RMSE                      |     37.8810     |       N/A       |     0.5000      |
+| MAE                       |     17.0259     |       N/A       |     0.5000      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: KERNELRIDGE -----
+Task Type: regression
+Data Dimensions: Train=(30,586), Test=(1,586), HPO on 10-Folds CV
+Best HPO Score (R²): -10.9797
+  - HPO Fold Scores: [-55.9558, -0.6815, 0.2687, -37.8119, 0.4919, 0.1066, 0.0000, -1.0522, 0.3764, -15.5394]
+Best Hyperparameters:
+{
+  "alpha": 0.2715835227788497,
+  "kernel": "rbf",
+  "gamma": 0.00010766406709502373
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: -10.9797 (± 19.9966)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.3935      |       N/A       |       nan       |
+| RMSE                      |     30.8769     |       N/A       |     9.5116      |
+| MAE                       |     18.4943     |       N/A       |     9.5116      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+----- Model: RIDGE -----
+Task Type: regression
+Data Dimensions: Train=(30,586), Test=(1,586), HPO on 10-Folds CV
+Best HPO Score (R²): -18.6625
+  - HPO Fold Scores: [-59.6632, 0.3180, 0.7213, -127.0241, 0.6640, -0.4194, 0.0000, -1.2917, -0.0374, 0.1076]
+Best Hyperparameters:
+{
+  "alpha": 99.50405345030262
+}
+
+CV Performance (on Training Set):
+  - Avg Fold R²: -18.6625 (± 42.4459)
+
+Final Metrics (on pre-defined splits):
+| Metric                    |    Train Set    | Validation Set  |    Test Set     |
+|---------------------------|-----------------|-----------------|-----------------|
+| R²                        |     0.7552      |       N/A       |       nan       |
+| RMSE                      |     19.6174     |       N/A       |     0.6429      |
+| MAE                       |     8.8373      |       N/A       |     0.6429      |
+|---------------------------|-----------------|-----------------|-----------------|
+
+========================================================================================
+--- Notes & Known Behaviors ---
+Note on Warnings: 'UserWarning' about 'X does not have valid feature names' is expected when using models like LightGBM.
+This is safely handled by the pipeline and warnings are suppressed for cleaner output.
+
+========================================================================================
+ACKNOWLEDGMENTS: Wuhan University • Tsinghua University • SIOC, CAS • UCAS
+Contributors: Gao, Ben • Wan, Haiyuan • Huang, Huaihai
+========================================================================================
+
+========================================================================================
+*** End of Summary Log ***

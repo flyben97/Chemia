@@ -1,7 +1,37 @@
-from rdkit import Chem
-from rdkit.Chem import MACCSkeys, Descriptors, rdFingerprintGenerator
 import numpy as np
 import pandas as pd
+
+# Handle RDKit imports with better error handling and version compatibility
+try:
+    from rdkit import Chem
+    from rdkit.Chem import MACCSkeys, Descriptors
+    
+    # Dynamic imports to avoid type checker issues
+    rdFingerprintGenerator = None
+    rdMolDescriptors = None
+    HAS_NEW_FP_GENERATOR = False
+    
+    # Try to import the new fingerprint generator (RDKit 2021.03+)
+    try:
+        import importlib
+        rdFingerprintGenerator = importlib.import_module('rdkit.Chem.rdFingerprintGenerator')
+        HAS_NEW_FP_GENERATOR = True
+    except ImportError:
+        # Fall back to older imports for older RDKit versions
+        try:
+            rdMolDescriptors = importlib.import_module('rdkit.Chem.rdMolDescriptors')
+            HAS_NEW_FP_GENERATOR = False
+        except ImportError:
+            pass
+        
+    RDKIT_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: RDKit not available: {e}")
+    print("Please install RDKit: conda install -c conda-forge rdkit")
+    RDKIT_AVAILABLE = False
+    rdFingerprintGenerator = None
+    rdMolDescriptors = None
+    HAS_NEW_FP_GENERATOR = False
 
 def _convert_numpy_types(value):
     """
@@ -37,6 +67,12 @@ def calculate_molecular_features(smiles, fp_type=None, descriptors=False, radius
         pandas.DataFrame: DataFrame with SMILES as index and columns for fingerprints/descriptors,
                           or None if SMILES is invalid
     """
+
+    # Check if RDKit is available
+    if not RDKIT_AVAILABLE:
+        print("Error: RDKit is not available. Cannot calculate molecular features.")
+        return None
+    
     # Validate input
     if not isinstance(smiles, str):
         raise ValueError("Input must be a single SMILES string")
@@ -49,10 +85,16 @@ def calculate_molecular_features(smiles, fp_type=None, descriptors=False, radius
         raise ValueError("Descriptors must be 'all' or False")
     
     # Get all RDKit descriptors from _descList
-    descriptor_funcs = {name: func for name, func in Descriptors._descList} if descriptors == "all" else None
+    descriptor_funcs = None
+    if descriptors == "all":
+        try:
+            descriptor_funcs = {name: func for name, func in Descriptors._descList}
+        except AttributeError:
+            print("Warning: Could not access RDKit descriptors list")
+            descriptor_funcs = None
     
     # Convert SMILES to molecule
-    mol = Chem.MolFromSmiles(smiles)
+    mol = Chem.MolFromSmiles(smiles)  # type: ignore
     if mol is None:
         print(f"Invalid SMILES: {smiles}")
         return None
@@ -63,36 +105,39 @@ def calculate_molecular_features(smiles, fp_type=None, descriptors=False, radius
     # Calculate fingerprint if requested
     if fp_type is not None:
         if fp_type.lower() == "maccs":
-            fp = MACCSkeys.GenMACCSKeys(mol)
+            fp = MACCSkeys.GenMACCSKeys(mol)  # type: ignore
             fp_array = np.array(fp)
             prefix = "maccs"
-        elif fp_type.lower() == "morgan":
+        elif fp_type.lower() == "morgan" and rdFingerprintGenerator is not None:
             morgan_gen = rdFingerprintGenerator.GetMorganGenerator(radius=radius, fpSize=nBits)
             fp = morgan_gen.GetFingerprint(mol)
             fp_array = np.array(fp)
             prefix = "morgan"
-        elif fp_type.lower() == "rdkit":
+        elif fp_type.lower() == "rdkit" and rdFingerprintGenerator is not None:
             rdk_gen = rdFingerprintGenerator.GetRDKitFPGenerator(maxPath=7, fpSize=nBits)
             fp = rdk_gen.GetFingerprint(mol)
             fp_array = np.array(fp)
             prefix = "rdkit"
-        elif fp_type.lower() == "atompair":
+        elif fp_type.lower() == "atompair" and rdFingerprintGenerator is not None:
             ap_gen = rdFingerprintGenerator.GetAtomPairGenerator(fpSize=nBits)
             fp = ap_gen.GetFingerprint(mol)
             fp_array = np.array(fp)
             prefix = "atompair"
-        elif fp_type.lower() == "torsion":
+        elif fp_type.lower() == "torsion" and rdFingerprintGenerator is not None:
             torsion_gen = rdFingerprintGenerator.GetTopologicalTorsionGenerator(fpSize=nBits)
             fp = torsion_gen.GetFingerprint(mol)
             fp_array = np.array(fp)
             prefix = "torsion"
+        else:
+            print(f"Warning: Fingerprint type '{fp_type}' not available or rdFingerprintGenerator not loaded")
+            return None
         
         # Add fingerprint bits as columns
         for i in range(len(fp_array)):
             row[f"{prefix}_{i+1}"] = int(fp_array[i])
     
     # Calculate descriptors if requested
-    if descriptors == "all":
+    if descriptors == "all" and descriptor_funcs is not None:
         for name, func in descriptor_funcs.items():
             try:
                 value = _convert_numpy_types(func(mol))
@@ -116,7 +161,7 @@ if __name__ == "__main__":
     descriptors = feature_type["descriptors"]
     
     # Calculate features
-    df = calculate_molecular_features(smiles, fp_type=fp_type, descriptors=descriptors, radius=2, nBits=2048)
+    df = calculate_molecular_features(smiles, fp_type=fp_type, descriptors=descriptors, radius=2, nBits=2048)  # type: ignore
     
     if df is not None:
         print(f"\nGenerated DataFrame (MACCS + Descriptors):")
@@ -154,8 +199,7 @@ if __name__ == "__main__":
     
     # Test with descriptors only
     print("\nTesting with descriptors only:")
-    feature_type = {"fp_type": None, "descriptors": "all"}
-    df = calculate_molecular_features(smiles, fp_type=feature_type["fp_type"], descriptors=feature_type["descriptors"])
+    df = calculate_molecular_features(smiles, fp_type=None, descriptors="all")  # type: ignore
     
     if df is not None:
         print("\nGenerated DataFrame (Descriptors Only):")

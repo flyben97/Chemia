@@ -1,0 +1,126 @@
+# ===================================================================
+#                CRAFT - Pure Graph Neural Network Training
+# ===================================================================
+# Configuration for training ONLY Graph Neural Networks (GNNs) for
+# molecular property prediction using direct graph representations.
+# ===================================================================
+
+experiment_name: "Pure_GNN_Training"
+task_type: "regression"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "yield"
+    precomputed_features:
+      feature_columns: null
+
+# --- Training Configuration ---
+training:
+  # ONLY Graph Neural Network models
+  models_to_run:
+    - "gcn"               # Graph Convolutional Network
+    - "gat"               # Graph Attention Network
+    - "mpnn"              # Message Passing Neural Network
+    - "graph_transformer" # Graph Transformer
+    - "ensemble_gnn"      # Ensemble of GNNs
+  
+  n_trials: 20
+  quiet_optuna: true
+
+# --- GNN Feature Configuration ---
+# GNNs work directly with molecular graphs - no traditional fingerprints needed!
+features:
+  # GNNs automatically convert SMILES to graph representations
+  # No per_smiles_col_generators needed - this is the beauty of GNNs!
+  gnn_mode: true
+  
+  # Optional: Include non-molecular features
+  additional_features:
+    scaling: true  # Scale any numerical features
+
+# --- GNN-specific Configuration ---
+gnn_config:
+  # Graph construction parameters
+  graph_construction:
+    include_edges: true
+    edge_features: true
+    max_atoms: 100
+    atom_features: ["atomic_num", "formal_charge", "hybridization", "aromatic"]
+    bond_features: ["bond_type", "conjugated", "ring"]
+    
+  # Model architectures
+  model_architectures:
+    gcn:
+      hidden_dim: 128
+      num_layers: 3
+      dropout: 0.2
+      activation: "relu"
+      
+    gat:
+      hidden_dim: 128
+      num_heads: 4
+      num_layers: 3
+      dropout: 0.2
+      attention_dropout: 0.1
+      
+    mpnn:
+      hidden_dim: 128
+      num_layers: 3
+      message_passing_steps: 3
+      readout: "mean"
+      
+    graph_transformer:
+      hidden_dim: 128
+      num_heads: 8
+      num_layers: 3
+      dropout: 0.2
+      
+    ensemble_gnn:
+      base_models: ["gcn", "gat", "mpnn"]
+      ensemble_method: "voting"
+
+# --- Data Splitting Strategy ---
+split_mode: "cross_validation"
+split_config:
+  cross_validation:
+    n_splits: 5
+    test_size_for_cv: 0.2
+    random_state: 42
+    shuffle: true
+
+# --- Evaluation Metrics ---
+evaluation:
+  primary_metric: "r2"
+  additional_metrics:
+    - "rmse"
+    - "mae"
+    - "mape"
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_hyperparameters: true
+  save_model_architectures: true
+  save_attention_weights: true  # For GAT models
+  save_graph_embeddings: true   # Save learned graph representations
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42
+  use_gpu: true  # Strongly recommended for GNN training
+  
+  # GNN-specific training settings
+  batch_size: 32
+  max_epochs: 200
+  early_stopping_patience: 20
+  learning_rate: 0.001
+  weight_decay: 1e-5
+  
+  # Memory optimization
+  gradient_checkpointing: true  # Save memory for large graphs
+  mixed_precision: true         # Use FP16 training if supported 

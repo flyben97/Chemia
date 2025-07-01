@@ -1,0 +1,8 @@
+{
+    "n_estimators": 200,
+    "max_depth": 16,
+    "max_features": 0.6,
+    "min_samples_split": 18,
+    "min_samples_leaf": 1,
+    "criterion": "absolute_error"
+}

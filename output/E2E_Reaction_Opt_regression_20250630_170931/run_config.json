@@ -1,0 +1,65 @@
+{
+    "experiment_name": "E2E_Reaction_Opt",
+    "task_type": "regression",
+    "data": {
+        "source_mode": "single_file",
+        "single_file_config": {
+            "main_file_path": "data/reactions_with_features.csv",
+            "smiles_col": [
+                "Reactant1",
+                "Reactant2",
+                "Ligand"
+            ],
+            "target_col": "ee",
+            "precomputed_features": {
+                "feature_columns": "5:"
+            }
+        }
+    },
+    "training": {
+        "models_to_run": [
+            "xgb",
+            "lgbm",
+            "gbdt",
+            "catb",
+            "hgb",
+            "rf",
+            "extratrees",
+            "svr",
+            "knn",
+            "gpr",
+            "krr",
+            "ridge"
+        ],
+        "n_trials": 100,
+        "quiet_optuna": true
+    },
+    "features": {
+        "per_smiles_col_generators": {
+            "Reactant1": [
+                {
+                    "type": "maccs"
+                }
+            ],
+            "Reactant2": [
+                {
+                    "type": "maccs"
+                }
+            ],
+            "Ligand": [
+                {
+                    "type": "rdkit_descriptors"
+                }
+            ]
+        },
+        "scaling": true
+    },
+    "split_mode": "cross_validation",
+    "split_config": {
+        "cross_validation": {
+            "n_splits": 10,
+            "test_size_for_cv": 0.02,
+            "random_state": 42
+        }
+    }
+}

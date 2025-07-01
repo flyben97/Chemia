@@ -1,0 +1,70 @@
+# ===================================================================
+#                    CRAFT - Quick Start Configuration
+# ===================================================================
+# Minimal configuration for quick testing and getting started.
+# Uses sensible defaults and a small number of models.
+# ===================================================================
+
+experiment_name: "QuickStart_Test"
+task_type: "regression"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "yield"
+
+# --- Training Configuration ---
+training:
+  # Just a few fast, reliable models
+  models_to_run:
+    - "xgb"           # XGBoost - usually performs well
+    - "rf"            # Random Forest - stable and interpretable
+    - "ridge"         # Ridge - simple and fast
+  
+  n_trials: 5           # Quick hyperparameter search
+  quiet_optuna: true
+
+# --- Simple Feature Engineering ---
+features:
+  per_smiles_col_generators:
+    Catalyst: 
+      - type: "morgan"  # Basic fingerprints only
+        radius: 2
+        nBits: 1024
+    Reactant1: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant2: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+  
+  scaling: true
+
+# --- Simple Data Splitting ---
+split_mode: "train_test_split"
+split_config:
+  train_test_split:
+    test_size: 0.2
+    random_state: 42
+
+# --- Basic Evaluation ---
+evaluation:
+  primary_metric: "r2"
+  additional_metrics:
+    - "rmse"
+    - "mae"
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_feature_importance: true
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42 

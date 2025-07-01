@@ -1,0 +1,3 @@
+2025-07-01 16:52:19 | unimol_tools/weights/weighthub.py | 32 | INFO | Uni-Mol Tools | Weights will be downloaded to default directory: /home/flybenben/miniconda3/envs/craft/lib/python3.12/site-packages/unimol_tools/weights
+2025-07-01 16:52:19 | unimol_tools/weights/weighthub.py | 73 | INFO | Uni-Mol Tools | Downloading modelzoo/310M/checkpoint.pt
+Fetching 1 files:   0%|          | 0/1 [00:00<?, ?it/s]Fetching 1 files:   0%|          | 0/1 [00:29<?, ?it/s]

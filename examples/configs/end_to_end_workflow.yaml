@@ -1,0 +1,123 @@
+# ===================================================================
+#              CRAFT - End-to-End Workflow Configuration
+# ===================================================================
+# Complete workflow that trains multiple models, selects the best one,
+# and uses it for Bayesian optimization of reaction conditions.
+# ===================================================================
+
+# --- Part 1: Model Training Configuration ---
+training_config:
+  experiment_name: "E2E_Reaction_Optimization"
+  task_type: "regression"
+
+  # Data configuration
+  data:
+    source_mode: "single_file"
+    single_file_config:
+      main_file_path: "data/reactions_with_features.csv"
+      smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+      target_col: "yield"
+      precomputed_features:
+        feature_columns: "4:"  # Include columns 4 onwards as features
+
+  # Model training
+  training:
+    models_to_run:
+      - "xgb"           # XGBoost
+      - "lgbm"          # LightGBM
+      - "catboost"      # CatBoost
+      - "rf"            # Random Forest
+      - "gpr"           # Gaussian Process Regression
+      - "ann"           # Neural Network
+    
+    n_trials: 20
+    quiet_optuna: true
+
+  # Feature engineering
+  features:
+    per_smiles_col_generators:
+      Catalyst: 
+        - type: "morgan"
+          radius: 2
+          nBits: 1024
+        - type: "rdkit_descriptors"
+      Reactant1: 
+        - type: "morgan"
+          radius: 2
+          nBits: 1024
+      Reactant2: 
+        - type: "morgan"
+          radius: 2
+          nBits: 1024
+    
+    scaling: true
+
+  # Data splitting
+  split_mode: "cross_validation"
+  split_config:
+    cross_validation:
+      n_splits: 5
+      test_size_for_cv: 0.15
+      random_state: 42
+      shuffle: true
+
+# --- Part 2: Model Selection Configuration ---
+model_selection:
+  metric: "test_r2"              # Metric to select best model
+  rank_mode: "higher_is_better"   # How to rank models
+
+# --- Part 3: Optimization Configuration ---
+optimization_config:
+  # Fixed reaction components
+  fixed_components:
+    Reactant1: 'CC(=O)C1=CC=CC=C1'  # Fixed acetophenone
+    Reactant2: 'NCc1ccccc1'         # Fixed benzylamine
+
+  # Dynamic search space
+  reaction_components:
+    # SMILES-based optimization
+    Catalyst:
+      mode: "search"
+      file: 'data/catalyst_library.csv'
+      display_col: 'SMILES'
+      sep: ','
+      
+    Ligand:
+      mode: "search"
+      file: 'data/ligand_library.csv'
+      display_col: 'SMILES'
+      sep: '\t'
+
+    # Feature-based optimization
+    solvent:
+      mode: "search"
+      file: 'data/solvent_space.csv'
+      display_col: 'Name'
+      is_feature_source: true
+      feature_slice: "2:"
+      
+    base:
+      mode: "search"
+      file: 'data/base_space.csv'
+      display_col: 'Base'
+      is_feature_source: true
+      feature_slice: "2:"
+      
+    temperature:
+      mode: "search"
+      file: 'data/temperature_space.csv'
+      display_col: 'Temp'
+      is_feature_source: true
+      feature_slice: "1:"
+  
+  # Bayesian optimization settings
+  bayesian_optimization:
+    init_points: 20
+    n_iter: 80
+    random_state: 42
+    top_k_results: 15
+    
+    # Advanced optimization settings
+    acquisition_function: "ei"  # Expected improvement
+    kappa: 2.576
+    alpha: 1e-6 

@@ -1,0 +1,125 @@
+# ===================================================================
+#                CRAFT - Graph Neural Network Training
+# ===================================================================
+# Configuration for training Graph Neural Networks (GNNs) for
+# molecular property prediction.
+# ===================================================================
+
+experiment_name: "GNN_Training"
+task_type: "regression"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "yield"
+    precomputed_features:
+      feature_columns: null
+
+# --- Training Configuration ---
+training:
+  # Graph Neural Network models
+  models_to_run:
+    - "gcn"               # Graph Convolutional Network
+    - "gat"               # Graph Attention Network
+    - "mpnn"              # Message Passing Neural Network
+    - "graph_transformer" # Graph Transformer
+    - "ensemble_gnn"      # Ensemble of GNNs
+    
+    # Compare with traditional methods
+    - "xgb"               # XGBoost for comparison
+    - "rf"                # Random Forest for comparison
+  
+  n_trials: 15
+  quiet_optuna: true
+
+# --- Feature Engineering ---
+# GNN models (gcn, gat, mpnn, graph_transformer, ensemble_gnn) work directly with molecular graphs
+# Traditional models (xgb, rf) use molecular fingerprints
+features:
+  # Configuration for traditional ML models only
+  # GNNs will automatically use graph structure from SMILES
+  per_smiles_col_generators:
+    # Only applied to traditional models (xgb, rf) - GNNs ignore these
+    Catalyst: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant1: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant2: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+  
+  scaling: true  # Only affects traditional models
+
+# --- GNN-specific Configuration ---
+gnn_config:
+  # Graph construction
+  graph_construction:
+    include_edges: true
+    edge_features: true
+    max_atoms: 100
+    
+  # Model architectures
+  model_architectures:
+    gcn:
+      hidden_dim: 128
+      num_layers: 3
+      dropout: 0.2
+      
+    gat:
+      hidden_dim: 128
+      num_heads: 4
+      num_layers: 3
+      dropout: 0.2
+      
+    mpnn:
+      hidden_dim: 128
+      num_layers: 3
+      message_passing_steps: 3
+      
+    graph_transformer:
+      hidden_dim: 128
+      num_heads: 8
+      num_layers: 3
+
+# --- Data Splitting Strategy ---
+split_mode: "cross_validation"
+split_config:
+  cross_validation:
+    n_splits: 5
+    test_size_for_cv: 0.2
+    random_state: 42
+    shuffle: true
+
+# --- Evaluation Metrics ---
+evaluation:
+  primary_metric: "r2"
+  additional_metrics:
+    - "rmse"
+    - "mae"
+    - "mape"
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_feature_importance: true
+  save_hyperparameters: true
+  save_model_architectures: true
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42
+  use_gpu: true  # Enable GPU for GNN training
+  
+  # GNN-specific settings
+  batch_size: 32
+  max_epochs: 200
+  early_stopping_patience: 20 

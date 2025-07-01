@@ -1,286 +1,384 @@
-# CRAFT: Chemical Representation & Analysis for Functional Targets
+![CRAFT Logo](images/craft.png) ![Python](https://img.shields.io/badge/python-3.8+-blue.svg) ![License](https://img.shields.io/badge/license-MIT-green.svg) ![Status](https://img.shields.io/badge/status-active-brightgreen.svg)
 
-**CRAFT** is a flexible, configurable, and automated machine learning pipeline framework designed for cheminformatics and drug discovery. It can also be easily extended as a general-purpose machine learning platform.
+# CRAFT: Chemical Reaction Analysis and Feature-based Training 
 
-This project aims to streamline the entire workflow from molecular structures (SMILES) to model performance evaluation. With a simple YAML configuration file, users can effortlessly define all steps, including data sources, feature engineering, data splitting, model training, and hyperparameter optimization.
+CRAFT is a comprehensive machine learning framework designed for chemical reaction prediction and optimization. It combines traditional ML algorithms, neural networks, and graph neural networks with Bayesian optimization to predict reaction outcomes and find optimal reaction conditions.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10+-blue.svg" alt="Python">
-  <img src="https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg" alt="PyTorch">
-  <img src="https://img.shields.io/badge/Scikit--learn-1.2+-f89931.svg" alt="Scikit-learn">
-  <img src="https://img.shields.io/badge/Optuna-3.1+-8d3cbf.svg" alt="Optuna">
-  <img src="https://img.shields.io/badge/RDKit-2022.09+-026464.svg" alt="RDKit">
-</p>
+[English](README.md) | [简体中文](README_zh-CN.md)
 
-<p align="center">
-  <a href="README_zh-CN.md">简体中文</a>
-</p>
+## 📁 Project Structure
 
----
+```
+craft/
+├── core/                    # Core framework components
+│   ├── run_manager.py      # Experiment management
+│   ├── config_loader.py    # Configuration loading
+│   └── trainer_setup.py    # Model training setup
+├── models/                  # Model implementations
+│   ├── sklearn_models.py   # Traditional ML models
+│   ├── ann.py              # Neural networks
+│   └── gnn_models.py       # Graph neural networks
+├── optimization/            # Bayesian optimization
+│   ├── optimizer.py        # Main optimization engine
+│   └── space_loader.py     # Search space management
+├── utils/                   # Utility functions
+├── examples/                # Example configurations and scripts
+│   └── configs/            # Configuration files
+├── data/                    # Data directory
+└── output/                  # Results and trained models
+```
 
-## :sparkles: Core Features
+## 📋 Quick Start
 
-*   **Configuration-Driven**: The entire experiment workflow is controlled by a single `config.yaml` file, no code modification required.
-*   **Flexible Data Sources**:
-    *   Supports automatic dataset splitting from a single file.
-    *   Supports user-provided, pre-split training/validation/test sets.
-    *   Supports feature-only data (no SMILES required), enabling its use as a general ML framework.
-*   **Powerful Feature Engineering**:
-    *   Seamless integration of various molecular feature generation methods (RDKit fingerprints, descriptors).
-    *   Built-in support for generating molecular embeddings from state-of-the-art pre-trained models (Uni-Mol, ChemBERTa, MolT5, etc.).
-    *   Ability to combine dynamically generated features with user-provided pre-computed features.
-*   **Automated Model Training**:
-    *   Supports a wide range of classic machine learning models (XGBoost, LightGBM, RandomForest, SVR, ANN, etc. - 14 models in total).
-    *   Utilizes [Optuna](https://optuna.org/) for efficient and automated hyperparameter optimization (HPO).
-*   **Comprehensive Evaluation & Logging**:
-    *   Automatically calculates and logs multiple evaluation metrics (R², RMSE, F1, Accuracy, etc.).
-    *   Generates detailed log files and performance plots for each experiment and model.
-    *   Saves trained models, best hyperparameters, prediction results, and out-of-fold (OOF) predictions for cross-validation.
+### 🔧 Environment Setup
 
----
+CRAFT provides multiple ways to set up your environment. Choose the method that works best for you:
 
-## :rocket: Quick Start
+#### 🐍 Option 1: Setup with pip (Recommended)
 
-### 1. Environment Setup
-
-We highly recommend using [Conda](https://docs.conda.io/en/latest/miniconda.html) to manage the project environment for compatibility.
-
-**Step 1: Clone the repository**
+1. **Clone the repository**:
 ```bash
-git clone https://github.com/flyben97/craft.git
+git clone https://github.com/your-username/craft.git
 cd craft
 ```
 
-**Step 2: Create and activate the Conda environment**
+2. **Create and activate virtual environment**:
 ```bash
-# Recommended: create from the environment.yml file (to be provided)
-# conda env create -f environment.yml
-# conda activate craft
-# Or, create the environment manually
-conda create -n craft python=3.10 -y
+python3 -m venv craft
+source craft/bin/activate  # On Windows: craft\Scripts\activate
+```
+
+3. **Install PyTorch (required for neural networks)**:
+```bash
+# For CPU only:
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+# For CUDA 11.8 (adjust based on your CUDA version):
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Install PyTorch Geometric:
+pip install torch_geometric torch_cluster torch_scatter torch_sparse
+```
+
+4. **Install other dependencies**:
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+#### 🐍 Option 2: Conda Environment
+
+1. **Clone the repository**:
+```bash
+git clone https://github.com/your-username/craft.git
+cd craft
+```
+
+2. **Install PyTorch first**:
+```bash
+# For CUDA (adjust version as needed):
+conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+
+# For CPU only:
+conda install pytorch torchvision torchaudio cpuonly -c pytorch
+
+# Install PyTorch Geometric:
+conda install pyg -c pyg
+```
+
+3. **Create conda environment**:
+```bash
+conda env create -f environment.yml
 conda activate craft
 ```
 
-**Step 3: Install core dependencies**
+#### 🔍 Verify Installation
+
+Test your installation:
 ```bash
-# Install ML and data processing libraries
-pip install numpy pandas scikit-learn pyyaml rich
-
-# Install model libraries
-pip install xgboost lightgbm catboost
-
-# Install hyperparameter optimization library
-pip install optuna
-
-# Install cheminformatics library
-pip install rdkit-pypi
-
-# Install deep learning library (choose the command that matches your CUDA version)
-# CPU version:
-pip install torch torchvision torchaudio
-
-# GPU version (e.g., for CUDA 11.8), check PyTorch official website for the latest command:
-# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-# For generating embeddings with pre-trained models
-pip install huggingface_hub
-
-# (Recommended) Set Hugging Face mirror before downloading models
-export HF_ENDPOINT=https://hf-mirror.com
-
-# Install molecular embedding libraries
-pip install transformers sentencepiece
-pip install unimol-tools
-
-# Note: All pre-trained models will be downloaded on first use.
+python -c "
+import numpy, pandas, sklearn, rdkit, optuna, rich
+print('✅ Core packages imported successfully')
+try:
+    import torch, torch_geometric
+    print('✅ PyTorch and PyTorch Geometric available')
+except ImportError:
+    print('⚠️  PyTorch/PyTorch Geometric not found - please install manually')
+"
 ```
 
-### 2. Prepare Your Data
+### 📋 System Requirements
 
-Prepare your data file(s) and place them in the `data/` directory (or any location specified in `config.yaml`).
+- **Python**: 3.8+ (3.9 recommended)
+- **Operating System**: Linux, macOS, Windows (WSL recommended)
+- **Memory**: Minimum 8GB RAM (16GB+ recommended for large datasets)
+- **GPU**: Optional (CUDA-compatible GPU for faster neural network training)
 
-### 3. Configure Your Experiment
+### 🧪 Prepare Your Data
 
-Open `config.yaml` in the project root and modify it according to your needs. See `config.en.yaml` for a fully commented template.
+Place your reaction data in CSV format in the `data/` directory:
 
-### 4. Run the Experiment
-
-In your terminal with the `craft` environment activated, run:
 ```bash
-python main.py --config config.yaml
+mkdir -p data
+# Copy your reaction data CSV file to data/
 ```
-Or, if your config file is named `config.yaml` and is in the root directory:
+
+**Note**: Ensure your virtual environment is activated before running any CRAFT commands:
 ```bash
-python main.py
+# For pip installation:
+source craft/bin/activate
+
+# For conda installation:
+conda activate craft
 ```
 
-### 5. Check the Results
+### Basic Usage
 
-All experiment artifacts (logs, models, plots, predictions) will be saved in the `output/` directory, organized by `experiment_name` and a timestamp.
-
-```
-output/
-└── My_First_Experiment_regression_20231027_103000/
-    ├── _experiment_summary.log       # Summary report for the entire experiment
-    ├── data_splits/                  # Processed and split data
-    │   ├── dataset_X_train.csv
-    │   └── ...
-    ├── models/
-    │   ├── xgb/
-    │   │   ├── xgb_hyperparameters.json
-    │   │   ├── xgb_model.joblib
-    │   │   ├── xgb_results.log       # Detailed report for the XGBoost model
-    │   │   └── predictions_final_model/
-    │   │       └── ...
-    │   └── rf/
-    │       └── ...
-    └── unimol_tools.log              # Log for Uni-Mol if used
+#### 1. Quick Training (Recommended for beginners)
+```bash
+python run_training_only.py --config examples/configs/quick_start.yaml
 ```
 
----
+#### 2. Full Model Training
+```bash
+# Simple regression training
+python run_training_only.py --config examples/configs/regression_training_simple.yaml
 
-## Example
+# Classification training
+python run_training_only.py --config examples/configs/classification_training_simple.yaml
+
+# Training with 5-fold cross-validation
+python run_training_only.py --config examples/configs/regression_training_kfold.yaml
+```
+
+#### 3. Bayesian Optimization (using pre-trained model)
+```bash
+python run_optimization.py --config examples/configs/bayesian_optimization_only.yaml
+```
+
+#### 4. End-to-End Workflow (Training + Optimization)
+```bash
+python run_full_workflow.py --config examples/configs/end_to_end_workflow.yaml
+```
+
+## ⚙️ Environment Configuration Files
+
+CRAFT includes several configuration files to help you set up your environment:
+
+### Environment Files
+
+| File | Purpose | Use Case |
+|------|---------|----------|
+| `requirements.txt` | Python package dependencies | Standard pip installation |
+| `environment.yml` | Conda environment specification | Conda users, reproducible environments |
+
+### Environment Management Tips
+
+For smooth environment management:
+
+- **Virtual Environment**: Always use a dedicated virtual environment named `craft`
+- **PyTorch Installation**: Install PyTorch separately based on your system configuration
+- **Dependency Isolation**: Keep CRAFT dependencies separate from your system Python
+- **Version Compatibility**: Use the recommended package versions for best results
+
+Quick setup checklist:
+```bash
+# 1. Create environment
+python3 -m venv craft  # or: conda env create -f environment.yml
+
+# 2. Activate environment  
+source craft/bin/activate  # or: conda activate craft
+
+# 3. Install PyTorch (see installation options above)
+
+# 4. Install other dependencies
+pip install -r requirements.txt
+```
+
+## 🔧 Configuration Files
+
+CRAFT provides various pre-configured YAML files for different scenarios:
+
+### Training Configurations
+
+| Configuration | Description | Use Case |
+|--------------|-------------|----------|
+| `quick_start.yaml` | Minimal setup for testing | First-time users, quick experiments |
+| `regression_training_simple.yaml` | Basic regression training | Standard regression tasks |
+| `regression_training_kfold.yaml` | 5-fold cross-validation | Robust model evaluation |
+| `regression_training_split.yaml` | Train/validation/test split | Model development |
+| `classification_training_simple.yaml` | Basic classification | Classification tasks |
+| `classification_training_kfold.yaml` | Classification with CV | Robust classification |
+| `training_with_features.yaml` | Rich feature engineering | Complex molecular datasets |
+| `training_without_features.yaml` | Minimal features | Simple datasets |
+| `gnn_training.yaml` | Graph neural networks | Advanced molecular modeling |
+
+### Optimization Configurations
+
+| Configuration | Description | Use Case |
+|--------------|-------------|----------|
+| `bayesian_optimization_only.yaml` | Standalone optimization | Using pre-trained models |
+| `end_to_end_workflow.yaml` | Complete pipeline | Full automation |
+
+## 📊 Supported Algorithms
+
+### Traditional Machine Learning
+- **Gradient Boosting**: XGBoost, LightGBM, CatBoost, Histogram Gradient Boosting
+- **Tree Ensembles**: Random Forest, Extra Trees, AdaBoost
+- **Linear Models**: Ridge, LASSO, ElasticNet, Bayesian Ridge
+- **Kernel Methods**: Gaussian Process Regression, Kernel Ridge Regression, SVR
+- **Instance-based**: k-Nearest Neighbors
+- **Linear**: Stochastic Gradient Descent
+
+### Neural Networks
+- **Traditional ANN**: PyTorch-based Artificial Neural Networks
+- **Graph Neural Networks**: GCN, GAT, MPNN, Graph Transformer, Ensemble GNN
+
+## 🧬 Feature Engineering
+
+CRAFT automatically generates molecular features from SMILES strings:
+
+- **Morgan Fingerprints**: Circular fingerprints with customizable radius and bits
+- **MACCS Keys**: 166-bit structural keys
+- **RDKit Descriptors**: 200+ molecular descriptors
+- **Custom Features**: Support for precomputed features
+
+## 📈 Data Splitting Strategies
+
+1. **Train/Test Split**: Simple 80/20 split
+2. **Train/Validation/Test Split**: 70/15/15 split for model development
+3. **K-Fold Cross-Validation**: Robust evaluation with stratified sampling
+
+## 🎯 Bayesian Optimization
+
+Find optimal reaction conditions using trained models:
+
+- **Acquisition Functions**: Expected Improvement (EI), Upper Confidence Bound (UCB), Probability of Improvement (POI)
+- **Search Spaces**: Discrete (catalyst libraries) and continuous (temperature, time) variables
+- **Multi-objective**: Support for multiple optimization targets
+- **Constraints**: Chemical and practical constraints
+
+## 📝 Example Data Format
+
+Your CSV file should contain SMILES strings and target values:
+
+```csv
+Catalyst,Reactant1,Reactant2,Temperature,Solvent,yield
+CC(C)P(c1ccccc1)c1ccccc1,CC(=O)c1ccccc1,NCc1ccccc1,80,toluene,95.2
+CCc1ccc(P(CCc2ccccc2)CCc2ccccc2)cc1,CC(=O)c1ccccc1,NCc1ccccc1,60,THF,87.5
+...
+```
+
+## 🛠️ Advanced Usage
+
+### Custom Configuration
+
+Create your own YAML configuration file based on the examples:
+
+```yaml
+experiment_name: "My_Experiment"
+task_type: "regression"
+
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/my_reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "yield"
+
+training:
+  models_to_run:
+    - "xgb"
+    - "lgbm"
+    - "rf"
+  n_trials: 20
+
+# ... additional configuration
+```
+
+### Programmatic Usage
 
 ```python
-from catboost import CatBoostRegressor, CatBoostClassifier
+from core.run_manager import start_experiment_run
+from core.config_loader import load_config
 
-# 定义模型文件路径
-model_path = "output/Your_Experiment_Name_xxxx/models/cat/cat_model.cbm"
+# Load configuration
+config = load_config("my_config.yaml")
 
-# 1. 创建一个空的模型实例
-# 如果是回归任务:
-model_to_load = CatBoostRegressor()
-# 如果是分类任务:
-# model_to_load = CatBoostClassifier()
+# Run experiment
+results = start_experiment_run(config)
 
-# 2. 使用 .load_model() 方法加载模型
-model_to_load.load_model(model_path)
-
-# 现在模型已经准备好进行预测
-# predictions = model_to_load.predict(your_new_data)
-
-print(f"成功加载 CatBoost 模型。")
+# Access results
+best_model = max(results['results'], key=lambda x: x['test_r2'])
+print(f"Best model: {best_model['model_name']} (R² = {best_model['test_r2']:.4f})")
 ```
 
-```python
-import joblib
+## 📊 Output and Results
 
-# 定义模型文件路径
-# 例如，加载 RandomForest 模型, 这适用于大多数模型，如 lgbm, rf, dt, knn, svr, ridge, krr, adab, lr, svc 等
-model_path = "output/Your_Experiment_Name_xxxx/models/rf/rf_model.joblib"
+CRAFT generates comprehensive outputs:
 
-# 使用 joblib.load 加载模型
-loaded_model = joblib.load(model_path)
+- **Trained Models**: Serialized models in multiple formats
+- **Predictions**: CSV files with predictions and uncertainties
+- **Metrics**: Detailed performance metrics and cross-validation results
+- **Feature Importance**: Analysis of important molecular features
+- **Visualizations**: Learning curves, feature importance plots
+- **Optimization Results**: Top-ranked reaction conditions
 
-# 现在模型已经准备好进行预测
-# predictions = loaded_model.predict(your_new_data)
+## 🔧 Troubleshooting
 
-print(f"成功加载模型: {type(loaded_model)}")
+### Common Installation Issues
+
+#### RDKit Installation Problems
+```bash
+# If RDKit installation fails with pip, try conda:
+conda install -c conda-forge rdkit
+
+# Or use the conda environment setup:
+./setup.sh conda
 ```
 
-```python
-import xgboost as xgb
+#### PyTorch Geometric Issues
+```bash
+# For CUDA compatibility issues:
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-# 定义模型文件路径
-model_path = "output/Your_Experiment_Name_xxxx/models/xgb/xgb_model.json"
-
-# 1. 创建一个空的模型实例
-# 如果是回归任务:
-model_to_load = xgb.XGBRegressor()
-# 如果是分类任务:
-# model_to_load = xgb.XGBClassifier()
-
-# 2. 使用 .load_model() 方法加载模型
-model_to_load.load_model(model_path)
-
-# 现在模型已经准备好进行预测
-# predictions = model_to_load.predict(your_new_data)
-
-print(f"成功加载 XGBoost 模型。")
+# For CPU-only installation:
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
 
-```python
-import torch
-# 确保 ComplexANN 类的定义在当前作用域内可用
-# 您需要从 models/ann.py 导入它
-from models.ann import ComplexANN 
+#### Memory Issues
+- **Large datasets**: Consider using data sampling or batch processing
+- **GPU memory**: Reduce batch size in neural network training
+- **System memory**: Close other applications or use a machine with more RAM
 
-# --- 关键步骤: 重新创建模型实例 ---
-# 您必须使用与训练时完全相同的参数来实例化模型
-# 这些参数（input_size, hidden_sizes, etc.）可以在日志文件或超参数json文件中找到
-
-# 示例参数 (请根据您的实际情况修改!)
-INPUT_SIZE = 1232  # 特征数量
-HIDDEN_SIZES = [1024, 512, 64] # 隐藏层结构
-OUTPUT_SIZE = 1 # 回归任务为1, 分类任务为类别数
-TASK_TYPE = 'regression'
-DROPOUT_RATE = 0.25 # 保存时使用的dropout率
-
-# 1. 实例化模型结构
-loaded_model = ComplexANN(
-    input_size=INPUT_SIZE,
-    hidden_sizes=HIDDEN_SIZES,
-    output_size=OUTPUT_SIZE,
-    task_type=TASK_TYPE,
-    dropout_rate=DROPOUT_RATE
-)
-
-# 定义模型文件路径
-model_path = "output/Your_Experiment_Name_xxxx/models/ann/ann_model.pth"
-
-# 2. 加载权重 (state dictionary)
-# 如果您在CPU上加载，即使模型是在GPU上训练的，也要使用 map_location
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-loaded_model.load_state_dict(torch.load(model_path, map_location=device))
-loaded_model.to(device) # 将模型移动到适当的设备
-
-# 3. 设置为评估模式
-# 这对于关闭 dropout 和 batch normalization 的训练行为非常重要
-loaded_model.eval()
-
-# 现在模型已经准备好进行预测
-# with torch.no_grad():
-#     input_tensor = torch.tensor(your_new_data, dtype=torch.float32).to(device)
-#     predictions = loaded_model(input_tensor)
-
-print(f"成功加载 ANN (PyTorch) 模型。")
+#### Permission Issues
+```bash
+# Fix virtual environment permissions:
+sudo chown -R $USER:$USER craft/
 ```
 
+### Environment Verification
 
+If you encounter import errors, verify your environment:
 
-## Framework Structure
+```bash
+# Check Python version
+python --version
 
-*   **`main.py`**: :classical_building: The sole entry point. It parses the config path and starts the core workflow.
-*   **`config.yaml`**: :gear: The "blueprint" for your experiment. Defines all parameters, separating configuration from code.
-*   **`core/`**: :brain: The project's brain.
-    *   `config_loader.py`: Loads and validates `config.yaml`.
-    *   `run_manager.py`: The main conductor. Orchestrates data loading, splitting, preprocessing, and model training.
-    *   `trainer_setup.py`: Manages the training loop for each specified model.
-*   **`optimizers/`**: :wrench: Model optimizers.
-    *   `base_optimizer.py`: Defines the abstract base class for all optimizers, unifying interfaces like `optimize`, `fit`, and `predict`.
-    *   `sklearn_optimizer.py`: Implements HPO for all Scikit-learn compatible models.
-    *   `ann_optimizer.py`: A dedicated optimizer for the PyTorch-based Artificial Neural Network (ANN).
-*   **`utils/`**: :toolbox: The utility toolkit.
-    *   `feature_generator.py`: A unified interface for generating features from various backends.
-    *   `mol_fp_features.py`: Backend for RDKit feature calculation.
-    *   `transformer_embeddings.py`, `unimol_embedding.py`: Backends for molecular embedding models.
-    *   `io.py`: Handles all file I/O (saving models, logs, predictions).
-    *   `data.py`, `metrics.py`: Helper functions for data processing and performance evaluation.
-*   **`models/`**: :bricks: Model definitions.
-    *   `ann.py`: Defines the PyTorch ANN architecture.
-    *   `sklearn_models.py`: Centralizes imports for all Scikit-learn ecosystem models (XGBoost, LightGBM, etc.).
+# Check installed packages
+pip list | grep -E "(torch|rdkit|optuna|sklearn|pandas)"
 
----
+# Test core imports
+python -c "
+try:
+    import torch, rdkit, optuna, sklearn, pandas, numpy
+    print('✅ All core packages available')
+except ImportError as e:
+    print(f'❌ Missing package: {e}')
+"
+```
 
-## Customization and Extension
+## 📄 License
 
-To add a new model or feature:
-
-*   **Add a new model**: Simply add the model's name and hyperparameter search space to the `param_grids` dictionary in `optimizers/sklearn_optimizer.py`.
-*   **Add a new feature generator**:
-    1.  Create a new backend file in `utils/` (e.g., `my_new_feature.py`).
-    2.  Import your new function in `utils/feature_generator.py` and register it in the `feature_dispatch` dictionary.
-    3.  You can now call it in `config.yaml` using `type: "my_new_feature"`.
-
----
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 

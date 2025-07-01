@@ -1,0 +1,94 @@
+# ===================================================================
+#                CRAFT - Simple Classification Training
+# ===================================================================
+# A straightforward configuration for classification model training
+# with commonly used algorithms and minimal setup.
+# ===================================================================
+
+experiment_name: "Simple_Classification_Training"
+task_type: "classification"
+
+# --- Data Configuration ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/classification_reactions.csv"
+    smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
+    target_col: "reaction_class"  # Target column to predict
+    precomputed_features:
+      feature_columns: null
+
+# --- Training Configuration ---
+training:
+  # Select algorithms suitable for classification
+  models_to_run:
+    - "xgb"           # XGBoost Classifier
+    - "lgbm"          # LightGBM Classifier
+    - "rf"            # Random Forest Classifier
+    - "ann"           # Neural Network Classifier
+    - "svc"           # Support Vector Classifier
+  
+  n_trials: 10
+  quiet_optuna: true
+
+# --- Feature Engineering ---
+features:
+  per_smiles_col_generators:
+    Catalyst: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant1: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+    Reactant2: 
+      - type: "morgan"
+        radius: 2
+        nBits: 1024
+  
+  scaling: true
+
+# --- Data Splitting Strategy ---
+split_mode: "train_test_split"
+split_config:
+  train_test_split:
+    test_size: 0.2
+    random_state: 42
+    shuffle: true
+    stratify: true  # Maintain class distribution
+
+# --- Evaluation Metrics ---
+evaluation:
+  primary_metric: "f1"
+  additional_metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "auc"
+
+# --- Model-specific Settings ---
+model_specific_configs:
+  ann:
+    hidden_layers: [64, 32]
+    dropout_rate: 0.3
+    learning_rate: 0.001
+    
+  xgb:
+    eval_metric: "logloss"
+    
+  lgbm:
+    metric: "multi_logloss"
+
+# --- Output Settings ---
+output:
+  save_predictions: true
+  save_feature_importance: true
+  save_hyperparameters: true
+  save_confusion_matrix: true
+  save_classification_report: true
+
+# --- Computational Settings ---
+computational:
+  n_jobs: -1
+  random_state: 42 

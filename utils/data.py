@@ -25,8 +25,16 @@ def encode_labels(y, task_type='regression', console=None):
     elif task_type in ['binary_classification', 'multiclass_classification']:
         label_encoder = LabelEncoder()
         y_processed = label_encoder.fit_transform(np.array(y).ravel())
-        if hasattr(label_encoder, 'classes_'):
-            console.print(f"  [dim]Original y classes: {list(label_encoder.classes_)}, Encoded y classes: {list(np.unique(y_processed))}[/dim]")
+        if hasattr(label_encoder, 'classes_') and label_encoder.classes_ is not None:
+            try:
+                original_classes = list(label_encoder.classes_)
+                if y_processed is not None and len(y_processed) > 0:
+                    encoded_classes = list(np.unique(y_processed))
+                    console.print(f"  [dim]Original y classes: {original_classes}, Encoded y classes: {encoded_classes}[/dim]")
+                else:
+                    console.print(f"  [dim]Original y classes: {original_classes}[/dim]")
+            except Exception as e:
+                console.print(f"  [dim]Label encoding completed (details unavailable: {e})[/dim]")
     else:
         raise ValueError(f"Unsupported task_type: {task_type}")
         

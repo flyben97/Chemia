@@ -1,0 +1,130 @@
+# ===================================================================
+#      CRAFT - Full End-to-End Workflow Configuration v2.0
+# ===================================================================
+# This file orchestrates the entire process:
+# 1. Train multiple models on a reaction dataset.
+# 2. Automatically select the best performing model.
+# 3. Use the best model to run Bayesian optimization on a search space.
+# ===================================================================
+
+# --- Part 1: Model Training Configuration ---
+# This section is identical to a standard CRAFT training config.
+training_config:
+  experiment_name: "E2E_Reaction_Opt"
+  task_type: "regression" # 'regression' or 'classification'
+
+  data:
+    source_mode: "single_file"
+    single_file_config:
+      main_file_path: "data/reactions_with_features.csv"
+      smiles_col: ["Reactant1", "Reactant2", "Ligand"]
+      target_col: "ee" # The target column to predict
+      precomputed_features:
+        feature_columns: "5:"  # Include Temp column as feature (from column 5)
+
+  training:
+    # List all models you want to compete for the "best model" title
+    models_to_run:
+      # Gradient Boosting Methods (powerful but can overfit on small data)
+      - "xgb"      # XGBoost with regularization
+      - "lgbm"     # LightGBM often better for small datasets
+      - "gbdt"     # Scikit-learn Gradient Boosting (NEW)
+      - "catb"     # Scikit-learn Gradient Boosting (NEW)
+      - "hgb"     # Scikit-learn Gradient Boosting (NEW)
+      # # Tree Ensembles (good balance)
+      - "rf"       # Random Forest has built-in feature selection
+      - "extratrees" # Extra Trees (NEW)
+      - "svr"     # Scikit-learn Gradient Boosting (NEW)
+      - "knn"     # Scikit-learn Gradient Boosting (NEW)
+      # # Linear Methods with Strong Regularization (excellent for small datasets)
+      - "gpr"           # Gaussian Process Regression (NEW) - excellent for small data
+      - "krr"           # Kernel Ridge Regression  
+      # - "bayesianridge" # Bayesian Ridge (NEW) - strong regularization
+      - "ridge"         # Ridge Regression
+      # - "elasticnet"    # ElasticNet (NEW) - L1+L2 regularization
+      
+      # # Neural Network
+      # - "ann"           # PyTorch ANN with Dropout
+    
+    n_trials: 100  # Increase hyperparameter optimization trials
+    quiet_optuna: true
+
+  features:
+    per_smiles_col_generators:
+      # Reduce feature complexity for small dataset
+      Reactant1: [{type: "maccs"}]  # MACCS keys (fixed 166 bits)
+      Reactant2: [{type: "maccs"}]  # MACCS keys (fixed 166 bits)  
+      Ligand: [{type: "rdkit_descriptors"}]      # Keep all descriptors for now
+    scaling: true
+
+  split_mode: "cross_validation"
+  split_config:
+    cross_validation:
+      n_splits: 10 # Use more folds for small dataset (closer to LOOCV)
+      test_size_for_cv: 0.02  # Keep more data for training
+      random_state: 42
+
+  # split_mode: "train_valid_test"
+  # split_config:
+  #     train_valid_test:
+  #       valid_size: 0.05
+  #       test_size: 0.05
+  #       random_state: 0
+
+# --- Part 2: Model Selection Criterion ---
+# Define how to select the best model after training is complete.
+model_selection:
+  # The metric to use for ranking models.
+  # For regression: 'test_r2', 'test_rmse' (lower is better), 'test_mae' (lower is better)
+  # For classification: 'test_f1', 'test_accuracy', 'test_auc' (if applicable)
+  metric: "test_r2"
+  # How to rank: 'higher_is_better' or 'lower_is_better'
+  rank_mode: "higher_is_better"
+
+# --- Part 3: Reaction Optimization Configuration ---
+# This section is identical to config_optimization.yaml, but without
+# the source model part, as that will be determined automatically.
+optimization_config:
+  # Fixed components of the reaction
+  fixed_components:
+    Reactant1: 'O=C(OC)CCC#C'
+    Reactant2: 'O=P(C1=CC=CC=C1)(C2=CC=CC=C2)C(Br)CCC'
+
+  # Dynamic search space for optimization
+  reaction_components:
+    Ligand:
+      mode: "search"
+      file: 'data/ligand_space.csv'
+      display_col: 'SMILES'
+      sep: '\t'
+    catalyst:
+      mode: "search"
+      file: 'data/catalysts_space.csv'
+      display_col: 'Compound'
+      is_feature_source: True
+      feature_slice: "2:"
+    base:
+      mode: "search"
+      file: 'data/base_space.csv'
+      display_col: 'Base'
+      is_feature_source: True
+      feature_slice: "2:"
+    solvent:
+      mode: "search"
+      file: 'data/solvent_space.csv'
+      display_col: 'Name'
+      is_feature_source: True
+      feature_slice: "3:"
+    temperature:
+      mode: "search"
+      file: 'data/temperature_space.csv'
+      display_col: 'Temp'
+      is_feature_source: true  # Include temperature as feature
+      feature_slice: "1:"
+  
+  # Bayesian optimization parameters
+  bayesian_optimization:
+    init_points: 10
+    n_iter: 100
+    random_state: 42
+    top_k_results: 5

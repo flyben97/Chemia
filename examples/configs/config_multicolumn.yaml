@@ -1,0 +1,80 @@
+# ===================================================================
+#           CRAFT - Advanced Feature & CV Configuration (v1.2)
+# ===================================================================
+# This file demonstrates per-column features with 5-fold cross-validation.
+
+# --- 1. Experiment Basics ---
+experiment_name: "S17_MultiColumn_Demo"  # <-- 建议填写
+task_type: "regression"
+
+# --- 2. Data Source ---
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/reactions_with_features.csv"
+    
+    smiles_col: 
+      - "Reactant1"
+      - "Reactant2"
+      - "Ligand"
+      
+    target_col: "ee"
+    
+    # Precomputed features from the 5th column to the 39th (index-based)
+    precomputed_features:
+      feature_columns: "4:39" 
+
+# --- 3. Models to Run ---
+training:
+  models_to_run:
+    - "xgb"
+    # - "lgbm"
+    # - "cat"
+    # - "rf"
+  n_trials: 5 # Reduced for a quick demo
+  quiet_optuna: true
+
+# --- 4. Feature Generation (Per-Column Mode) ---
+# CORRECTED: Keys now match the names in `smiles_col`
+features:
+  per_smiles_col_generators:
+    
+    # Features for the "Reactant1" column
+    Reactant1:
+      - type: "maccs"
+        
+    # Features for the "Reactant2" column
+    Reactant2:
+      - type: "maccs"
+      
+    # Features for the "Ligand" column
+    Ligand:
+      - type: "rdkit_descriptors"
+      # - type: "morgan"
+      #   nBits: 1024
+      #   radius: 2
+
+  scaling: true
+
+# --- 5. Splitting Strategy ---
+# Choose ONE of the following modes
+# For a full CV run, uncomment the first block and comment out the second.
+
+# Option A: Cross-Validation for HPO
+# The data is split into 95% training and 5% final test set.
+# The 95% training set is then used for 5-fold CV during HPO.
+split_mode: "cross_validation"
+split_config:
+  cross_validation:
+    n_splits: 5               # <-- Number of CV folds
+    test_size_for_cv: 0.05     # <-- Size of the hold-out test set
+    random_state: 42
+
+# Option B: Simple Train/Validation/Test Split
+# split_mode: "train_valid_test"
+# split_config:
+#   train_valid_test:
+#     train_size: 0.9 # This means 90% of the (1 - test_size) remainder
+#     valid_size: 0.05
+#     test_size: 0.05
+#     random_state: 42

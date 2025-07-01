@@ -1,0 +1,102 @@
+{
+    "experiment_name": "S04_agent_5_a",
+    "task_type": "regression",
+    "data": {
+        "source_mode": "single_file",
+        "single_file_config": {
+            "main_file_path": "data/agent5_IB.csv",
+            "smiles_col": [
+                "SMILES",
+                "Solvent_1_SMILES",
+                "Solvent_2_SMILES"
+            ],
+            "target_col": "Left_Time",
+            "precomputed_features": {
+                "feature_columns": "3:10"
+            }
+        }
+    },
+    "training": {
+        "models_to_run": [
+            "xgb"
+        ],
+        "n_trials": 100,
+        "quiet_optuna": true,
+        "optuna_config": {
+            "sampler": "TPE",
+            "pruner": "MedianPruner",
+            "n_startup_trials": 10
+        }
+    },
+    "features": {
+        "per_smiles_col_generators": {
+            "SMILES": [
+                {
+                    "type": "maccs"
+                }
+            ],
+            "Solvent_1_SMILES": [
+                {
+                    "type": "rdkit_descriptors"
+                },
+                {
+                    "type": "maccs"
+                }
+            ],
+            "Solvent_2_SMILES": [
+                {
+                    "type": "rdkit_descriptors"
+                },
+                {
+                    "type": "maccs"
+                }
+            ]
+        },
+        "scaling": true
+    },
+    "split_mode": "train_valid_test",
+    "split_config": {
+        "train_valid_test": {
+            "test_size": 0.05,
+            "valid_size": 0.05,
+            "random_state": 0
+        }
+    },
+    "evaluation": {
+        "primary_metric": "r2",
+        "additional_metrics": [
+            "rmse",
+            "mae",
+            "mape"
+        ]
+    },
+    "output": {
+        "save_predictions": true,
+        "save_feature_importance": true,
+        "save_cv_predictions": true,
+        "save_hyperparameters": true,
+        "generate_model_comparison": true,
+        "save_artifacts": [
+            "best_model",
+            "scaler",
+            "feature_names",
+            "training_history"
+        ]
+    },
+    "computational": {
+        "n_jobs": -1,
+        "memory_efficient": true,
+        "random_state": 42
+    },
+    "advanced": {
+        "enable_stacking": false,
+        "feature_analysis": {
+            "permutation_importance": true,
+            "shap_analysis": false
+        },
+        "model_interpretation": {
+            "save_partial_dependence": false,
+            "save_learning_curves": true
+        }
+    }
+}

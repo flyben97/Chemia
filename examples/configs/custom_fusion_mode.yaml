@@ -1,0 +1,199 @@
+# Custom Feature Fusion Mode Configuration  
+# This mode combines graph embeddings with user-provided experimental features
+
+metadata:
+  name: "Custom Feature Fusion Mode Demo"
+  description: "Fuse graph neural network embeddings with experimental features"
+  use_case: "When you have additional experimental data to combine with molecular graphs"
+
+# Data Configuration
+data:
+  file_path: "data/experimental_reactions.csv"
+  target_column: "reaction_yield"
+  smiles_columns: ["catalyst", "reactant_1", "reactant_2"]
+  task_type: "regression"
+  
+  # Custom experimental features to fuse with graph embeddings
+  custom_feature_columns:
+    - "temperature"      # Reaction temperature (°C)
+    - "pressure"         # Reaction pressure (bar)  
+    - "reaction_time"    # Reaction time (hours)
+    - "catalyst_loading" # Catalyst loading (mol%)
+    - "solvent_polarity" # Solvent polarity index
+
+# Data Preprocessing
+preprocessing:
+  # Normalize custom features before fusion
+  normalize_custom_features: true
+  custom_feature_scaling: "standard"  # Standardize experimental features
+
+# Data Splitting  
+split:
+  method: "random"
+  test_size: 0.2
+  validation_size: 0.2
+  random_state: 42
+
+# Training Configuration - Custom Fusion Mode
+training:
+  models_to_run: ["gcn", "gat"]  # Models that support custom fusion
+  n_trials: 25
+  max_epochs: 120
+  early_stopping_patience: 20
+  batch_size: 32
+  cv_folds: 5
+
+# Graph Construction - Custom Fusion Mode
+graph_construction:
+  mode: "custom_fusion"
+  
+  # Fusion configuration
+  fusion_method: "attention"  # How to combine graph + custom features
+  # Options: "concatenate", "attention", "gated", "transformer"
+  
+  # Dimension settings
+  custom_feature_dim: 5    # Number of custom features
+  graph_embed_dim: 128     # GNN embedding dimension
+  output_dim: 256          # Final fused representation dimension
+  
+  # This mode will:
+  # 1. Build molecular graphs normally (batch mode for molecules)
+  # 2. Extract graph embeddings using GNN
+  # 3. Process custom features separately  
+  # 4. Fuse graph embeddings + custom features using specified method
+  # 5. Make final prediction on fused representation
+
+# Fusion Method Details
+fusion_config:
+  
+  # Method 1: Simple Concatenation
+  concatenate:
+    description: "Simply concatenate graph embedding and custom features"
+    pros: ["Simple", "Fast", "Always stable"]
+    cons: ["No learned interaction", "May not find optimal combination"]
+  
+  # Method 2: Attention-Based Fusion (RECOMMENDED)
+  attention:
+    description: "Use multi-head attention to fuse embeddings and features" 
+    attention_heads: [4, 8]  # Number of attention heads to try
+    pros: ["Learns optimal fusion weights", "Interpretable attention weights"]
+    cons: ["More parameters", "Slightly slower"]
+  
+  # Method 3: Gated Fusion
+  gated:
+    description: "Use gating mechanism to control information flow"
+    pros: ["Adaptive fusion", "Can ignore irrelevant features"]
+    cons: ["More complex", "May require more data"]
+  
+  # Method 4: Transformer Fusion  
+  transformer:
+    description: "Use transformer layers for advanced fusion"
+    transformer_layers: [1, 2]
+    pros: ["Most sophisticated", "Can model complex interactions"]
+    cons: ["Most parameters", "May overfit on small data"]
+
+# Model Configuration for Custom Fusion
+model_configs:
+  gcn:
+    # Base GNN parameters
+    hidden_dim: [64, 128, 256]
+    num_layers: [3, 4]
+    dropout_rate: [0.1, 0.2, 0.3]
+    
+    # Fusion-specific parameters
+    fusion_method: ["attention", "gated"]  # Try different fusion methods
+    fusion_attention_heads: [4, 8]        # For attention fusion
+  
+  gat:
+    # Base GNN parameters
+    hidden_dim: [64, 128, 256]
+    num_layers: [3, 4]
+    num_heads: [4, 8]
+    attention_dropout: [0.1, 0.2]
+    
+    # Fusion-specific parameters
+    fusion_method: ["attention", "transformer"]  # GAT works well with attention
+    fusion_attention_heads: [4, 8, 12]
+    transformer_layers: [1, 2]
+
+# Custom Feature Engineering
+custom_features:
+  # Temperature encoding
+  temperature:
+    type: "continuous"
+    normalization: "standard"
+    expected_range: [20, 200]  # °C
+  
+  # Pressure encoding  
+  pressure:
+    type: "continuous"
+    normalization: "standard"
+    expected_range: [1, 50]    # bar
+  
+  # Time encoding (may benefit from log transform)
+  reaction_time:
+    type: "continuous" 
+    normalization: "standard"
+    log_transform: true        # Log transform for time
+    expected_range: [0.5, 72]  # hours
+  
+  # Catalyst loading
+  catalyst_loading:
+    type: "continuous"
+    normalization: "standard"
+    expected_range: [0.1, 20]  # mol%
+  
+  # Solvent polarity (ordinal/continuous)
+  solvent_polarity:
+    type: "continuous"
+    normalization: "minmax"    # Keep in [0,1] range
+    expected_range: [0, 1]
+
+# Evaluation
+evaluation:
+  metrics:
+    regression: ["r2", "rmse", "mae"]
+  
+  # Fusion-specific analysis
+  analyze_fusion_weights: true      # Analyze learned fusion weights
+  feature_importance: true          # Importance of each custom feature
+  ablation_study:
+    enabled: true
+    test_graph_only: true          # Test performance with only graph features
+    test_custom_only: true         # Test performance with only custom features
+    test_best_fusion: true         # Test best fusion method
+
+# Output
+output:
+  base_directory: "results/custom_fusion_mode"
+  save_models: true
+  save_predictions: true
+  save_fusion_analysis: true        # Save fusion weight analysis
+  save_feature_importance: true     # Save custom feature importance
+
+# Advantages of Custom Fusion Mode:
+# ✓ Combines molecular structure with experimental conditions
+# ✓ Can capture effects not visible in molecular structure alone
+# ✓ Flexible fusion methods to find optimal combination
+# ✓ Interpretable - can see which experimental features matter most
+# ✓ Handles heterogeneous data (graphs + tabular)
+#
+# Disadvantages:
+# ✗ Requires additional experimental data
+# ✗ More complex architecture
+# ✗ Risk of overfitting if too many custom features
+# ✗ Need to tune fusion method hyperparameters
+
+# Example Use Cases:
+# 1. Reaction yield prediction: molecular structures + reaction conditions
+# 2. Catalyst performance: catalyst structure + operating conditions  
+# 3. Drug efficacy: molecular structure + patient features
+# 4. Material properties: structure + processing conditions
+# 5. Environmental fate: chemical structure + environmental conditions
+
+# Best Practices:
+# 1. Normalize all custom features before fusion
+# 2. Start with simple concatenation, then try attention
+# 3. Use ablation studies to validate fusion benefits
+# 4. Monitor for overfitting when adding many custom features
+# 5. Analyze fusion weights to understand model behavior 

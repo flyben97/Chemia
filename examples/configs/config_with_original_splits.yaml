@@ -1,0 +1,62 @@
+# ===================================================================
+#      CRAFT - Training Configuration with Original Data Splits
+# ===================================================================
+# This configuration demonstrates the new feature that saves the original
+# data as separate CSV files (train/val/test) for easy inspection.
+# ===================================================================
+
+experiment_name: "agent5_with_original_splits"
+task_type: "regression" # 'regression' or 'classification'
+
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/agent5.csv" # Your original data file
+    smiles_col: ["Reactant1", "Reactant2", "Ligand"]
+    target_col: "ee"
+    precomputed_features:
+      feature_columns: "5:" # Include all columns from column 5 onwards as features
+
+training:
+  models_to_run:
+    - "xgb"
+    - "lgbm"
+    - "rf"
+  n_trials: 10
+  quiet_optuna: true
+
+features:
+  per_smiles_col_generators:
+    Reactant1: [{type: "maccs"}]
+    Reactant2: [{type: "maccs"}]  
+    Ligand: [{type: "rdkit_descriptors"}]
+  scaling: true
+
+# Choose your preferred split mode:
+# Option 1: Cross-validation (recommended for small datasets)
+split_mode: "cross_validation"
+split_config:
+  cross_validation:
+    n_splits: 5
+    test_size_for_cv: 0.2  # 20% for final test, 80% for cross-validation
+    random_state: 42
+
+# Option 2: Traditional train/validation/test split
+# split_mode: "train_valid_test"
+# split_config:
+#   train_valid_test:
+#     test_size: 0.2      # 20% for test
+#     valid_size: 0.1     # 10% for validation
+#     random_state: 42
+
+# After training, you will find the following files in your output directory:
+# 
+# output/your_experiment_name/original_data_splits/
+# ├── train_original_data.csv        # Training set from original data
+# ├── test_original_data.csv         # Test set from original data
+# ├── val_original_data.csv          # Validation set (if using train_valid_test mode)
+# └── data_split_summary.csv         # Summary of split sizes and percentages
+#
+# These files contain the exact same rows from your original agent5.csv file,
+# split according to your configuration, making it easy to inspect what data
+# was used for training vs testing. 

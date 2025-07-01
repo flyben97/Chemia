@@ -1,0 +1,226 @@
+# 化学反应收率预测配置 - 支持列范围功能
+# 演示如何使用列范围语法来指定连续的特征列
+
+metadata:
+  name: "Reaction Yield Prediction with Column Ranges"
+  description: "Predict reaction yield using column range syntax for features"
+  use_case: "反应收率预测：支持列范围的多特征融合"
+
+# 数据配置
+data:
+  file_path: "data/reaction_dataset_extended.csv"  # 扩展的反应数据文件
+  target_column: "yield"                           # 收率列（目标变量）
+  
+  # SMILES 列（反应组分）
+  smiles_columns: 
+    - "catalyst_smiles"      # 催化剂SMILES
+    - "reactant_1_smiles"    # 反应物1 SMILES  
+    - "reactant_2_smiles"    # 反应物2 SMILES
+  
+  # 自定义特征列 - 支持多种范围语法
+  custom_feature_columns:
+    # 方法1: 单个列名
+    - "temperature"          # 反应温度
+    
+    # 方法2: 前缀+数字范围 (推荐)
+    - "pressure_1:3"         # pressure_1, pressure_2, pressure_3
+    - "time_1:5"             # time_1, time_2, time_3, time_4, time_5
+    
+    # 方法3: 完整名称范围
+    - "feature_1:feature_10" # feature_1 到 feature_10
+    
+    # 方法4: 索引范围 (需要知道列的位置)
+    # - "15:20"              # 第15到20列
+    
+    # 方法5: 混合使用
+    - "catalyst_loading"     # 单个列
+    - "solvent_param_1:4"    # solvent_param_1 到 solvent_param_4
+  
+  task_type: "regression"    # 回归任务
+  
+  # 分子角色定义
+  molecule_roles:
+    catalyst_smiles: "catalyst"
+    reactant_1_smiles: "reactant"  
+    reactant_2_smiles: "reactant"
+
+# 数据预处理
+preprocessing:
+  remove_duplicates: true
+  handle_missing: "drop"
+  
+  # 自定义特征预处理
+  normalize_custom_features: true
+  custom_feature_scaling: "standard"  # 标准化所有自定义特征
+
+# 数据分割
+split:
+  method: "random"
+  test_size: 0.2
+  validation_size: 0.2
+  random_state: 42
+
+# 训练配置 - 自定义特征融合模式
+training:
+  models_to_run: ["gcn", "gat", "mpnn"]  # 支持特征融合的GNN模型
+  n_trials: 25                           # 超参数优化试验次数
+  max_epochs: 100
+  early_stopping_patience: 15
+  batch_size: 32
+  cv_folds: 5
+
+# 核心配置：图构建 + 多特征融合
+graph_construction:
+  mode: "custom_fusion"                  # 自定义特征融合模式
+  
+  # 融合配置
+  fusion_method: "attention"             # 注意力融合
+  
+  # 维度设置 - 根据实际特征数量调整
+  # 计算方式：
+  # - temperature: 1维
+  # - pressure_1:3: 3维  
+  # - time_1:5: 5维
+  # - feature_1:feature_10: 10维
+  # - catalyst_loading: 1维
+  # - solvent_param_1:4: 4维
+  # 总计: 1 + 3 + 5 + 10 + 1 + 4 = 24维
+  custom_feature_dim: 24                 # 自定义特征总维度
+  graph_embed_dim: 128                   # 图embedding维度
+  output_dim: 256                        # 融合后的表示维度
+  
+  # 这种模式将会：
+  # 1. 自动解析列范围规范为具体列名
+  # 2. 将各个分子转换为图
+  # 3. 使用GNN提取图embedding (128维)
+  # 4. 处理所有自定义特征 (24维)
+  # 5. 使用注意力机制融合图embedding和所有特征
+  # 6. 输出融合后的表示 (256维) 用于收率预测
+
+# 模型特定配置
+model_configs:
+  gcn:
+    hidden_dim: [64, 128, 256]
+    num_layers: [3, 4, 5]
+    dropout_rate: [0.1, 0.2, 0.3]
+    fusion_method: ["attention", "concatenate"]
+    
+  gat:
+    hidden_dim: [64, 128, 256]
+    num_layers: [3, 4]
+    num_heads: [4, 8]
+    attention_dropout: [0.1, 0.2]
+    fusion_method: ["attention"]
+    fusion_attention_heads: [4, 8]
+    
+  mpnn:
+    hidden_dim: [64, 128, 256]
+    num_layers: [3, 4, 5]
+    message_hidden_dim: [64, 128]
+    num_message_steps: [3, 4]
+    fusion_method: ["attention", "gated"]
+
+# 特征组配置 - 对不同特征组进行特殊处理
+feature_groups:
+  # 温度组
+  temperature_group:
+    columns: ["temperature"]
+    type: "continuous"
+    normalization: "standard"
+    expected_range: [20, 200]
+  
+  # 压力组
+  pressure_group:
+    columns: "pressure_1:3"              # 使用范围语法
+    type: "continuous"
+    normalization: "standard"
+    expected_range: [1, 50]
+  
+  # 时间组
+  time_group:
+    columns: "time_1:5"                  # 使用范围语法
+    type: "continuous"
+    normalization: "standard"
+    log_transform: true                  # 时间可能需要对数变换
+    expected_range: [0.1, 100]
+  
+  # 实验特征组
+  experimental_group:
+    columns: "feature_1:feature_10"      # 使用范围语法
+    type: "continuous"
+    normalization: "minmax"              # 使用最小-最大归一化
+    expected_range: [0, 1]
+  
+  # 催化剂参数组
+  catalyst_group:
+    columns: ["catalyst_loading", "solvent_param_1:4"]  # 混合语法
+    type: "continuous"
+    normalization: "robust"              # 使用鲁棒归一化（对异常值不敏感）
+
+# 评估配置
+evaluation:
+  metrics:
+    regression: ["r2", "rmse", "mae", "mape"]
+  
+  # 融合分析
+  analyze_fusion_weights: true          # 分析融合权重
+  feature_importance: true              # 特征重要性分析
+  feature_group_analysis: true          # 特征组重要性分析
+  
+  # 消融研究
+  ablation_study:
+    enabled: true
+    test_graph_only: true              # 测试仅使用图特征的性能
+    test_feature_groups: true          # 测试各个特征组的贡献
+    test_fusion_methods: true          # 比较不同融合方法
+
+# 输出配置
+output:
+  base_directory: "results/reaction_yield_ranges"
+  save_models: true
+  save_predictions: true
+  save_fusion_analysis: true           # 保存融合分析结果
+  save_feature_importance: true        # 保存特征重要性分析
+  save_column_mapping: true            # 保存列范围解析结果
+
+# 计算配置
+compute:
+  device: "auto"
+  num_workers: 2
+  pin_memory: true
+
+# 分析和可视化
+analysis:
+  enabled: true
+  
+  # 特征分析
+  multi_feature_effect_analysis: true   # 分析多特征对收率的影响
+  feature_correlation_matrix: true      # 特征相关性矩阵
+  fusion_weight_visualization: true     # 可视化融合权重
+  
+  # 模型解释
+  attention_visualization: true         # 可视化注意力权重
+  feature_group_contribution: true      # 特征组贡献分析
+
+# 使用说明：
+# 
+# 支持的列范围语法：
+# 1. 单个列名: "temperature"
+# 2. 前缀+数字范围: "pressure_1:5" → ["pressure_1", "pressure_2", "pressure_3", "pressure_4", "pressure_5"]
+# 3. 完整名称范围: "feature_1:feature_10" → ["feature_1", "feature_2", ..., "feature_10"]
+# 4. 索引范围: "5:10" → [第5到10列] (需要知道确切的列位置)
+# 5. 混合列表: ["temperature", "pressure_1:3", "time_1:5"]
+#
+# 数据格式要求：
+# 您的CSV文件应该包含以下列：
+# - catalyst_smiles, reactant_1_smiles, reactant_2_smiles: SMILES字符串
+# - temperature: 反应温度
+# - pressure_1, pressure_2, pressure_3: 压力相关参数
+# - time_1, time_2, time_3, time_4, time_5: 时间相关参数
+# - feature_1, feature_2, ..., feature_10: 其他实验特征
+# - catalyst_loading: 催化剂用量
+# - solvent_param_1, solvent_param_2, solvent_param_3, solvent_param_4: 溶剂参数
+# - yield: 反应收率（目标变量）
+#
+# 运行命令：
+# python run_training_only.py --config examples/configs/reaction_yield_with_ranges.yaml 
