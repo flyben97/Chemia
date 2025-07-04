@@ -6,55 +6,55 @@
 # for both traditional ML and advanced algorithms suitable for small datasets.
 # ===================================================================
 
-experiment_name: "CRAFT_Training_Comprehensive"
+experiment_name: "S04_agent_5_a"
 task_type: "regression"  # 'regression' or 'classification'
 
 # --- Data Configuration ---
 data:
   source_mode: "single_file"
   single_file_config:
-    main_file_path: "data/reactions_with_features.csv"
-    smiles_col: ["Reactant1", "Reactant2", "Ligand"]
-    target_col: "ee"  # The target column to predict
+    main_file_path: "data/0610-collected-data.csv"
+    smiles_col: ["SMILES"]
+    target_col: "emission_energy(eV)"  # The target column to predict
     precomputed_features:
-      feature_columns: "5:"  # Include Temp column as feature (from column 5)
+      feature_columns: "8:"  # Include Temp column as feature (from column 5)
 
 # --- Training Configuration ---
 training:
   # Comprehensive model selection - grouped by algorithm type
   models_to_run:
     # Gradient Boosting Methods (Best for most ML tasks)
-    - "xgb"           # XGBoost
-    - "lgbm"          # LightGBM  
-    - "catboost"      # CatBoost
-    - "gbdt"          # Scikit-learn Gradient Boosting (NEW)
-    - "histgradientboosting"  # Histogram-based GB
+    # - "ann"           # XGBoost
+    # - "lgbm"          # LightGBM  
+    # - "catboost"      # CatBoost
+    # - "gbdt"          # Scikit-learn Gradient Boosting (NEW)
+    - "hgb"  # Histogram-based GB
     
-    # Tree-based Ensemble Methods
-    - "rf"            # Random Forest
-    - "extratrees"    # Extra Trees (NEW)
-    - "adaboost"      # AdaBoost
+    # # Tree-based Ensemble Methods
+    # - "rf"            # Random Forest
+    # - "extratrees"    # Extra Trees (NEW)
+    # - "adaboost"      # AdaBoost
     
-    # Linear Methods with Regularization (Good for small datasets)
-    - "ridge"         # Ridge Regression
-    - "elasticnet"    # ElasticNet (NEW)
-    - "lasso"         # LASSO (NEW)
-    - "bayesianridge" # Bayesian Ridge (NEW)
+    # # Linear Methods with Regularization (Good for small datasets)
+    # - "ridge"         # Ridge Regression
+    # - "elasticnet"    # ElasticNet (NEW)
+    # - "lasso"         # LASSO (NEW)
+    # - "bayesianridge" # Bayesian Ridge (NEW)
     
-    # Advanced Methods (Excellent for small datasets)
-    - "gpr"           # Gaussian Process Regression (NEW)
-    - "krr"           # Kernel Ridge Regression
-    - "svr"           # Support Vector Regression
+    # # Advanced Methods (Excellent for small datasets)
+    # - "gpr"           # Gaussian Process Regression (NEW)
+    # - "krr"           # Kernel Ridge Regression
+    # - "svr"           # Support Vector Regression
     
-    # Neural Networks
-    - "ann"           # PyTorch-based Artificial Neural Network
+    # # Neural Networks
+    # - "ann"           # PyTorch-based Artificial Neural Network
     
-    # Simple but Effective Methods
-    - "kneighbors"    # k-Nearest Neighbors
-    - "sgd"           # Stochastic Gradient Descent (NEW)
+    # # Simple but Effective Methods
+    # - "kneighbors"    # k-Nearest Neighbors
+    # - "sgd"           # Stochastic Gradient Descent (NEW)
   
   # Hyperparameter optimization settings
-  n_trials: 5              # Increased for better optimization
+  n_trials: 20              # Increased for better optimization
   quiet_optuna: true        # Suppress Optuna output
   
   # Optuna optimization strategy
@@ -67,12 +67,19 @@ training:
 features:
   per_smiles_col_generators:
     # Reduced complexity for small dataset to avoid overfitting
-    Reactant1: 
-      - type: "maccs"  # MACCS keys (fixed 166 bits)
-    Reactant2: 
-      - type: "maccs"  # MACCS keys (fixed 166 bits)
-    Ligand: 
-      - type: "rdkit_descriptors"  # Keep descriptors for ligand (most important)
+    SMILES: 
+      # - type: "unimol"
+      #   model_version: "v2"
+      #   model_size: "310m"
+      - type: "maccs"
+      # - type: "morgan"
+      #   nbits: 2048
+      #   radius: 2
+    #   - type: "rdkit_descriptors"
+    # Solvent_1_SMILES: 
+    #   - type: "rdkit_descriptors" 
+    # Solvent_2_SMILES: 
+    #   - type: "rdkit_descriptors"  # Keep descriptors for ligand (most important)
   
   scaling: true             # Essential for many algorithms
   
@@ -81,32 +88,39 @@ features:
   #   method: "variance_threshold"
   #   threshold: 0.01
 
-# --- Cross-Validation Strategy ---
-split_mode: "cross_validation"
+split_mode: "train_valid_test"
 split_config:
-  cross_validation:
-    n_splits: 10            # Leave-One-Out-like for small datasets
-    test_size_for_cv: 0.05  # Keep 95% for training
-    random_state: 42
-    shuffle: true
+  train_valid_test:
+    test_size: 0.1
+    valid_size: 0.1
+    random_state: 0
+
+# --- Cross-Validation Strategy ---
+# split_mode: "cross_validation"
+# split_config:
+#   cross_validation:
+#     n_splits: 5            # 5-fold cross-validation
+#     test_size_for_cv: 0.1  # Keep 80% for training (reasonable test size)
+#     random_state: 42
+#     shuffle: true
 
 # --- Model-specific Settings ---
-model_specific_configs:
-  # Small dataset optimizations
-  gpr:
-    optimize_restarts: 5    # Multiple restarts for GP optimization
+# model_specific_configs:
+#   # Small dataset optimizations
+#   gpr:
+#     optimize_restarts: 5    # Multiple restarts for GP optimization
    
-  xgb:
-    early_stopping_rounds: 20
-    eval_metric: "rmse"
+#   xgb:
+#     early_stopping_rounds: 20
+#     eval_metric: "rmse"
   
-  lgbm:
-    early_stopping_rounds: 20
-    metric: "rmse"
+#   lgbm:
+#     early_stopping_rounds: 20
+#     metric: "rmse"
   
-  catboost:
-    early_stopping_rounds: 20
-    eval_metric: "RMSE"
+#   catboost:
+#     early_stopping_rounds: 20
+#     eval_metric: "RMSE"
 
 # --- Evaluation Metrics ---
 evaluation:
@@ -116,11 +130,11 @@ evaluation:
     - "mae"
     - "mape"                    # Mean Absolute Percentage Error
   
-  # Cross-validation reporting
-  cv_reporting:
-    show_fold_details: true
-    show_std: true
-    confidence_interval: 0.95
+  # # Cross-validation reporting
+  # cv_reporting:
+  #   show_fold_details: true
+  #   show_std: true
+  #   confidence_interval: 0.95
 
 # --- Output Settings ---
 output:
@@ -143,11 +157,11 @@ computational:
   memory_efficient: true    # For large feature matrices
   random_state: 42
   
-  # Early stopping for ensemble methods
-  early_stopping:
-    enabled: true
-    patience: 20
-    min_delta: 0.001
+  # # Early stopping for ensemble methods
+  # early_stopping:
+  #   enabled: true
+  #   patience: 20
+  #   min_delta: 0.001
 
 # --- Advanced Options ---
 advanced:

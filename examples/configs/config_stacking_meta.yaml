@@ -1,0 +1,62 @@
+# ===================================================================
+#      CRAFT - 元学习器模型堆叠配置文件
+# ===================================================================
+# 这个配置文件展示如何使用元学习器（Meta-Learner）进行高级模型堆叠
+# 元学习器可以自动学习如何最优地组合基础模型的预测结果
+# ===================================================================
+
+# 基本堆叠配置
+stacking:
+  # 实验目录（包含训练好的模型）
+  experiment_dir: "output/S04_agent_5_a_regression_20250702_201036"
+  
+  # 使用元学习器方法：ridge | rf | logistic
+  method: "ridge"
+  
+  # 参与堆叠的模型（权重在元学习器方法中会被自动学习）
+  models:
+    - name: "xgb"
+      enabled: true
+      
+    # - name: "lgbm"
+    #   enabled: true
+      
+    - name: "catboost"
+      enabled: true
+      
+    # - name: "rf"
+    #   enabled: true
+      
+    # - name: "ann"
+    #   enabled: false  # 可以临时禁用某些模型
+  
+  # 元模型配置
+  meta_model:
+    auto_train: true  # 自动训练元学习器
+    
+    # 验证数据配置
+    validation:
+      auto_load: true   # 自动从实验目录加载验证数据
+      size: 200         # 用于训练元学习器的验证样本数量
+      split_aware: true # 🆕 根据原实验的split_mode智能选择验证数据
+                       # true: train_valid_test模式使用validation集，cross_validation模式使用test集
+                       # false: 按传统逻辑优先使用validation集
+
+# 自动评估
+evaluation:
+  auto_evaluate: true
+  use_test_set: true
+  compare_with_base: true  # 与基础模型性能进行比较
+
+# 保存设置
+save:
+  save_stacker: true
+  save_path: "output/meta_ensemble_model.pkl"
+  results_dir: "output/meta_stacking_results"
+  save_evaluation: true
+  save_config_copy: true
+
+# 高级选项
+advanced:
+  experiment_name: "meta_learner_ensemble"
+  description: "使用Ridge回归元学习器的模型堆叠" 

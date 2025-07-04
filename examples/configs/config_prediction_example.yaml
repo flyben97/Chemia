@@ -1,0 +1,88 @@
+# ===================================================================
+#      CRAFT - 预测配置示例文件
+# ===================================================================
+# 这个示例文件展示了如何配置CRAFT框架进行模型预测
+# 请根据您的实际情况修改相关路径和参数
+# ===================================================================
+
+# --- 预测模式配置 ---
+prediction_mode: "experiment_directory"  # 使用实验目录模式
+
+# --- 实验目录模式配置 ---
+# 使用完整的训练实验目录（推荐方式）
+experiment_directory_mode:
+  # 替换为您实际的实验目录路径
+  run_directory: "output/S04_agent_5_a_regression_20250101_120000"
+  # 选择要使用的模型（确保该模型在训练时已经生成）
+  model_name: "xgb"  # 可选: xgb, lgbm, catboost, rf, ann 等
+
+# --- 替代方案：直接文件模式配置 ---
+# 如果您想直接指定模型文件路径，可以使用此模式
+# direct_files_mode:
+#   model_path: "output/S04_agent_5_a_regression_20250101_120000/models/xgboost/xgboost_model.json"
+#   config_path: "output/S04_agent_5_a_regression_20250101_120000/run_config.json"
+#   scaler_path: "output/S04_agent_5_a_regression_20250101_120000/data_splits/processed_dataset_scaler.joblib"
+#   label_encoder_path: null  # 回归任务不需要标签编码器
+
+# --- 输入输出配置 ---
+data:
+  # 输入数据文件路径 - 修改为您的新数据文件
+  input_file: "data/new_prediction_data.csv"
+  
+  # 输出预测结果文件路径
+  output_file: "predictions/prediction_results_20250101.csv"
+  
+  # 列名映射（如果输入数据的列名与训练数据不同）
+  column_mapping:
+    # 示例：将输入文件中的列名映射到训练时使用的列名
+    # "input_smiles": "SMILES"
+    # "input_solvent1": "Solvent_1_SMILES"
+    # "input_solvent2": "Solvent_2_SMILES"
+
+# --- 预测设置 ---
+prediction:
+  batch_size: 1000  # 批处理大小，适合大数据集
+  save_probabilities: true  # 分类任务时保存类别概率
+  save_feature_importance: false  # 不保存特征重要性（可选）
+  confidence_threshold: null  # 分类置信度阈值（可选）
+  
+  # 输出格式选项
+  output_format:
+    include_input_data: true  # 在输出中包含原始输入数据
+    add_prediction_metadata: true  # 添加预测时间戳和模型信息
+    precision: 4  # 预测值的小数位数
+
+# --- 日志和调试 ---
+logging:
+  verbose: false  # 设为true可查看详细的特征生成过程
+  save_log: true  # 保存预测日志文件
+  log_directory: "logs/predictions"  # 日志保存目录
+  
+# --- 高级选项 ---
+advanced:
+  # 内存管理
+  memory_efficient: true  # 启用内存优化
+  chunk_size: 5000  # 大文件分块处理大小
+  
+  # 错误处理
+  skip_invalid_rows: true  # 跳过包含无效SMILES的行
+  error_log_file: "prediction_errors.log"  # 错误日志文件
+  
+  # 特征处理
+  regenerate_features: false  # 强制重新生成特征（较慢但更可靠）
+  cache_features: true  # 缓存生成的特征以加速重复预测
+  
+  # 质量控制
+  validate_predictions: true  # 对预测结果进行基本验证
+  outlier_detection: false  # 标记潜在的异常预测值
+
+# --- 性能优化提示 ---
+# 对于大数据集：
+# - 设置较小的 batch_size (如 500-1000)
+# - 启用 memory_efficient: true
+# - 考虑设置 chunk_size 进行分块处理
+
+# 对于高质量预测：
+# - 设置 regenerate_features: true
+# - 启用 validate_predictions: true
+# - 设置 verbose: true 以监控处理过程 

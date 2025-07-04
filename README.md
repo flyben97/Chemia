@@ -1,266 +1,317 @@
-![CRAFT Logo](images/craft.png) ![Python](https://img.shields.io/badge/python-3.8+-blue.svg) ![License](https://img.shields.io/badge/license-MIT-green.svg) ![Status](https://img.shields.io/badge/status-active-brightgreen.svg)
+<div align="center">
+  <img src="images/crane.png" alt="CRANE Logo" width="200"/>
+  <h1>CRANE</h1>
+  <p><strong>A Comprehensive Machine Learning Framework for Predicting and Optimizing Chemical Properties and Reactions</strong></p>
+  <p>
+    <a href="https://img.shields.io/badge/python-3.8+-blue.svg"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
+    <a href="https://img.shields.io/badge/license-MIT-green.svg"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
+    <a href="https://img.shields.io/badge/status-active-brightgreen.svg"><img src="https://img.shields.io/badge/status-active-brightgreen.svg" alt="Status"></a>
+  </p>
+  <p>
+    <strong>English</strong> | <a href="README_zh-CN.md">简体中文</a>
+  </p>
+</div>
 
-# CRAFT: Chemical Reaction Analysis and Feature-based Training 
 
-CRAFT is a comprehensive machine learning framework designed for chemical reaction prediction and optimization. It combines traditional ML algorithms, neural networks, and graph neural networks with Bayesian optimization to predict reaction outcomes and find optimal reaction conditions.
+---
 
-[English](README.md) | [简体中文](README_zh-CN.md)
+**CRANE** — **C**hemical **R**epresentation and **A**nalysis using **N**eural and **E**nsemble models
 
-## 📁 Project Structure
+**CRANE** is a powerful tool designed for machine learning researchers in chemistry. Through simple YAML configuration files, it provides a "one-stop" workflow—from data processing and feature engineering to model training, hyperparameter tuning, and Bayesian optimization. This allows you to focus on the chemistry problem itself, rather than the tedious engineering details.
+
+## 📚 Table of Contents
+
+*   [**Chapter 1: Getting to Know CRANE**](#chapter-1-getting-to-know-crane)
+    *   [1.1 Core Features](#11-core-features)
+    *   [1.2 Project Structure](#12-project-structure)
+*   [**Chapter 2: Five-Minute Quick Start**](#chapter-2-five-minute-quick-start)
+    *   [2.1 Prepare Your Data](#21-prepare-your-data)
+    *   [2.2 Configure Your Experiment](#22-configure-your-experiment)
+    *   [2.3 Launch the Training](#23-launch-the-training)
+*   [**Chapter 3: Installation and Deployment**](#chapter-3-installation-and-deployment)
+    *   [3.1 Environment Setup](#31-environment-setup)
+    *   [3.2 Script Guide](#32-script-guide)
+*   [**Chapter 4: In-Depth Usage Guide**](#chapter-4-in-depth-usage-guide)
+    *   [4.1 Detailed Training Modes](#41-detailed-training-modes)
+    *   [4.2 Bayesian Optimization](#42-bayesian-optimization)
+    *   [4.3 End-to-End Workflow](#43-end-to-end-workflow)
+*   [**Chapter 5: Configuration File Deep Dive**](#chapter-5-configuration-file-deep-dive)
+    *   [5.1 Training Configuration Templates](#51-training-configuration-templates)
+    *   [5.2 Optimization Configuration Templates](#52-optimization-configuration-templates)
+*   [**Chapter 6: Core Capabilities Analysis**](#chapter-6-core-capabilities-analysis)
+    *   [6.1 Supported Algorithm Library](#61-supported-algorithm-library)
+    *   [6.2 Automated Feature Engineering](#62-automated-feature-engineering)
+    *   [6.3 Data Splitting Strategies](#63-data-splitting-strategies)
+    *   [6.4 Data Format Requirements](#64-data-format-requirements)
+*   [**Chapter 7: Advanced Techniques and Programmatic API**](#chapter-7-advanced-techniques-and-programmatic-api)
+    *   [7.1 Custom Configurations](#71-custom-configurations)
+    *   [7.2 Programmatic Usage](#72-programmatic-usage)
+*   [**Chapter 8: Interpreting Results and Outputs**](#chapter-8-interpreting-results-and-outputs)
+*   [**Appendix: License**](#appendix-license)
+
+---
+
+## Chapter 1: Getting to Know CRANE
+
+### 1.1 Core Features
+
+*   **🤖 Diverse Machine Learning Algorithms**: Built-in support for 15+ classic algorithms, including `XGBoost`, `LightGBM`, `CatBoost`, `Random Forest`, `Gaussian Process Regression`, as well as `Neural Networks` and `Graph Neural Networks`.
+*   **✨ Automated Feature Engineering**: Automatically generates molecular fingerprints (`Morgan`, `MACCS`) and `RDKit` descriptors from SMILES, and supports embeddings from pre-trained models like `UniMol`.
+*   **🧩 Flexible Data Splitting**: Supports train/test split, train/validation/test split, and k-fold cross-validation to meet various evaluation needs.
+*   **🔎 Hyperparameter Optimization**: Deeply integrated with `Optuna` for fully automated and efficient hyperparameter searching.
+*   **🎯 Bayesian Optimization**: Utilizes trained surrogate models to intelligently explore and find optimal reaction conditions.
+*   **⚙️ End-to-End Workflow**: Provides a complete, automated pipeline from model training to reaction optimization.
+*   **📜 Rich Configuration Options**: A clear and intuitive YAML-based configuration system that offers high flexibility for customization.
+
+### 1.2 Project Structure
 
 ```
 craft/
-├── core/                    # Core framework components
+├── 📂 core/                    # Core Framework Components
 │   ├── run_manager.py      # Experiment management
 │   ├── config_loader.py    # Configuration loading
 │   └── trainer_setup.py    # Model training setup
-├── models/                  # Model implementations
+├── 📂 models/                  # Model Implementations
 │   ├── sklearn_models.py   # Traditional ML models
-│   ├── ann.py              # Neural networks
-│   └── gnn_models.py       # Graph neural networks
-├── optimization/            # Bayesian optimization
+│   ├── ann.py              # Neural Networks
+│   └── gnn_models.py       # Graph Neural Networks
+├── 📂 optimization/            # Bayesian Optimization
 │   ├── optimizer.py        # Main optimization engine
 │   └── space_loader.py     # Search space management
-├── utils/                   # Utility functions
-├── examples/                # Example configurations and scripts
+├── 📂 utils/                   # Utility functions
+├── 📂 examples/                # Example configurations and scripts
 │   └── configs/            # Configuration files
-├── data/                    # Data directory
-└── output/                  # Results and trained models
+├── 📂 data/                    # Data directory
+└── 📂 output/                  # Results and trained models
 ```
 
-## 📋 Quick Start
+---
 
-### 🔧 Environment Setup
+## Chapter 2: Five-Minute Quick Start
 
-CRAFT provides multiple ways to set up your environment. Choose the method that works best for you:
+Let's quickly experience the power of CRANE with a simple example.
 
-#### 🐍 Option 1: Setup with pip (Recommended)
+### 2.1 Prepare Your Data
 
-1. **Clone the repository**:
-```bash
-git clone https://github.com/your-username/craft.git
-cd craft
+First, place your dataset (e.g., `CPA.csv`) in the `data/` directory. The file format should be as follows:
+
+```csv
+# data/CPA.csv
+Catalyst,Imine,Thiol,Output
+O=P1(O)OC2=C(C3=CC=CC=C3)C=C4C(C=CC=C4)=C2C5=C(O1)C(C6=CC=CC=C6)=CC7=C5C=CC=C7,O=C(C1=CC=CC=C1)/N=C/C2=CC=C(C(F)(F)F)C=C2,CCS,0.501758501
+O=P1(O)OC2=C(C3=C(F)C=C(OC)C=C3F)C=C4C(C=CC=C4)=[C@]2[C@]5=C(O1)C(C6=C(F)C=C(OC)C=C6F)=CC7=C5C=CC=C7,O=C(C1=CC=CC=C1)/N=C/C2=CC=C(C(F)(F)F)C=C2,CCS,1.074990526
+...
 ```
 
-2. **Create and activate virtual environment**:
-```bash
-python3 -m venv craft
-source craft/bin/activate  # On Windows: craft\Scripts\activate
+### 2.2 Configure Your Experiment
+
+Next, create a YAML configuration file (or use an existing template) to define your experiment.
+
+```yaml
+# Example config file: config_quick_start.yaml
+
+# ===================================================================
+# 1. Basic Experiment Information
+# ===================================================================
+experiment_name: "CPA_Quick_Start" # Experiment name; all results will be saved to output/CPA_Quick_Start/
+task_type: "regression"            # Task type: 'regression' or 'classification'
+
+# ===================================================================
+# 2. Data Source Configuration
+# ===================================================================
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "data/CPA.csv"
+    smiles_col: ["Catalyst", "Imine", "Thiol"] # Define columns containing SMILES
+    target_col: "Output"                     # Define the target value column
+    precomputed_features: null               # No pre-computed features in this example
+
+# ===================================================================
+# 3. Feature Engineering Strategy
+# ===================================================================
+features:
+  per_smiles_col_generators:
+    Catalyst: 
+      - type: "unimol"       # Generate features using UniMol v2
+        model_version: "v2"
+        model_size: "310m"
+      - type: "morgan"
+        nbits: 2048
+        radius: 2
+    Imine: 
+      - type: "rdkit_descriptors"
+    Thiol: 
+      - type: "rdkit_descriptors"
+  scaling: true # Standardize features
+
+# ===================================================================
+# 4. Training and Evaluation Configuration
+# ===================================================================
+training:
+  models_to_run: # Select models to train
+    - "lgbm"
+    - "catboost"
+    - "xgb"
+  n_trials: 30 # Number of Optuna hyperparameter search trials
+
+split_mode: "train_valid_test" # Dataset splitting mode
+split_config:
+  train_valid_test:
+    valid_size: 0.1
+    test_size: 0.1
+    random_state: 42
+
+evaluation:
+  primary_metric: "r2" # Primary metric for model selection
+  additional_metrics: ["rmse", "mae"]
+
+# ===================================================================
+# 5. Other Settings (can be left as default)
+# ===================================================================
+output:
+  save_predictions: true
+  save_feature_importance: true
+
+computational:
+  n_jobs: -1 # Use all available CPU cores
+  random_state: 42
 ```
 
-3. **Install PyTorch (required for neural networks)**:
-```bash
-# For CPU only:
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+> **💡 Tip:** GNN algorithms are currently in the testing phase, so there's no need to install the CUDA version of PyTorch for now.
 
-# For CUDA 11.8 (adjust based on your CUDA version):
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+### 2.3 Launch the Training
 
-# Install PyTorch Geometric:
-pip install torch_geometric torch_cluster torch_scatter torch_sparse
-```
+Once configured, run the following command in your terminal:
 
-4. **Install other dependencies**:
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-#### 🐍 Option 2: Conda Environment
-
-1. **Clone the repository**:
-```bash
-git clone https://github.com/your-username/craft.git
-cd craft
-```
-
-2. **Install PyTorch first**:
-```bash
-# For CUDA (adjust version as needed):
-conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
-
-# For CPU only:
-conda install pytorch torchvision torchaudio cpuonly -c pytorch
-
-# Install PyTorch Geometric:
-conda install pyg -c pyg
-```
-
-3. **Create conda environment**:
-```bash
-conda env create -f environment.yml
-conda activate craft
-```
-
-#### 🔍 Verify Installation
-
-Test your installation:
-```bash
-python -c "
-import numpy, pandas, sklearn, rdkit, optuna, rich
-print('✅ Core packages imported successfully')
-try:
-    import torch, torch_geometric
-    print('✅ PyTorch and PyTorch Geometric available')
-except ImportError:
-    print('⚠️  PyTorch/PyTorch Geometric not found - please install manually')
-"
-```
-
-### 📋 System Requirements
-
-- **Python**: 3.8+ (3.9 recommended)
-- **Operating System**: Linux, macOS, Windows (WSL recommended)
-- **Memory**: Minimum 8GB RAM (16GB+ recommended for large datasets)
-- **GPU**: Optional (CUDA-compatible GPU for faster neural network training)
-
-### 🧪 Prepare Your Data
-
-Place your reaction data in CSV format in the `data/` directory:
-
-```bash
-mkdir -p data
-# Copy your reaction data CSV file to data/
-```
-
-**Note**: Ensure your virtual environment is activated before running any CRAFT commands:
-```bash
-# For pip installation:
-source craft/bin/activate
-
-# For conda installation:
-conda activate craft
-```
-
-### Basic Usage
-
-#### 1. Quick Training (Recommended for beginners)
 ```bash
 python run_training_only.py --config examples/configs/quick_start.yaml
 ```
 
-#### 2. Full Model Training
-```bash
-# Simple regression training
-python run_training_only.py --config examples/configs/regression_training_simple.yaml
+Congratulations! You have successfully launched a complete machine learning training pipeline. The results, models, and analysis reports will be automatically saved in the `output/CPA_Quick_Start/` directory.
 
-# Classification training
-python run_training_only.py --config examples/configs/classification_training_simple.yaml
+---
 
-# Training with 5-fold cross-validation
-python run_training_only.py --config examples/configs/regression_training_kfold.yaml
-```
+## Chapter 3: Installation and Deployment
 
-#### 3. Bayesian Optimization (using pre-trained model)
+### 3.1 Environment Setup
+
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/flyben97/interncrane.git
+    cd crane
+    ```
+
+2.  **Install dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### 3.2 Script Guide
+
+CRANE provides three core execution scripts to suit different needs:
+
+| Script                     | Function                                                     | Recommended Use Case                                         |
+| :------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| **`run_training_only.py`** | Focuses on model training, evaluation, and comparison.       | **Model development**, algorithm comparison, and for beginners. |
+| **`run_optimization.py`**  | Performs standalone Bayesian optimization with a pre-trained model. | When you have a reliable model and need to perform **condition optimization**. |
+| **`run_full_workflow.py`** | An automated end-to-end pipeline (Train → Optimize).         | For fully automated **production environments** or complete experiments. |
+
+---
+
+## Chapter 4: In-Depth Usage Guide
+
+### 4.1 Detailed Training Modes
+
+Using `run_training_only.py` with different configuration files allows for various training modes.
+
+*   **Basic Regression Training**:
+    ```bash
+    python run_training_only.py --config examples/configs/regression_training_simple.yaml
+    ```
+*   **Basic Classification Training**:
+    ```bash
+    python run_training_only.py --config examples/configs/classification_training_simple.yaml
+    ```
+*   **5-Fold Cross-Validation Training** (for more robust evaluation):
+    ```bash
+    python run_training_only.py --config examples/configs/regression_training_kfold.yaml
+    ```
+
+### 4.2 Bayesian Optimization
+
+If you have already trained and saved a model, you can use `run_optimization.py` to find the optimal reaction conditions.
+
 ```bash
 python run_optimization.py --config examples/configs/bayesian_optimization_only.yaml
 ```
 
-#### 4. End-to-End Workflow (Training + Optimization)
+### 4.3 End-to-End Workflow
+
+For fully automated needs, `run_full_workflow.py` will first train models, then automatically select the best one for Bayesian optimization.
+
 ```bash
 python run_full_workflow.py --config examples/configs/end_to_end_workflow.yaml
 ```
 
-## ⚙️ Environment Configuration Files
+---
 
-CRAFT includes several configuration files to help you set up your environment:
+## Chapter 5: Configuration File Deep Dive
 
-### Environment Files
+The core of CRANE is its powerful YAML configuration system. The `examples/configs/` directory provides a rich set of templates.
 
-| File | Purpose | Use Case |
-|------|---------|----------|
-| `requirements.txt` | Python package dependencies | Standard pip installation |
-| `environment.yml` | Conda environment specification | Conda users, reproducible environments |
+### 5.1 Training Configuration Templates
 
-### Environment Management Tips
+| Config File                           | Description                                                  |
+| :------------------------------------ | :----------------------------------------------------------- |
+| `quick_start.yaml`                    | A minimal setup for quick testing and first-time use.        |
+| `regression_training_simple.yaml`     | Basic configuration for standard regression tasks.           |
+| `regression_training_kfold.yaml`      | Regression training using k-fold cross-validation.           |
+| `regression_training_split.yaml`      | Regression training with a train/validation/test split.      |
+| `classification_training_simple.yaml` | Basic configuration for standard classification tasks.       |
+| `classification_training_kfold.yaml`  | Classification training using k-fold cross-validation.       |
+| `training_with_features.yaml`         | A configuration with extensive feature engineering options.  |
+| `gnn_training.yaml`                   | A configuration specifically for training Graph Neural Networks. |
 
-For smooth environment management:
+### 5.2 Optimization Configuration Templates
 
-- **Virtual Environment**: Always use a dedicated virtual environment named `craft`
-- **PyTorch Installation**: Install PyTorch separately based on your system configuration
-- **Dependency Isolation**: Keep CRAFT dependencies separate from your system Python
-- **Version Compatibility**: Use the recommended package versions for best results
+| Config File                       | Description                                                  |
+| :-------------------------------- | :----------------------------------------------------------- |
+| `bayesian_optimization_only.yaml` | Runs standalone Bayesian optimization, requiring a pre-trained model. |
+| `end_to_end_workflow.yaml`        | Configuration for the complete train-and-optimize pipeline.  |
 
-Quick setup checklist:
-```bash
-# 1. Create environment
-python3 -m venv craft  # or: conda env create -f environment.yml
+---
 
-# 2. Activate environment  
-source craft/bin/activate  # or: conda activate craft
+## Chapter 6: Core Capabilities Analysis
 
-# 3. Install PyTorch (see installation options above)
+### 6.1 Supported Algorithm Library
 
-# 4. Install other dependencies
-pip install -r requirements.txt
-```
+*   **Gradient Boosting**: XGBoost, LightGBM, CatBoost, Histogram-based Gradient Boosting
+*   **Tree Ensembles**: Random Forest, Extra Trees, AdaBoost
+*   **Linear Models**: Ridge, LASSO, ElasticNet, Bayesian Ridge
+*   **Kernel Methods**: Gaussian Process Regression, Kernel Ridge, Support Vector Regression
+*   **Instance-based Methods**: k-Nearest Neighbors
+*   **Neural Networks**: PyTorch-based fully connected Artificial Neural Networks (ANN)
+*   **Graph Neural Networks**: GCN, GAT, MPNN, Graph Transformer, etc.
 
-## 🔧 Configuration Files
+### 6.2 Automated Feature Engineering
 
-CRAFT provides various pre-configured YAML files for different scenarios:
+CRANE automatically generates high-quality molecular features from SMILES strings:
 
-### Training Configurations
+*   **Morgan Fingerprints**: Circular fingerprints with customizable radius and bit length.
+*   **MACCS Keys**: 166-bit structural keys.
+*   **RDKit Descriptors**: 200+ physicochemical properties and topological descriptors.
+*   **Pre-trained Model Embeddings**: Supports pre-computed features from models like `UniMol`, `ChemBerta`, and `Molt5`.
 
-| Configuration | Description | Use Case |
-|--------------|-------------|----------|
-| `quick_start.yaml` | Minimal setup for testing | First-time users, quick experiments |
-| `regression_training_simple.yaml` | Basic regression training | Standard regression tasks |
-| `regression_training_kfold.yaml` | 5-fold cross-validation | Robust model evaluation |
-| `regression_training_split.yaml` | Train/validation/test split | Model development |
-| `classification_training_simple.yaml` | Basic classification | Classification tasks |
-| `classification_training_kfold.yaml` | Classification with CV | Robust classification |
-| `training_with_features.yaml` | Rich feature engineering | Complex molecular datasets |
-| `training_without_features.yaml` | Minimal features | Simple datasets |
-| `gnn_training.yaml` | Graph neural networks | Advanced molecular modeling |
+### 6.3 Data Splitting Strategies
 
-### Optimization Configurations
+1.  **Train/Test Split**: A simple split by a user-defined ratio.
+2.  **Train/Validation/Test Split**: Used for model development and tuning, with customizable ratios.
+3.  **K-Fold Cross-Validation**: Provides a more robust assessment of model performance, with a customizable number of folds.
 
-| Configuration | Description | Use Case |
-|--------------|-------------|----------|
-| `bayesian_optimization_only.yaml` | Standalone optimization | Using pre-trained models |
-| `end_to_end_workflow.yaml` | Complete pipeline | Full automation |
+### 6.4 Data Format Requirements
 
-## 📊 Supported Algorithms
-
-### Traditional Machine Learning
-- **Gradient Boosting**: XGBoost, LightGBM, CatBoost, Histogram Gradient Boosting
-- **Tree Ensembles**: Random Forest, Extra Trees, AdaBoost
-- **Linear Models**: Ridge, LASSO, ElasticNet, Bayesian Ridge
-- **Kernel Methods**: Gaussian Process Regression, Kernel Ridge Regression, SVR
-- **Instance-based**: k-Nearest Neighbors
-- **Linear**: Stochastic Gradient Descent
-
-### Neural Networks
-- **Traditional ANN**: PyTorch-based Artificial Neural Networks
-- **Graph Neural Networks**: GCN, GAT, MPNN, Graph Transformer, Ensemble GNN
-
-## 🧬 Feature Engineering
-
-CRAFT automatically generates molecular features from SMILES strings:
-
-- **Morgan Fingerprints**: Circular fingerprints with customizable radius and bits
-- **MACCS Keys**: 166-bit structural keys
-- **RDKit Descriptors**: 200+ molecular descriptors
-- **Custom Features**: Support for precomputed features
-
-## 📈 Data Splitting Strategies
-
-1. **Train/Test Split**: Simple 80/20 split
-2. **Train/Validation/Test Split**: 70/15/15 split for model development
-3. **K-Fold Cross-Validation**: Robust evaluation with stratified sampling
-
-## 🎯 Bayesian Optimization
-
-Find optimal reaction conditions using trained models:
-
-- **Acquisition Functions**: Expected Improvement (EI), Upper Confidence Bound (UCB), Probability of Improvement (POI)
-- **Search Spaces**: Discrete (catalyst libraries) and continuous (temperature, time) variables
-- **Multi-objective**: Support for multiple optimization targets
-- **Constraints**: Chemical and practical constraints
-
-## 📝 Example Data Format
-
-Your CSV file should contain SMILES strings and target values:
+Your input data should be in CSV format, containing columns with SMILES strings and a target value column. Other numerical or categorical features are also handled automatically.
 
 ```csv
 Catalyst,Reactant1,Reactant2,Temperature,Solvent,yield
@@ -269,116 +320,71 @@ CCc1ccc(P(CCc2ccccc2)CCc2ccccc2)cc1,CC(=O)c1ccccc1,NCc1ccccc1,60,THF,87.5
 ...
 ```
 
-## 🛠️ Advanced Usage
+---
 
-### Custom Configuration
+## Chapter 7: Advanced Techniques and Programmatic API
 
-Create your own YAML configuration file based on the examples:
+### 7.1 Custom Configurations
+
+You can create your own `my_config.yaml` file based on any of the provided templates to meet specific experimental needs.
 
 ```yaml
-experiment_name: "My_Experiment"
+experiment_name: "My_New_Experiment"
 task_type: "regression"
 
 data:
-  source_mode: "single_file"
   single_file_config:
     main_file_path: "data/my_reactions.csv"
     smiles_col: ["Catalyst", "Reactant1", "Reactant2"]
     target_col: "yield"
+    # ...
 
 training:
-  models_to_run:
-    - "xgb"
-    - "lgbm"
-    - "rf"
-  n_trials: 20
-
-# ... additional configuration
+  models_to_run: ["xgb", "lgbm", "rf"]
+  n_trials: 50
+# ... other configurations
 ```
 
-### Programmatic Usage
+### 7.2 Programmatic Usage
+
+Besides the command line, you can also call CRANE's core functions within your Python scripts.
 
 ```python
 from core.run_manager import start_experiment_run
 from core.config_loader import load_config
 
-# Load configuration
+# 1. Load the configuration file
 config = load_config("my_config.yaml")
 
-# Run experiment
-results = start_experiment_run(config)
+# 2. Run the experiment
+results_summary = start_experiment_run(config)
 
-# Access results
-best_model = max(results['results'], key=lambda x: x['test_r2'])
-print(f"Best model: {best_model['model_name']} (R² = {best_model['test_r2']:.4f})")
+# 3. Access and analyze the results
+best_model_info = max(results_summary['results'], key=lambda x: x['test_r2'])
+print(f"Best Model: {best_model_info['model_name']} (R² = {best_model_info['test_r2']:.4f})")
 ```
 
-## 📊 Output and Results
+---
 
-CRAFT generates comprehensive outputs:
+## Chapter 8: Interpreting Results and Outputs
 
-- **Trained Models**: Serialized models in multiple formats
-- **Predictions**: CSV files with predictions and uncertainties
-- **Metrics**: Detailed performance metrics and cross-validation results
-- **Feature Importance**: Analysis of important molecular features
-- **Visualizations**: Learning curves, feature importance plots
-- **Optimization Results**: Top-ranked reaction conditions
+After each experiment, CRANE generates a well-structured folder in the `output/` directory, containing:
 
-## 🔧 Troubleshooting
+*   **📈 Comprehensive Report**: A `_model_comparison.csv` file summarizing the performance metrics of all models.
+*   **📦 Trained Models**: Serialized model files (e.g., `.pkl` or `.pt`), along with the associated scaler and feature names.
+*   **📝 Prediction Results**: CSV files with predictions for the validation and test sets.
+*   **📊 Visualizations**: Feature importance plots, learning curves, and more.
+*   **🎯 Optimization Results**: The best conditions found by Bayesian optimization and their predicted values.
+*   **⚙️ Experiment Records**: A saved copy of the hyperparameters and configuration file to ensure reproducibility.
 
-### Common Installation Issues
+---
 
-#### RDKit Installation Problems
-```bash
-# If RDKit installation fails with pip, try conda:
-conda install -c conda-forge rdkit
-
-# Or use the conda environment setup:
-./setup.sh conda
-```
-
-#### PyTorch Geometric Issues
-```bash
-# For CUDA compatibility issues:
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-
-# For CPU-only installation:
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-```
-
-#### Memory Issues
-- **Large datasets**: Consider using data sampling or batch processing
-- **GPU memory**: Reduce batch size in neural network training
-- **System memory**: Close other applications or use a machine with more RAM
-
-#### Permission Issues
-```bash
-# Fix virtual environment permissions:
-sudo chown -R $USER:$USER craft/
-```
-
-### Environment Verification
-
-If you encounter import errors, verify your environment:
-
-```bash
-# Check Python version
-python --version
-
-# Check installed packages
-pip list | grep -E "(torch|rdkit|optuna|sklearn|pandas)"
-
-# Test core imports
-python -c "
-try:
-    import torch, rdkit, optuna, sklearn, pandas, numpy
-    print('✅ All core packages available')
-except ImportError as e:
-    print(f'❌ Missing package: {e}')
-"
-```
-
-## 📄 License
+## Appendix: License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+---
+
+<div align="center">
+  <strong>Happy modeling on your chemistry tasks! 🧪✨</strong>
+</div>

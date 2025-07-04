@@ -2,7 +2,7 @@
 """
 Advanced Graph Construction Demo Script
 
-This script demonstrates the advanced graph construction features of the CRAFT framework,
+This script demonstrates the advanced graph construction features of the INTERNCRANE framework,
 including feature concatenation, reaction graphs, and custom feature fusion.
 """
 
@@ -342,8 +342,8 @@ def demo_use_cases():
 def main():
     """Run the complete demonstration"""
     
-    console.print(Panel.fit("🚀 CRAFT Advanced Graph Construction Demo", style="bold blue"))
-    console.print("\nThis demo showcases the advanced graph construction capabilities of CRAFT framework.")
+    console.print(Panel.fit("🚀 INTERNCRANE Advanced Graph Construction Demo", style="bold blue"))
+    console.print("\nThis demo showcases the advanced graph construction capabilities of INTERNCRANE framework.")
     console.print("We'll demonstrate 4 different modes for handling multiple SMILES inputs.\n")
     
     # Check if demo is available

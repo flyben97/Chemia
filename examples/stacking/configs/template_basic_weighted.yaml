@@ -1,0 +1,18 @@
+evaluation:
+  auto_evaluate: true
+  use_test_set: true
+save:
+  save_stacker: true
+stacking:
+  experiment_dir: output/my_experiment
+  method: weighted_average
+  models:
+  - enabled: true
+    name: xgb
+    weight: 0.4
+  - enabled: true
+    name: lgbm
+    weight: 0.3
+  - enabled: true
+    name: catboost
+    weight: 0.3

@@ -15,9 +15,9 @@ data:
   single_file_config:
     main_file_path: "data/agent5_IB.csv"
     smiles_col: ["SMILES", "Solvent_1_SMILES", "Solvent_2_SMILES"]
-    target_col: "Left_Time"  # The target column to predict
+    target_col: "Right_Time"  # The target column to predict
     precomputed_features:
-      feature_columns: "3:10"  # Include Temp column as feature (from column 5)
+      feature_columns: "3:11"  # Include Temp column as feature (from column 5)
 
 # --- Training Configuration ---
 training:
@@ -54,7 +54,7 @@ training:
     # - "sgd"           # Stochastic Gradient Descent (NEW)
   
   # Hyperparameter optimization settings
-  n_trials: 100              # Increased for better optimization
+  n_trials: 30              # Increased for better optimization
   quiet_optuna: true        # Suppress Optuna output
   
   # Optuna optimization strategy
@@ -93,8 +93,8 @@ features:
 split_mode: "train_valid_test"
 split_config:
   train_valid_test:
-    test_size: 0.05
     valid_size: 0.05
+    test_size: 0.05
     random_state: 0
 
 #  --- Cross-Validation Strategy ---

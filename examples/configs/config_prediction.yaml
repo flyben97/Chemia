@@ -1,0 +1,100 @@
+# ===================================================================
+#      CRAFT - Model Prediction Configuration v1.0
+# ===================================================================
+# This configuration file is designed for using trained models to make
+# predictions on new data. It supports both experiment directory mode
+# and direct file paths mode for maximum flexibility.
+# ===================================================================
+
+# --- Prediction Mode Configuration ---
+prediction_mode: "experiment_directory"  # Options: "experiment_directory" or "direct_files"
+
+# --- Experiment Directory Mode Configuration ---
+# Use this when you have a complete experiment run directory
+experiment_directory_mode:
+  run_directory: "output/your_experiment_run_directory_here"  # Path to completed experiment run
+  model_name: "xgb"  # Model name to use for prediction (e.g., "xgb", "lgbm", "catboost", "rf", etc.)
+
+# --- Direct Files Mode Configuration ---
+# Use this when you want to specify model files directly
+direct_files_mode:
+  model_path: "path/to/your/model.json"  # Direct path to model file
+  config_path: "path/to/run_config.json"  # Path to training configuration
+  scaler_path: "path/to/scaler.joblib"  # Path to feature scaler (optional)
+  label_encoder_path: "path/to/label_encoder.joblib"  # Path to label encoder (for classification only)
+
+# --- Input/Output Configuration ---
+data:
+  input_file: "data/new_data_for_prediction.csv"  # Path to input CSV file
+  output_file: "predictions/prediction_results.csv"  # Path to save prediction results
+  
+  # Optional: Specify if input data has different column names
+  column_mapping:
+    # Map input columns to expected column names
+    # Example: 
+    # "input_smiles_col": "SMILES"
+    # "input_solvent_col": "Solvent_1_SMILES"
+
+# --- Prediction Settings ---
+prediction:
+  batch_size: 1000  # Process data in batches (useful for large datasets)
+  save_probabilities: true  # Save class probabilities for classification tasks
+  save_feature_importance: false  # Save feature importance if model supports it
+  confidence_threshold: null  # Optional confidence threshold for classification
+  
+  # Output format options
+  output_format:
+    include_input_data: true  # Include original input columns in output
+    add_prediction_metadata: true  # Add prediction timestamp and model info
+    precision: 4  # Decimal precision for predictions
+
+# --- Logging and Debugging ---
+logging:
+  verbose: false  # Show detailed feature generation logs
+  save_log: true  # Save prediction log file
+  log_directory: "logs/predictions"  # Directory for prediction logs
+  
+# --- Advanced Options ---
+advanced:
+  # Memory management
+  memory_efficient: true  # Use memory-efficient processing for large datasets
+  chunk_size: 5000  # Process large files in chunks
+  
+  # Error handling
+  skip_invalid_rows: true  # Skip rows with invalid SMILES instead of failing
+  error_log_file: "prediction_errors.log"  # Log file for errors
+  
+  # Feature processing
+  regenerate_features: false  # Force regeneration of features (slower but more reliable)
+  cache_features: true  # Cache generated features for faster repeated predictions
+  
+  # Quality control
+  validate_predictions: true  # Perform basic validation on predictions
+  outlier_detection: false  # Flag potential outlier predictions
+  
+# --- Multi-model Ensemble (Optional) ---
+# Uncomment and configure this section to use multiple models for ensemble predictions
+# ensemble:
+#   enabled: false
+#   models:
+#     - name: "xgb"
+#       weight: 0.4
+#     - name: "lgbm" 
+#       weight: 0.3
+#     - name: "catboost"
+#       weight: 0.3
+#   aggregation_method: "weighted_average"  # Options: "weighted_average", "majority_vote", "median"
+
+# --- Notification Settings (Optional) ---
+# notifications:
+#   email:
+#     enabled: false
+#     smtp_server: "smtp.gmail.com"
+#     port: 587
+#     username: "your_email@gmail.com"
+#     password: "your_app_password"
+#     recipients: ["recipient@gmail.com"]
+#   
+#   slack:
+#     enabled: false
+#     webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL" 

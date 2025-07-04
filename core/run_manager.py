@@ -284,7 +284,7 @@ def start_experiment_run(config):
         optuna.logging.set_verbosity(optuna.logging.WARNING)
     
     run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    exp_name = f"{config.get('experiment_name', 'CRAFT_run')}_{config.get('task_type', 'task')}_{run_timestamp}"
+    exp_name = f"{config.get('experiment_name', 'INTERNCRANE_run')}_{config.get('task_type', 'task')}_{run_timestamp}"
     run_dir, models_dir, data_splits_dir = ensure_experiment_directories('output', exp_name, console)
     
     save_config(config, run_dir, console=console)

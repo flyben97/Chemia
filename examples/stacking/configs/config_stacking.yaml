@@ -1,0 +1,111 @@
+# ===================================================================
+#      CRAFT - 模型堆叠 (Model Stacking) 配置文件
+# ===================================================================
+# 这个配置文件用于定义如何将多个训练好的CRAFT模型进行堆叠集成
+# 支持多种堆叠方法：简单平均、加权平均、元学习器等
+# ===================================================================
+
+# 模型堆叠配置
+stacking:
+  # 实验目录路径（包含训练好的模型）
+  experiment_dir: "output/my_experiment"
+  
+  # 堆叠方法选择
+  # 可选: "simple_average", "weighted_average", "ridge", "rf", "logistic"
+  method: "weighted_average"
+  
+  # 参与堆叠的模型列表
+  models:
+    - name: "xgb"           # XGBoost模型
+      weight: 0.35          # 权重（仅在weighted_average方法中使用）
+      enabled: true         # 是否启用此模型
+      
+    - name: "lgbm"          # LightGBM模型
+      weight: 0.30
+      enabled: true
+      
+    - name: "catboost"      # CatBoost模型
+      weight: 0.25
+      enabled: true
+      
+    - name: "rf"            # 随机森林模型
+      weight: 0.10
+      enabled: true
+      
+    - name: "ann"           # 神经网络模型
+      weight: 0.0           # 权重为0，但保留配置
+      enabled: false        # 临时禁用
+  
+  # 元模型配置（用于高级堆叠方法）
+  meta_model:
+    auto_train: true        # 是否自动训练元模型
+    
+    # 验证数据配置
+    validation:
+      auto_load: true       # 自动从实验目录加载验证数据
+      size: 200             # 验证数据大小限制
+      
+    # 元模型参数（可选，使用默认值即可）
+    # parameters:
+    #   ridge:
+    #     alpha: 1.0
+    #   rf:
+    #     n_estimators: 100
+    #     random_state: 42
+
+# 预测配置
+prediction:
+  # 批量预测设置
+  batch_size: 1000          # 批量预测大小
+  
+  # 输出配置
+  output:
+    save_predictions: true  # 保存预测结果
+    save_probabilities: true # 保存概率预测（分类任务）
+    save_base_predictions: true # 保存基础模型预测
+    format: "csv"           # 输出格式: "csv", "json", "pickle"
+
+# 评估配置
+evaluation:
+  # 自动评估设置
+  auto_evaluate: true       # 是否自动评估堆叠模型
+  use_test_set: true        # 使用测试集进行评估（否则使用验证集）
+  
+  # 评估指标
+  metrics:
+    regression:
+      - "r2"
+      - "rmse"
+      - "mae"
+    classification:
+      - "accuracy"
+      - "log_loss"
+  
+  # 比较分析
+  compare_with_base: true   # 与基础模型性能进行比较
+
+# 保存配置
+save:
+  # 堆叠模型保存
+  save_stacker: true        # 保存堆叠器
+  save_path: "output/stacked_models/ensemble_model.pkl"
+  
+  # 结果保存
+  results_dir: "output/stacking_results"
+  save_evaluation: true     # 保存评估结果
+  save_config_copy: true    # 保存配置文件副本
+
+# 高级选项
+advanced:
+  # 性能优化
+  n_jobs: -1                # 并行处理数量
+  quiet_mode: false         # 静默模式
+  
+  # 实验记录
+  experiment_name: "stacking_ensemble_v1"
+  description: "XGBoost + LightGBM + CatBoost + RF 加权平均集成"
+  
+  # 调试选项
+  debug:
+    verbose: true           # 详细输出
+    save_intermediate: false # 保存中间结果 

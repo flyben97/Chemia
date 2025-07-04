@@ -1,0 +1,38 @@
+# ===================================================================
+#      CRAFT - 简化版模型堆叠配置文件
+# ===================================================================
+# 这是一个简化的配置文件，包含最常用的堆叠设置
+# 适合日常使用和快速配置
+# ===================================================================
+
+# 基本堆叠配置
+stacking:
+  # 实验目录（包含训练好的模型）
+  experiment_dir: "output/my_experiment"
+  
+  # 堆叠方法："weighted_average" | "simple_average" | "ridge"
+  method: "weighted_average"
+  
+  # 参与堆叠的模型
+  models:
+    - name: "xgb"
+      weight: 0.4
+      enabled: true
+      
+    - name: "lgbm"
+      weight: 0.3
+      enabled: true
+      
+    - name: "catboost"
+      weight: 0.3
+      enabled: true
+
+# 自动评估
+evaluation:
+  auto_evaluate: true
+  use_test_set: true
+
+# 保存设置
+save:
+  save_stacker: true
+  save_path: "output/ensemble_model.pkl" 

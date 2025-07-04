@@ -1,0 +1,15 @@
+evaluation:
+  auto_evaluate: true
+  use_test_set: true
+save:
+  save_stacker: true
+stacking:
+  experiment_dir: output/my_experiment
+  method: simple_average
+  models:
+  - enabled: true
+    name: xgb
+  - enabled: true
+    name: lgbm
+  - enabled: true
+    name: catboost

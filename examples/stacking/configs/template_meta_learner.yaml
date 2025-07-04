@@ -1,0 +1,24 @@
+evaluation:
+  auto_evaluate: true
+  compare_with_base: true
+  use_test_set: true
+save:
+  save_evaluation: true
+  save_stacker: true
+stacking:
+  experiment_dir: output/my_experiment
+  meta_model:
+    auto_train: true
+    validation:
+      auto_load: true
+      size: 200
+  method: ridge
+  models:
+  - enabled: true
+    name: xgb
+  - enabled: true
+    name: lgbm
+  - enabled: true
+    name: catboost
+  - enabled: true
+    name: rf

@@ -1,0 +1,42 @@
+# CRAFT 模型堆叠配置 - Split-Aware模式示例
+# 这个配置文件展示如何使用split_aware功能，让堆叠验证数据与原实验的数据拆分策略保持一致
+
+stacking:
+  experiment_dir: output/S04_agent_5_a_regression_20250702_201036
+  method: weighted_average  # 使用加权平均堆叠
+  models:
+    - name: xgb
+      weight: 0.8  # XGBoost性能更好，给更高权重
+      enabled: true
+    - name: catboost
+      weight: 0.2  # CatBoost性能较差，给较低权重
+      enabled: true
+  
+  # 元模型配置（对于weighted_average不是必需的，但可以配置用于对比测试）
+  meta_model:
+    auto_train: false  # 加权平均不需要训练元模型
+    validation:
+      auto_load: true
+      size: 200
+      split_aware: true  # 🎯 关键功能：智能数据选择
+                        # ✅ 如果原实验是train_valid_test模式 → 使用validation set进行堆叠验证
+                        # ✅ 如果原实验是cross_validation模式 → 使用test set进行堆叠验证
+                        # 🎯 确保堆叠验证与原实验的数据拆分策略一致！
+
+# 评估配置
+evaluation:
+  auto_evaluate: true
+  compare_with_base: true
+  use_test_set: true
+
+# 保存配置
+save:
+  save_stacker: true
+  save_evaluation: true
+  save_path: output/weighted_ensemble_split_aware.pkl
+
+# 使用说明：
+# 1. split_aware=true时，系统会自动检测原实验的split_mode
+# 2. train_valid_test模式：优先使用validation set，这样堆叠验证不会污染test set
+# 3. cross_validation模式：使用test set，因为cross_validation通常没有专门的validation set
+# 4. 这样可以确保堆叠模型的验证策略与原实验保持一致，避免数据泄露 

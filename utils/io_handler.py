@@ -19,13 +19,13 @@ console = Console(width=120, highlight=False)
 default_console = Console(width=120)
 
 # --- 横幅 ---
-CRAFT_BANNER = r"""
-   ██████╗ ██████╗   █████╗ ███████╗████████╗
-  ██╔════╝ ██╔══██╗ ██╔══██╗██╔════╝╚══██╔══╝
-  ██║      ██████╔╝███████║█████╗     ██║   
-  ██║      ██╔══██╗██╔══██║██╔══╝     ██║   
-  ╚██████╗ ██║  ██║██║  ██║██║        ██║   
-   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝        ╚═╝   
+CRANE_BANNER = r"""
+   ██████╗██████╗  █████╗ ███╗   ██╗███████╗
+  ██╔════╝██╔══██╗██╔══██╗████╗  ██║██╔════╝
+  ██║     ██████╔╝███████║██╔██╗ ██║█████╗  
+  ██║     ██╔══██╗██╔══██║██║╚██╗██║██╔══╝  
+  ╚██████╗██║  ██║██║  ██║██║ ╚████║███████╗
+   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝
 """
 
 # --- 内部辅助函数 ---
@@ -196,7 +196,7 @@ def load_config_from_run(run_dir: str, console=None) -> dict:
     config_path = os.path.join(run_dir, "run_config.json")
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Configuration file 'run_config.json' not found in {run_dir}. "
-                              "This experiment may be from an older version of CRAFT.")
+                              "This experiment may be from an older version of CRANE.")
     with open(config_path, 'r', encoding='utf-8') as f:
         config = json.load(f)
     return config
@@ -243,8 +243,8 @@ def log_prediction_summary(log_path, run_dir, model_name, input_file, output_fil
     
     # --- MODIFICATION: Added version number and cleaned up format ---
     log_content = [
-        CRAFT_BANNER,
-        "CRAFT - v1.4.0 - Prediction Run Log\n",
+        CRANE_BANNER,
+        "CRANE - v1.4.0 - Prediction Run Log\n",
         "="*88,
         f"{'Prediction Time:':<28} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         f"{'Total Duration:':<28} {duration:.2f} seconds",
@@ -293,7 +293,7 @@ def log_results(model_name_short, best_params, best_score, metrics_dict,
     log_path = os.path.join(model_specific_output_dir, f"{model_name_short}_results.log") 
     main_metric_name = "R²" if task_type == 'regression' else "F1 (Weighted)"
     if task_type == 'binary_classification': main_metric_name = "F1 (Binary)"
-    log_content = [CRAFT_BANNER, "CRAFT - v1.3.0\n", "="*88]
+    log_content = [CRANE_BANNER, "CRANE - v1.3.0\n", "="*88]
     log_content.extend([f"{'Log Generated:':<25} {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
                         f"{'Experiment Run Name:':<25} {experiment_run_name}",
                         f"{'Run Configuration:':<25} {textwrap.fill(_format_config_to_str(config or {}), 86, initial_indent=' '*27, subsequent_indent=' '*27).strip()}",
@@ -335,7 +335,7 @@ def log_results(model_name_short, best_params, best_score, metrics_dict,
             log_content.append(f"| {name:<25} | {train_s:^15} | {val_s:^15} | {test_s:^15} |")
     log_content.extend([separator, "\n" + "="*88 + "\n"])
     if model_runtime_seconds: log_content.append(f"Model-Specific Runtime (HPO, Fit, Eval): {model_runtime_seconds:.2f} seconds")
-    log_content.append("\n*** End of CRAFT Log for this Model ***")
+    log_content.append("\n*** End of CRANE Log for this Model ***")
     with open(log_path, 'w', encoding='utf-8') as f: f.write("\n".join(log_content))
     console.print(f"  [green]✓ Logged results[/green] for {model_name_short} ({task_type}) to [dim]{log_path}[/dim]")
 
@@ -344,7 +344,7 @@ def log_experiment_summary(run_base_dir, experiment_run_name, config, total_dura
     summary_log_path = os.path.join(run_base_dir, "_experiment_summary.log")
     days, rem = divmod(total_duration_seconds, 86400); hours, rem = divmod(rem, 3600); mins, secs = divmod(rem, 60)
     duration_str = f"{int(days)}d {int(hours)}h {int(mins)}m {int(secs)}s"
-    log_content = [CRAFT_BANNER, "CRAFT - v1.3.0\n", "=" * 88, "  EXPERIMENT RUN SUMMARY", "=" * 88]
+    log_content = [CRANE_BANNER, "CRANE - v1.3.0\n", "=" * 88, "  EXPERIMENT RUN SUMMARY", "=" * 88]
     log_content.extend([f"{'Experiment Name:':<25} {experiment_run_name}", f"{'Run Started:':<25} {datetime.fromtimestamp(start_timestamp).strftime('%Y-%m-%d %H:%M:%S')}", f"{'Total Runtime:':<25} {duration_str}"])
     if config and isinstance(config, dict):
         log_content.append(f"{'Run Configuration:':<25} {textwrap.fill(_format_config_to_str(config), 86, initial_indent=' ' * 27, subsequent_indent=' ' * 27).strip()}")
@@ -382,7 +382,7 @@ def log_experiment_summary(run_base_dir, experiment_run_name, config, total_dura
     # Add simple acknowledgment to main experiment log only
     log_content.extend([
         "\n" + "="*88,
-        "ACKNOWLEDGMENTS: Wuhan University • Tsinghua University • SIOC, CAS • UCAS",
+        "ACKNOWLEDGMENTS: Wuhan University • Shanghai AI Lab • Tsinghua University • SIOC, CAS • UCAS",
         "Contributors: Gao, Ben • Wan, Haiyuan • Huang, Huaihai",
         "="*88
     ])

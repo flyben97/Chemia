@@ -1,0 +1,20 @@
+# 加权平均堆叠配置
+stacking:
+  experiment_dir: "output/S04_agent_5_a_regression_20250702_201036"
+  method: "weighted_average"
+  models:
+    - name: "xgb"
+      weight: 0.8        # 给最佳模型更高权重
+      enabled: true
+    - name: "catboost"
+      weight: 0.2        # 给较差模型较低权重
+      enabled: true
+
+evaluation:
+  auto_evaluate: true
+  use_test_set: true
+
+save:
+  save_stacker: true
+  save_path: "output/weighted_ensemble_model.pkl"
+  results_dir: "output/weighted_stacking_results"
