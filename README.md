@@ -1,6 +1,6 @@
 <div align="center">
   <img src="images/crane.png" alt="CRANE Logo" width="200"/>
-  <h1>CRANE</h1>
+  <h1>INTERNCRANE</h1>
   <p><strong>A Comprehensive Machine Learning Framework for Predicting and Optimizing Chemical Properties and Reactions</strong></p>
   <p>
     <a href="https://img.shields.io/badge/python-3.8+-blue.svg"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
