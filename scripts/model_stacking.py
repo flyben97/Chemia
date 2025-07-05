@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-INTERNCRANE Model Stacking Module
+CHEMIA Model Stacking Module
 
 This module provides the core model stacking class ModelStacker, supporting multiple stacking strategies:
 1. Simple Average
@@ -35,12 +35,12 @@ project_root = os.path.dirname(os.path.abspath(__file__))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from prediction_api import load_model, INTERNCRANEPredictor
+from prediction_api import load_model, CHEMIAPredictor
 from data_loader import create_validation_dataset
 
 class ModelStacker:
     """
-    INTERNCRANE Model Stacker Core Class
+    CHEMIA Model Stacker Core Class
     
     Supports multiple stacking strategies:
     1. Simple Average
@@ -48,7 +48,7 @@ class ModelStacker:
     3. Learned Meta-Model
     """
     
-    def __init__(self, experiment_dir: Optional[str] = None, models: Optional[List[INTERNCRANEPredictor]] = None):
+    def __init__(self, experiment_dir: Optional[str] = None, models: Optional[List[CHEMIAPredictor]] = None):
         """Initialize model stacker"""
         self.experiment_dir = experiment_dir
         self.base_models = {}  # Base models dictionary
@@ -98,7 +98,7 @@ class ModelStacker:
         except Exception as e:
             print(f"❌ Failed to add model {model_name}: {e}")
     
-    def add_model_instance(self, model_name: str, predictor: INTERNCRANEPredictor, weight: float = 1.0):
+    def add_model_instance(self, model_name: str, predictor: CHEMIAPredictor, weight: float = 1.0):
         """Add model instance directly"""
         self.base_models[model_name] = predictor
         self.model_weights[model_name] = weight
@@ -484,7 +484,7 @@ def load_stacking_config_from_yaml(config_path: str) -> ModelStacker:
 
 # Example usage
 if __name__ == "__main__":
-    print("CRAFT Model Stacking Core Module")
+    print("CHEMIA Model Stacking Core Module")
     print("-" * 50)
     print("Main Features:")
     print("1. ModelStacker - Core stacking class")

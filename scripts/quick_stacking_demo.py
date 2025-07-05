@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-INTERNCRANE Quick Stacking Demo - Can be run directly
+CHEMIA Quick Stacking Demo - Can be run directly
 
 This script can be run directly, it will automatically use preset configurations for stacking demonstration.
 
@@ -22,7 +22,7 @@ if project_root not in sys.path:
 
 def run_quick_stacking_demo():
     """Run stacking demo directly"""
-    print("🚀 INTERNCRANE Quick Stacking Demo")
+    print("🚀 CHEMIA Quick Stacking Demo")
     print("=" * 50)
     
     # Check if there's a config_stacking_meta.yaml file

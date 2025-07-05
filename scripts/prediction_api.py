@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-INTERNCRANE Prediction API
+CHEMIA Prediction API
 
-This module provides simple function call interfaces to use trained INTERNCRANE models.
+This module provides simple function call interfaces to use trained CHEMIA models.
 Can be directly imported and used in other Python code without command line or configuration files.
 
 Usage example:
@@ -46,8 +46,8 @@ from utils.io_handler import (
 )
 from core.run_manager import process_dataframe
 
-class INTERNCRANEPredictor:
-    """INTERNCRANE model predictor class"""
+class CHEMIAPredictor:
+    """CHEMIA model predictor class"""
     
     def __init__(self, model, training_config, scaler=None, label_encoder=None):
         self.model = model
@@ -190,16 +190,16 @@ class INTERNCRANEPredictor:
         else:
             raise ValueError(f"Expected single prediction value, but got {len(predictions)}")
 
-def load_model(experiment_dir: str, model_name: str) -> INTERNCRANEPredictor:
+def load_model(experiment_dir: str, model_name: str) -> CHEMIAPredictor:
     """
-    Load trained INTERNCRANE model
+    Load trained CHEMIA model
     
     Args:
         experiment_dir: Experiment directory path
         model_name: Model name (e.g., 'xgb', 'lgbm', 'catboost')
     
     Returns:
-        INTERNCRANEPredictor: Predictor object
+        CHEMIAPredictor: Predictor object
     
     Raises:
         FileNotFoundError: If model files cannot be found
@@ -243,11 +243,11 @@ def load_model(experiment_dir: str, model_name: str) -> INTERNCRANEPredictor:
         if os.path.exists(encoder_path):
             label_encoder = load_label_encoder_from_path(encoder_path)
     
-    return INTERNCRANEPredictor(model, training_config, scaler, label_encoder)
+    return CHEMIAPredictor(model, training_config, scaler, label_encoder)
 
 def load_model_from_files(model_path: str, config_path: str, 
                          scaler_path: Optional[str] = None, 
-                         encoder_path: Optional[str] = None) -> INTERNCRANEPredictor:
+                         encoder_path: Optional[str] = None) -> CHEMIAPredictor:
     """
     Load model from direct file paths
     
@@ -258,7 +258,7 @@ def load_model_from_files(model_path: str, config_path: str,
         encoder_path: Label encoder file path (optional)
     
     Returns:
-        INTERNCRANEPredictor: Predictor object
+        CHEMIAPredictor: Predictor object
     """
     # Load configuration
     training_config = load_config_from_path(config_path)
@@ -276,15 +276,15 @@ def load_model_from_files(model_path: str, config_path: str,
     if encoder_path and os.path.exists(encoder_path):
         label_encoder = load_label_encoder_from_path(encoder_path)
     
-    return INTERNCRANEPredictor(model, training_config, scaler, label_encoder)
+    return CHEMIAPredictor(model, training_config, scaler, label_encoder)
 
 # Convenience functions
-def predict(predictor: INTERNCRANEPredictor, data: Union[Dict, List[Dict], pd.DataFrame]) -> Dict[str, Any]:
+def predict(predictor: CHEMIAPredictor, data: Union[Dict, List[Dict], pd.DataFrame]) -> Dict[str, Any]:
     """
     Use predictor to make predictions
     
     Args:
-        predictor: INTERNCRANEPredictor object
+        predictor: CHEMIAPredictor object
         data: Input data
     
     Returns:
@@ -292,12 +292,12 @@ def predict(predictor: INTERNCRANEPredictor, data: Union[Dict, List[Dict], pd.Da
     """
     return predictor.predict(data)
 
-def predict_single(predictor: INTERNCRANEPredictor, sample: Dict[str, Any]) -> Union[float, str, int]:
+def predict_single(predictor: CHEMIAPredictor, sample: Dict[str, Any]) -> Union[float, str, int]:
     """
     Predict single sample
     
     Args:
-        predictor: INTERNCRANEPredictor object
+        predictor: CHEMIAPredictor object
         sample: Feature dictionary for single sample
     
     Returns:
@@ -323,7 +323,7 @@ def quick_predict(experiment_dir: str, model_name: str, data: Union[Dict, List[D
 # Example usage
 if __name__ == "__main__":
     # Example: How to use this API
-    print("INTERNCRANE Prediction API Example Usage")
+    print("CHEMIA Prediction API Example Usage")
     print("-" * 50)
     
     # 1. Load model

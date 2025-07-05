@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-INTERNCRANE 快速预测脚本
+CHEMIA Quick Prediction Script
 
-这是一个简化的预测脚本，提供最基本的模型预测功能。
-适合快速预测任务，无需复杂的配置。
+This is a simplified prediction script that provides the most basic model prediction functionality.
+Suitable for quick prediction tasks without complex configuration.
 
-使用示例：
+Usage example:
     python quick_predict.py /path/to/experiment_dir xgb input.csv output.csv
 """
 
@@ -14,7 +14,7 @@ import sys
 import argparse
 from pathlib import Path
 
-# 添加项目根目录到路径
+# Add project root directory to path
 project_root = os.path.dirname(os.path.abspath(__file__))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -23,34 +23,34 @@ from run_prediction_standalone import PredictionRunner, console
 
 def quick_predict(experiment_dir: str, model_name: str, input_file: str, output_file: str, verbose: bool = False):
     """
-    快速预测函数
+    Quick prediction function
     
     Args:
-        experiment_dir: 训练实验目录路径
-        model_name: 模型名称 (如 xgb, lgbm, catboost)
-        input_file: 输入CSV文件路径
-        output_file: 输出CSV文件路径
-        verbose: 是否显示详细信息
+        experiment_dir: Training experiment directory path
+        model_name: Model name (e.g., xgb, lgbm, catboost)
+        input_file: Input CSV file path
+        output_file: Output CSV file path
+        verbose: Whether to show detailed information
     """
     
-    console.print(f"[bold blue]🚀 INTERNCRANE 快速预测[/bold blue]")
-    console.print(f"[cyan]实验目录:[/cyan] {experiment_dir}")
-    console.print(f"[cyan]模型名称:[/cyan] {model_name}")
-    console.print(f"[cyan]输入文件:[/cyan] {input_file}")
-    console.print(f"[cyan]输出文件:[/cyan] {output_file}")
+    console.print(f"[bold blue]🚀 CHEMIA Quick Prediction[/bold blue]")
+    console.print(f"[cyan]Experiment directory:[/cyan] {experiment_dir}")
+    console.print(f"[cyan]Model name:[/cyan] {model_name}")
+    console.print(f"[cyan]Input file:[/cyan] {input_file}")
+    console.print(f"[cyan]Output file:[/cyan] {output_file}")
     console.print("-" * 60)
     
-    # 检查输入文件是否存在
+    # Check if input file exists
     if not os.path.exists(input_file):
-        console.print(f"[bold red]❌ 输入文件不存在:[/bold red] {input_file}")
+        console.print(f"[bold red]❌ Input file does not exist:[/bold red] {input_file}")
         return False
     
-    # 检查实验目录是否存在
+    # Check if experiment directory exists
     if not os.path.exists(experiment_dir):
-        console.print(f"[bold red]❌ 实验目录不存在:[/bold red] {experiment_dir}")
+        console.print(f"[bold red]❌ Experiment directory does not exist:[/bold red] {experiment_dir}")
         return False
     
-    # 创建配置
+    # Create configuration
     config = {
         'prediction_mode': 'experiment_directory',
         'experiment_directory_mode': {
@@ -78,82 +78,82 @@ def quick_predict(experiment_dir: str, model_name: str, input_file: str, output_
         }
     }
     
-    # 创建预测运行器并执行
+    # Create prediction runner and execute
     runner = PredictionRunner(config)
     success = runner.run_prediction_pipeline()
     
     if success:
-        console.print(f"\n[bold green]✅ 预测完成![/bold green]")
-        console.print(f"[green]结果已保存到:[/green] {output_file}")
+        console.print(f"\n[bold green]✅ Prediction completed![/bold green]")
+        console.print(f"[green]Results saved to:[/green] {output_file}")
         
-        # 显示简单的结果统计
+        # Show simple result statistics
         try:
             import pandas as pd
             result_df = pd.read_csv(output_file)
-            console.print(f"[cyan]预测样本数:[/cyan] {len(result_df)}")
+            console.print(f"[cyan]Number of predicted samples:[/cyan] {len(result_df)}")
             
-            # 如果是回归任务，显示预测值范围
+            # For regression tasks, show prediction value range
             if 'prediction' in result_df.columns:
                 pred_min = result_df['prediction'].min()
                 pred_max = result_df['prediction'].max()
                 pred_mean = result_df['prediction'].mean()
-                console.print(f"[cyan]预测值范围:[/cyan] {pred_min:.4f} ~ {pred_max:.4f} (平均: {pred_mean:.4f})")
+                console.print(f"[cyan]Prediction range:[/cyan] {pred_min:.4f} ~ {pred_max:.4f} (mean: {pred_mean:.4f})")
             
-            # 如果是分类任务，显示类别分布
+            # For classification tasks, show class distribution
             elif 'prediction_label' in result_df.columns:
                 class_counts = result_df['prediction_label'].value_counts()
-                console.print(f"[cyan]类别分布:[/cyan]")
+                console.print(f"[cyan]Class distribution:[/cyan]")
                 for class_name, count in class_counts.items():
-                    console.print(f"  - {class_name}: {count} 个样本")
+                    console.print(f"  - {class_name}: {count} samples")
                     
         except Exception as e:
-            console.print(f"[yellow]注意: 无法读取结果统计: {e}[/yellow]")
+            console.print(f"[yellow]Note: Unable to read result statistics: {e}[/yellow]")
     else:
-        console.print(f"\n[bold red]❌ 预测失败![/bold red]")
+        console.print(f"\n[bold red]❌ Prediction failed![/bold red]")
         return False
     
     return True
 
 def main():
     parser = argparse.ArgumentParser(
-        description="INTERNCRANE 快速预测工具",
+        description="CHEMIA Quick Prediction Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-使用示例:
-  # 基本用法
+Usage examples:
+  # Basic usage
   python quick_predict.py output/my_experiment xgb input.csv output.csv
   
-  # 显示详细信息
+  # Show detailed information
   python quick_predict.py output/my_experiment xgb input.csv output.csv --verbose
   
-  # 使用其他模型
+  # Use other models
   python quick_predict.py output/my_experiment lgbm input.csv output.csv
   python quick_predict.py output/my_experiment catboost input.csv output.csv
 
-支持的模型名称:
+Supported model names:
   - xgb (XGBoost)
   - lgbm (LightGBM) 
   - catboost (CatBoost)
   - rf (Random Forest)
-  - ann (人工神经网络)
-  - 以及其他在训练时使用的模型
+  - ann (Artificial Neural Network)
+  - and other models used during training
         """
     )
     
     parser.add_argument('experiment_dir', type=str, 
-                       help='训练实验目录路径')
+                       help='Training experiment directory path')
     parser.add_argument('model_name', type=str,
-                       help='模型名称 (如: xgb, lgbm, catboost)')
+                       help='Model name (e.g., xgb, lgbm, catboost)')
     parser.add_argument('input_file', type=str,
-                       help='输入CSV文件路径')
+                       help='Input CSV file path')
     parser.add_argument('output_file', type=str,
-                       help='输出CSV文件路径')
+                       help='Output CSV file path')
     parser.add_argument('--verbose', '-v', action='store_true',
-                       help='显示详细信息')
+                       help='Show detailed information')
     
     args = parser.parse_args()
     
-    # 执行预测
+    # Execute prediction
     success = quick_predict(
         experiment_dir=args.experiment_dir,
         model_name=args.model_name,

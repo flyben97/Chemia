@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
 """
-INTERNCRANE Stacking Model API
+CHEMIA Stacking Model API
 
-This module provides simple function call interfaces to use trained INTERNCRANE stacking models.
+This module provides simple function call interfaces to use trained CHEMIA stacking models.
 
 Usage example:
     from stacking_api import load_stacker_from_config, stack_predict
@@ -129,7 +128,7 @@ def quick_stack_predict(config_path: str,
 
 # Example usage
 if __name__ == "__main__":
-    print("INTERNCRANE Stacking Model API Example Usage")
+    print("CHEMIA Stacking Model API Example Usage")
     print("-" * 50)
     
     print("1. Load stacker from config file:")
@@ -139,4 +138,4 @@ if __name__ == "__main__":
     print("predictor = create_stacker('output/my_experiment', ['xgb', 'lgbm'])")
     
     print("\n3. Make predictions:")
-    print("result = stack_predict(predictor, {'SMILES': 'CCO'})")
+    print("result = stack_predict(predictor, {'SMILES': 'CCO'})") 

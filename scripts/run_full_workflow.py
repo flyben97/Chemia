@@ -96,7 +96,7 @@ def setup_optimization_logging(output_dir):
     return opt_logger
 
 def main(config_path: str):
-    console.rule("[bold]INTERNCRANE End-to-End Workflow[/bold]")
+    console.rule("[bold]CHEMIA End-to-End Workflow[/bold]")
     console.print(f"Loading workflow configuration from: [cyan]{config_path}[/cyan]")
     with open(config_path, 'r') as f:
         workflow_config = yaml_loader(f)
@@ -124,7 +124,7 @@ def main(config_path: str):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     opt_output_dir = f"output/E2E_optimization_{timestamp}"
     opt_logger = setup_optimization_logging(opt_output_dir)
-    opt_logger.info("INTERNCRANE Reaction Optimizer Started (as part of E2E workflow)")
+    opt_logger.info("CHEMIA Reaction Optimizer Started (as part of E2E workflow)")
     opt_logger.info(f"Output will be saved to: {opt_output_dir}")
     opt_logger.info(f"Using best model from training run: {best_model_info['model_name'].upper()}")
 

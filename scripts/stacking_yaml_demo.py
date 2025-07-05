@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-INTERNCRANE 模型堆叠 YAML 配置演示
+CHEMIA Model Stacking YAML Configuration Demo
 
-这个脚本演示如何使用YAML配置文件来进行模型堆叠。
-支持从配置文件自动加载模型、设置堆叠方法、训练元模型等功能。
+This script demonstrates how to use YAML configuration files for model stacking.
+Supports automatic model loading, stacking, and evaluation.
 
-使用方法:
+Usage:
     python stacking_yaml_demo.py --config config_stacking.yaml
 
-需要先有训练好的模型在指定的实验目录中。
+You need to have trained models in the specified experiment directory.
 """
 
 import argparse
@@ -259,43 +259,43 @@ def create_example_config(output_path: str = "config_stacking_example.yaml"):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="INTERNCRANE 模型堆叠 YAML 配置演示",
+        description="CHEMIA Model Stacking YAML Configuration Demo",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-使用示例:
-  # 基本使用
+Usage Examples:
+  # Basic Usage
   python stacking_yaml_demo.py --config config_stacking.yaml
   
-  # 创建示例配置文件
+  # Create Example Configuration File
   python stacking_yaml_demo.py --create-sample-config
   
-  # 指定输出路径创建示例配置
+  # Create Example Configuration File with Specific Output Path
   python stacking_yaml_demo.py --create-sample-config --output my_config.yaml
 
-注意事项:
-  1. 确保实验目录中有训练好的模型
-  2. 配置文件中的模型名称必须与实际模型文件匹配
-  3. 使用元学习器时会自动训练，需要验证数据
+Notes:
+  1. Ensure the experiment directory has trained models
+  2. Model names in the configuration file must match actual model files
+  3. Meta-learners will automatically train if validation data is needed
         """
     )
     
     parser.add_argument(
         '--config', '-c',
         type=str,
-        help='YAML配置文件路径'
+        help='YAML Configuration File Path'
     )
     
     parser.add_argument(
         '--create-sample-config',
         action='store_true',
-        help='创建示例配置文件'
+        help='Create Example Configuration File'
     )
     
     parser.add_argument(
         '--output', '-o',
         type=str,
         default='config_stacking_meta.yaml',
-        help='示例配置文件输出路径 (默认: config_stacking_meta.yaml)'
+        help='Example Configuration File Output Path (Default: config_stacking_meta.yaml)'
     )
     
     args = parser.parse_args()
@@ -305,15 +305,15 @@ def main():
         return
     
     if not args.config:
-        print("❌ 请指定配置文件路径或使用 --create-sample-config 创建示例配置")
+        print("❌ Please specify configuration file path or use --create-sample-config to create example configuration")
         parser.print_help()
         sys.exit(1)
     
     if not os.path.exists(args.config):
-        print(f"❌ 配置文件不存在: {args.config}")
+        print(f"❌ Configuration file does not exist: {args.config}")
         sys.exit(1)
     
-    # 运行模型堆叠
+    # Run model stacking
     results = run_stacking_from_yaml(args.config)
     
     if results:

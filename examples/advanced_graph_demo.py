@@ -2,8 +2,8 @@
 """
 Advanced Graph Construction Demo Script
 
-This script demonstrates the advanced graph construction features of the INTERNCRANE framework,
-including feature concatenation, reaction graphs, and custom feature fusion.
+This script demonstrates the advanced graph construction features of the CHEMIA framework,
+including custom node features, edge features, and graph augmentation techniques.
 """
 
 import sys
@@ -342,8 +342,8 @@ def demo_use_cases():
 def main():
     """Run the complete demonstration"""
     
-    console.print(Panel.fit("🚀 INTERNCRANE Advanced Graph Construction Demo", style="bold blue"))
-    console.print("\nThis demo showcases the advanced graph construction capabilities of INTERNCRANE framework.")
+    console.print(Panel.fit("🚀 CHEMIA Advanced Graph Construction Demo", style="bold blue"))
+    console.print("\nThis demo showcases the advanced graph construction capabilities of CHEMIA framework.")
     console.print("We'll demonstrate 4 different modes for handling multiple SMILES inputs.\n")
     
     # Check if demo is available

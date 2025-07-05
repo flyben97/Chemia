@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="images/crane.png" alt="CRANE Logo" width="200"/>
-  <h1>INTERNCRANE</h1>
+  <img src="images/chemia.png" alt="CHEMIA Logo" width="200"/>
+  <h1>CHEMIA</h1>
   <p><strong>A Comprehensive Machine Learning Framework for Predicting and Optimizing Chemical Properties and Reactions</strong></p>
   <p>
     <a href="https://img.shields.io/badge/python-3.8+-blue.svg"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
@@ -13,11 +13,10 @@
 </div>
 
 
+
 ---
 
-**CRANE** — **C**hemical **R**epresentation and **A**nalysis using **N**eural and **E**nsemble models
-
-**CRANE** is a powerful tool designed for machine learning researchers in chemistry. Through simple YAML configuration files, it provides a "one-stop" workflow—from data processing and feature engineering to model training, hyperparameter tuning, and Bayesian optimization. This allows you to focus on the chemistry problem itself, rather than the tedious engineering details.
+**CHEMIA** is a powerful tool designed for machine learning researchers in chemistry. Through simple YAML configuration files, it provides a "one-stop" workflow—from data processing and feature engineering to model training, hyperparameter tuning, and Bayesian optimization. This allows you to focus on the chemistry problem itself, rather than the tedious engineering details.
 
 ## 📚 Table of Contents
 
@@ -66,7 +65,7 @@
 ### 1.2 Project Structure
 
 ```
-craft/
+chemia/
 ├── 📂 core/                    # Core Framework Components
 │   ├── run_manager.py      # Experiment management
 │   ├── config_loader.py    # Configuration loading
@@ -185,7 +184,7 @@ computational:
 Once configured, run the following command in your terminal:
 
 ```bash
-python run_training_only.py --config examples/configs/quick_start.yaml
+python scripts/run_training_only.py --config examples/configs/quick_start.yaml
 ```
 
 Congratulations! You have successfully launched a complete machine learning training pipeline. The results, models, and analysis reports will be automatically saved in the `output/CPA_Quick_Start/` directory.
@@ -198,18 +197,19 @@ Congratulations! You have successfully launched a complete machine learning trai
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/flyben97/interncrane.git
+    git clone https://github.com/flyben97/Chemia.git
     cd crane
     ```
 
 2.  **Install dependencies**:
+    
     ```bash
     pip install -r requirements.txt
     ```
 
 ### 3.2 Script Guide
 
-CRANE provides three core execution scripts to suit different needs:
+CHEMIA provides three core execution scripts to suit different needs:
 
 | Script                     | Function                                                     | Recommended Use Case                                         |
 | :------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
@@ -227,15 +227,15 @@ Using `run_training_only.py` with different configuration files allows for vario
 
 *   **Basic Regression Training**:
     ```bash
-    python run_training_only.py --config examples/configs/regression_training_simple.yaml
+    python scripts/run_training_only.py --config examples/configs/regression_training_simple.yaml
     ```
 *   **Basic Classification Training**:
     ```bash
-    python run_training_only.py --config examples/configs/classification_training_simple.yaml
+    python scripts/run_training_only.py --config examples/configs/classification_training_simple.yaml
     ```
 *   **5-Fold Cross-Validation Training** (for more robust evaluation):
     ```bash
-    python run_training_only.py --config examples/configs/regression_training_kfold.yaml
+    python scripts/run_training_only.py --config examples/configs/regression_training_kfold.yaml
     ```
 
 ### 4.2 Bayesian Optimization
@@ -243,7 +243,7 @@ Using `run_training_only.py` with different configuration files allows for vario
 If you have already trained and saved a model, you can use `run_optimization.py` to find the optimal reaction conditions.
 
 ```bash
-python run_optimization.py --config examples/configs/bayesian_optimization_only.yaml
+python scripts/run_optimization.py --config examples/configs/bayesian_optimization_only.yaml
 ```
 
 ### 4.3 End-to-End Workflow
@@ -251,14 +251,14 @@ python run_optimization.py --config examples/configs/bayesian_optimization_only.
 For fully automated needs, `run_full_workflow.py` will first train models, then automatically select the best one for Bayesian optimization.
 
 ```bash
-python run_full_workflow.py --config examples/configs/end_to_end_workflow.yaml
+python scripts/run_full_workflow.py --config examples/configs/end_to_end_workflow.yaml
 ```
 
 ---
 
 ## Chapter 5: Configuration File Deep Dive
 
-The core of CRANE is its powerful YAML configuration system. The `examples/configs/` directory provides a rich set of templates.
+The core of CHEMIA is its powerful YAML configuration system. The `examples/configs/` directory provides a rich set of templates.
 
 ### 5.1 Training Configuration Templates
 
@@ -347,7 +347,7 @@ training:
 
 ### 7.2 Programmatic Usage
 
-Besides the command line, you can also call CRANE's core functions within your Python scripts.
+Besides the command line, you can also call CHEMIA's core functions within your Python scripts.
 
 ```python
 from core.run_manager import start_experiment_run
@@ -368,7 +368,7 @@ print(f"Best Model: {best_model_info['model_name']} (R² = {best_model_info['tes
 
 ## Chapter 8: Interpreting Results and Outputs
 
-After each experiment, CRANE generates a well-structured folder in the `output/` directory, containing:
+After each experiment, CHEMIA generates a well-structured folder in the `output/` directory, containing:
 
 *   **📈 Comprehensive Report**: A `_model_comparison.csv` file summarizing the performance metrics of all models.
 *   **📦 Trained Models**: Serialized model files (e.g., `.pkl` or `.pt`), along with the associated scaler and feature names.

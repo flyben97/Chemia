@@ -1,8 +1,6 @@
----
-
 <div align="center">
-  <img src="images/crane.png" alt="CRAFT Logo" width="200"/>
-  <h1>INTERNCRANE</h1>
+  <img src="images/chemia.png" alt="CHEMIA Logo" width="200"/>
+  <h1>CHEMIA</h1>
   <p><strong>一个专为化学性质与反应预测与优化而生的综合机器学习框架</strong></p>
   <p>
     <a href="https://img.shields.io/badge/python-3.8+-blue.svg"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python"></a>
@@ -17,13 +15,11 @@
 
 ---
 
-**CRANE** — **C**hemical **R**epresentation and **A**nalysis using **N**eural and **E**nsemble models
-
-**CRANE** 是一个面向化学方向机器学习研究人员的强大工具。它通过简单的 YAML 配置文件，实现了从数据处理、特征工程到模型训练、超参数优化和贝叶斯优化的“一站式”工作流，让您可以专注于化学问题本身，而非繁琐的工程细节。
+**CHEMIA** 是一个面向化学方向机器学习研究人员的强大工具。它通过简单的 YAML 配置文件，实现了从数据处理、特征工程到模型训练、超参数优化和贝叶斯优化的“一站式”工作流，让您可以专注于化学问题本身，而非繁琐的工程细节。
 
 ## 📚 目录
 
-*   [**第一章：初识 CRANE**](#第一章初识-crane)
+*   [**第一章：初识 CHEMIA**](#第一章初识-chemia)
     *   [1.1 核心特性](#11-核心特性)
     *   [1.2 项目结构](#12-项目结构)
 *   [**第二章：五分钟快速上手**](#第二章五分钟快速上手)
@@ -53,7 +49,7 @@
 
 ---
 
-## 第一章：初识 CRANE
+## 第一章：初识 CHEMIA
 
 ### 1.1 核心特性
 
@@ -68,7 +64,7 @@
 ### 1.2 项目结构
 
 ```
-craft/
+chemia/
 ├── 📂 core/                    # 核心框架组件
 │   ├── run_manager.py      # 实验管理
 │   ├── config_loader.py    # 配置加载
@@ -91,7 +87,7 @@ craft/
 
 ## 第二章：五分钟快速上手
 
-让我们通过一个简单的例子，快速体验 CRANE 的强大功能。
+让我们通过一个简单的例子，快速体验 CHEMIA 的强大功能。
 
 ### 2.1 准备数据
 
@@ -187,7 +183,7 @@ computational:
 配置完成后，在终端中运行以下命令：
 
 ```bash
-python run_training_only.py --config examples/configs/quick_start.yaml
+python scripts/run_training_only.py --config examples/configs/quick_start.yaml
 ```
 
 恭喜！您已经成功启动了一次完整的机器学习训练流程。结果、模型和分析报告将自动保存在 `output/CPA_Quick_Start/` 目录下。
@@ -200,8 +196,8 @@ python run_training_only.py --config examples/configs/quick_start.yaml
 
 1.  **克隆仓库**：
     ```bash
-    git clone https://github.com/flyben97/interncrane.git
-    cd crane
+    git clone https://github.com/flyben97/Chemia.git
+    cd Chemia
     ```
 
 2.  **安装依赖**：
@@ -211,7 +207,7 @@ python run_training_only.py --config examples/configs/quick_start.yaml
 
 ### 3.2 运行脚本说明
 
-CRANE 提供了三个核心运行脚本，以适应不同需求：
+CHEMIA 提供了三个核心运行脚本，以适应不同需求：
 
 | 脚本                       | 功能                                 | 推荐场景                                 |
 | :------------------------- | :----------------------------------- | :--------------------------------------- |
@@ -229,15 +225,15 @@ CRANE 提供了三个核心运行脚本，以适应不同需求：
 
 *   **基础回归训练**：
     ```bash
-    python run_training_only.py --config examples/configs/regression_training_simple.yaml
+    python scripts/run_training_only.py --config examples/configs/regression_training_simple.yaml
     ```
 *   **基础分类训练**：
     ```bash
-    python run_training_only.py --config examples/configs/classification_training_simple.yaml
+    python scripts/run_training_only.py --config examples/configs/classification_training_simple.yaml
     ```
 *   **5-折交叉验证训练** (更稳健的评估):
     ```bash
-    python run_training_only.py --config examples/configs/regression_training_kfold.yaml
+    python scripts/run_training_only.py --config examples/configs/regression_training_kfold.yaml
     ```
 
 ### 4.2 贝叶斯优化
@@ -245,22 +241,22 @@ CRANE 提供了三个核心运行脚本，以适应不同需求：
 如果您已经训练并保存了一个模型，可以使用 `run_optimization.py` 来寻找最佳反应条件。
 
 ```bash
-python run_optimization.py --config examples/configs/bayesian_optimization_only.yaml
+python scripts/run_optimization.py --config examples/configs/bayesian_optimization_only.yaml
 ```
 
-### 4.3 端到端工作流程
+### 4.3 端到端工作流
 
 对于全自动化需求，`run_full_workflow.py` 会先训练模型，然后自动选择最优模型进行贝叶斯优化。
 
 ```bash
-python run_full_workflow.py --config examples/configs/end_to_end_workflow.yaml
+python scripts/run_full_workflow.py --config examples/configs/end_to_end_workflow.yaml
 ```
 
 ---
 
 ## 第五章：配置文件详解
 
-CRANE 的核心在于其强大的 YAML 配置系统。`examples/configs/` 目录下提供了丰富的模板。
+CHEMIA 的核心在于其强大的 YAML 配置系统。`examples/configs/` 目录下提供了丰富的模板。
 
 ### 5.1 训练配置模板
 
@@ -298,7 +294,7 @@ CRANE 的核心在于其强大的 YAML 配置系统。`examples/configs/` 目录
 
 ### 6.2 自动化特征工程
 
-CRANE 自动从 SMILES 字符串生成高质量分子特征：
+CHEMIA 自动从 SMILES 字符串生成高质量分子特征：
 
 *   **Morgan 指纹**：可定制半径和位数的圆形指纹。
 *   **MACCS 密钥**：166 位结构密钥。
@@ -349,7 +345,7 @@ training:
 
 ### 7.2 程序化使用
 
-除了命令行，您也可以在 Python 脚本中调用 CRANE 的核心功能。
+除了命令行，您也可以在 Python 脚本中调用 CHEMIA 的核心功能。
 
 ```python
 from core.run_manager import start_experiment_run
@@ -370,7 +366,7 @@ print(f"最佳模型: {best_model_info['model_name']} (R² = {best_model_info['t
 
 ## 第八章：结果解读与输出
 
-每次实验运行后，CRANE 会在 `output/` 目录下生成一个结构清晰的文件夹，包含：
+每次实验运行后，CHEMIA 会在 `output/` 目录下生成一个结构清晰的文件夹，包含：
 
 *   **📈 综合报告**：一个 `_model_comparison.csv` 文件，汇总所有模型的性能指标。
 *   **📦 训练好的模型**：序列化的模型文件（如 `.pkl` 或 `.pt`），以及相关的 scaler 和特征名称。

@@ -42,7 +42,7 @@ def main(config_path: str):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dir = f"output/optimization_{timestamp}"
     setup_logging(output_dir)
-    logging.info("INTERNCRANE Reaction Optimizer Started")
+    logging.info("CHEMIA Reaction Optimizer Started")
     logging.info(f"Output will be saved to: {output_dir}")
 
     try:
@@ -127,7 +127,7 @@ def main(config_path: str):
         logging.error("A critical error occurred during the optimization process.", exc_info=True)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run Bayesian Optimization for chemical reactions using a INTERNCRANE model.")
+    parser = argparse.ArgumentParser(description="Run Bayesian Optimization for chemical reactions using a CHEMIA model.")
     parser.add_argument(
         '--config', 
         type=str, 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-INTERNCRANE GNN Workflow Demonstration
+CHEMIA GNN Workflow Demonstration
 
 This script demonstrates how to use Graph Neural Networks for molecular
-property prediction using SMILES input in the INTERNCRANE framework.
+property prediction using SMILES input in the CHEMIA framework.
 """
 
 import os
@@ -86,7 +86,7 @@ def create_demo_data():
 def demo_gnn_training():
     """Demonstrate GNN model training with SMILES data"""
     
-    print("🧪 INTERNCRANE GNN Workflow Demonstration")
+    print("🧪 CHEMIA GNN Workflow Demonstration")
     print("=" * 50)
     
     # 1. Create demo data
@@ -258,7 +258,7 @@ gnn_settings:
 
 
 if __name__ == "__main__":
-    print("Starting CRAFT GNN Workflow Demonstration...")
+    print("Starting CHEMIA GNN Workflow Demonstration...")
     
     try:
         success = demo_gnn_training()

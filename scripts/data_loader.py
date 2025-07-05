@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-INTERNCRANE 数据加载模块
+CHEMIA Data Loading Module
 
-自动读取INTERNCRANE训练时生成的数据拆分，支持从实验目录加载
-train/valid/test数据，同时保持用户自定义数据的灵活性。
+Automatically read data splits generated during CHEMIA training, supports loading from experiment directory
+train/valid/test data, while maintaining the flexibility of user-defined data.
 """
 
 import os
@@ -397,7 +397,7 @@ def load_custom_validation_data(validation_file: str,
 
 # 示例用法
 if __name__ == "__main__":
-    print("INTERNCRANE 数据加载模块示例")
+    print("CHEMIA Data Loading Module Example")
     print("=" * 50)
     
     # 示例实验目录

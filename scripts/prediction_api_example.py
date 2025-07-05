@@ -254,7 +254,7 @@ def example_7_error_handling():
         print(f"Data format error: {e}")
 
 if __name__ == "__main__":
-    print("INTERNCRANE Prediction API Usage Examples")
+    print("CHEMIA Prediction API Usage Examples")
     print("Please ensure you modify the experiment directory path to your actual path")
     print()
     

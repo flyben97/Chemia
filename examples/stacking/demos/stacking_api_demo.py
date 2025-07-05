@@ -16,7 +16,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # 导入新的API
-from stacking_api import (
+from crane.scripts.stacking_api import (
     load_stacker_from_config, create_stacker, stack_predict, 
     stack_predict_single, quick_stack_predict, StackingPredictor
 )
