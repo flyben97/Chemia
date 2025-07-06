@@ -63,6 +63,7 @@ def process_dataframe(df: pd.DataFrame, common_cfg: dict, feature_gen_cfg: dict,
     Returns X, y, feature_cols, and the cleaned DataFrame with surviving indices.
     """
     from utils.feature_generator import generate_features
+    from utils.smiles_validator import validate_smiles_columns
     
     # 1. Work on a copy and perform initial cleaning.
     df_processed = df.copy()
@@ -70,6 +71,81 @@ def process_dataframe(df: pd.DataFrame, common_cfg: dict, feature_gen_cfg: dict,
     smiles_cols_list = [smiles_col_spec] if isinstance(smiles_col_spec, str) else smiles_col_spec
     existing_smiles_cols = [col for col in smiles_cols_list if col in df_processed.columns]
     
+    # 2. SMILES Validation - NEW FEATURE
+    if existing_smiles_cols:
+        console.print(f"\n[bold cyan]🔍 SMILES Validation:[/bold cyan]")
+        console.print(f"  - Checking {len(existing_smiles_cols)} SMILES columns: {existing_smiles_cols}")
+        
+        # Get validation settings from config
+        validation_cfg = common_cfg.get('smiles_validation', {})
+        enabled = validation_cfg.get('enabled', True)  # Default: enabled
+        min_valid_ratio = validation_cfg.get('min_valid_ratio', 0.8)  # Default: 80%
+        sample_size = validation_cfg.get('sample_size', 200)  # Default: 200 samples
+        strict_mode = validation_cfg.get('strict_mode', True)  # Default: strict (raise error)
+        
+        if not enabled:
+            console.print(f"  [yellow]⚠️  SMILES validation is disabled in configuration[/yellow]")
+        else:
+            # Validate SMILES columns
+            all_valid, validation_results = validate_smiles_columns(
+                df_processed, 
+                existing_smiles_cols, 
+                sample_size=min(sample_size, len(df_processed)),
+                min_valid_ratio=min_valid_ratio,
+                show_details=True
+            )
+            
+            if not all_valid:
+                console.print(f"\n[bold red]❌ SMILES Validation Failed![/bold red]")
+                console.print(f"[yellow]One or more specified SMILES columns contain invalid SMILES strings.[/yellow]")
+                
+                # Create detailed error message
+                error_details = []
+                for col, results in validation_results.items():
+                    if not results['is_valid_column']:
+                        if results['error_message']:
+                            error_details.append(f"Column '{col}': {results['error_message']}")
+                        else:
+                            error_details.append(
+                                f"Column '{col}': Only {results['valid_count']}/{results['sample_size_checked']} "
+                                f"samples are valid SMILES ({results['valid_ratio']:.1%})"
+                            )
+                
+                # Suggest potential solutions
+                console.print(f"\n[bold blue]💡 Suggested Solutions:[/bold blue]")
+                console.print(f"  1. Check your configuration file - make sure 'smiles_col' points to actual SMILES columns")
+                console.print(f"  2. Clean your data - remove or fix invalid SMILES strings")
+                console.print(f"  3. Use SMILES standardization tools (e.g., RDKit canonicalization)")
+                console.print(f"  4. Consider using different column names if these are not SMILES columns")
+                console.print(f"  5. Disable SMILES validation by setting 'smiles_validation.enabled: false' in config")
+                console.print(f"  6. Lower the validation threshold by setting 'smiles_validation.min_valid_ratio: 0.5' in config")
+                
+                # Check if there might be other SMILES columns
+                from utils.smiles_validator import suggest_potential_smiles_columns
+                potential_cols = suggest_potential_smiles_columns(df_processed)
+                if potential_cols:
+                    console.print(f"\n[bold green]🔍 Potential SMILES columns detected:[/bold green]")
+                    for col in potential_cols:
+                        console.print(f"  • {col}")
+                    console.print(f"Consider updating your configuration to use these columns instead.")
+                
+                # Handle based on strict mode
+                if strict_mode:
+                    # Raise error with detailed information
+                    raise ValueError(
+                        f"SMILES validation failed for columns: {[col for col in validation_results.keys() if not validation_results[col]['is_valid_column']]}. "
+                        f"Details: {'; '.join(error_details)}. "
+                        f"Please check your data and configuration, or set 'smiles_validation.strict_mode: false' to continue with warnings."
+                    )
+                else:
+                    # Continue with warning
+                    console.print(f"\n[yellow]⚠️  Continuing with invalid SMILES data (strict_mode: false)[/yellow]")
+                    console.print(f"[dim]Note: This may cause errors during feature generation.[/dim]")
+            else:
+                console.print(f"[green]✅ All SMILES columns validated successfully![/green]")
+                console.print(f"[dim]  • Sample size: {sample_size}, Min valid ratio: {min_valid_ratio:.1%}[/dim]")
+    
+    # 3. Continue with existing processing
     if existing_smiles_cols:
         df_processed.dropna(subset=existing_smiles_cols, inplace=True)
     
@@ -80,7 +156,7 @@ def process_dataframe(df: pd.DataFrame, common_cfg: dict, feature_gen_cfg: dict,
     # This will hold all feature parts
     all_feature_dfs = []
 
-    # 2. Load Pre-computed Features
+    # 4. Load Pre-computed Features
     precomputed_cfg = common_cfg.get('precomputed_features')
     if precomputed_cfg and precomputed_cfg.get('feature_columns'):
         console.print("  - Loading pre-computed features...")
@@ -113,7 +189,7 @@ def process_dataframe(df: pd.DataFrame, common_cfg: dict, feature_gen_cfg: dict,
 
         all_feature_dfs.append(precomputed_df)
 
-    # 3. Generate Features from SMILES columns.
+    # 5. Generate Features from SMILES columns.
     use_per_col_config = 'per_smiles_col_generators' in feature_gen_cfg
     if use_per_col_config and existing_smiles_cols:
         console.print("  - Using per-SMILES-column feature configuration...")
@@ -126,7 +202,7 @@ def process_dataframe(df: pd.DataFrame, common_cfg: dict, feature_gen_cfg: dict,
                 generated_df = generate_features(smiles_list_for_gen, per_col_configs[s_col], output_dir=output_dir)
                 all_feature_dfs.append(generated_df.reset_index(drop=True))
 
-    # 4. Concatenate all feature parts.
+    # 6. Concatenate all feature parts.
     if not all_feature_dfs:
         raise ValueError("No features were loaded or generated. Check your configuration.")
     

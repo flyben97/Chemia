@@ -18,9 +18,9 @@ project_root = os.path.dirname(utils_dir)
 sys.path.insert(0, project_root)
 
 from utils.io_handler import (
-    load_model_from_path, load_scaler_from_path, load_label_encoder_from_path,
-    load_config_from_path, log_prediction_summary, CRANE_BANNER,
-    get_full_model_name, find_model_file
+    load_config_from_path, log_prediction_summary, CHEMIA_BANNER,
+    load_trained_model_from_run, load_model_from_path, load_scaler_from_path, load_label_encoder_from_path, 
+    suppress_output, is_run_directory_path, get_full_model_name, find_model_file
 )
 
 from core.run_manager import process_dataframe
@@ -44,8 +44,8 @@ def predict(args):
     prediction_start_time = time.time()
     
     # --- UI Enhancement: Final Minimalist Header ---
-    console.print(Text(CRANE_BANNER, justify="center", style="bold blue"))
-    console.print(f"[bold cyan]CRANE Predictor v1.5.7[/bold cyan]")
+    console.print(Text(CHEMIA_BANNER, justify="center", style="bold blue"))
+    console.print(f"[bold cyan]CHEMIA Predictor v1.5.7[/bold cyan]")
     console.print(f"[dim]Starting Prediction Pipeline...[/dim]")
     console.print("-" * 80)
 
@@ -171,7 +171,7 @@ def predict(args):
     console.print(f"  [bold]Duration:[/bold]    [yellow]{prediction_duration:.2f}s[/yellow]")
 
 def main():
-    parser = argparse.ArgumentParser(description="CRANE Predictor: Use a trained model on new data.", formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description="CHEMIA Predictor: Use a trained model on new data.", formatter_class=argparse.RawTextHelpFormatter)
     mode_group = parser.add_mutually_exclusive_group(required=True)
     mode_group.add_argument('--run_dir', type=str, help='(Experiment Mode) Path to a completed experiment run directory.')
     mode_group.add_argument('--model_path', type=str, help='(File Mode) Direct path to the model file (e.g., model.json).')

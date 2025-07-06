@@ -1,6 +1,6 @@
-# INTERNCRANE 模型堆叠 (Model Stacking)
+# INTERNCHEMIA 模型堆叠 (Model Stacking)
 
-> 🚀 强大的集成学习工具，将多个INTERNCRANE模型组合获得更好预测性能
+> 🚀 强大的集成学习工具，将多个INTERNCHEMIA模型组合获得更好预测性能
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)

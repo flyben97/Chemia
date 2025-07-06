@@ -1,0 +1,86 @@
+# Example Configuration for SMILES Validation
+# This config demonstrates how to control SMILES validation behavior
+
+experiment_name: "SMILES_Validation_Example"
+task_type: "regression"
+
+# Data configuration
+data:
+  source_mode: "single_file"
+  single_file_config:
+    main_file_path: "path/to/your/data.csv"
+    target_col: "target_property"
+    smiles_col: ["Catalyst", "Solvent", "Reagent"]  # List of SMILES columns
+    
+    # SMILES Validation Configuration (NEW FEATURE)
+    smiles_validation:
+      enabled: true                # Enable/disable SMILES validation (default: true)
+      min_valid_ratio: 0.8        # Minimum ratio of valid SMILES required (default: 0.8 = 80%)
+      sample_size: 200             # Number of samples to check for validation (default: 200)
+      strict_mode: true            # If true, raise error on validation failure; if false, continue with warning (default: true)
+      
+    # Alternative: Disable SMILES validation entirely
+    # smiles_validation:
+    #   enabled: false
+    
+    # Alternative: Lenient validation (allow more invalid SMILES)
+    # smiles_validation:
+    #   enabled: true
+    #   min_valid_ratio: 0.5       # Only require 50% valid SMILES
+    #   strict_mode: false         # Continue with warnings instead of errors
+    #   sample_size: 100           # Check fewer samples for performance
+
+# Feature generation configuration
+features:
+  scaling: true
+  per_smiles_col_generators:
+    Catalyst:
+      - feature_type: "molecular_fingerprints"
+        fp_type: "morgan"
+        radius: 2
+        nBits: 1024
+    Solvent:
+      - feature_type: "molecular_descriptors"
+        descriptors: "all"
+    Reagent:
+      - feature_type: "molecular_fingerprints"
+        fp_type: "rdkit"
+        nBits: 512
+
+# Model training configuration
+training:
+  models_to_run: ["xgb", "rf", "lgbm"]
+  n_trials: 10
+  quiet_optuna: true
+
+# Data splitting configuration
+split_mode: "train_valid_test"
+split_config:
+  train_valid_test:
+    test_size: 0.2
+    valid_size: 0.1
+    random_state: 42
+
+# Common validation scenarios:
+# 
+# 1. Strict validation (default) - Recommended for production
+#    smiles_validation:
+#      enabled: true
+#      min_valid_ratio: 0.8
+#      strict_mode: true
+#
+# 2. Lenient validation - For experimental/messy data
+#    smiles_validation:
+#      enabled: true
+#      min_valid_ratio: 0.5
+#      strict_mode: false
+#
+# 3. Quick validation - For large datasets
+#    smiles_validation:
+#      enabled: true
+#      sample_size: 50
+#      min_valid_ratio: 0.8
+#
+# 4. Disable validation - Not recommended but available
+#    smiles_validation:
+#      enabled: false 

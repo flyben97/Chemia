@@ -114,7 +114,7 @@ class SklearnOptimizer(BaseOptimizer):
                 'weights': {'type': 'categorical', 'choices': ['uniform', 'distance']}
             },
             'kernelridge': {
-                'alpha': {'type': 'float', 'low': 1e-3, 'high': 1e2, 'log': True},
+                'alpha': {'type': 'float', 'low': 1e-2, 'high': 1e3, 'log': True},
                 'kernel': {'type': 'categorical', 'choices': ['linear', 'rbf', 'poly']},
                 'gamma': {'type': 'float', 'low': 1e-4, 'high': 1e2, 'log': True}
             },
@@ -129,16 +129,16 @@ class SklearnOptimizer(BaseOptimizer):
                 'reg_lambda': {'type': 'loguniform', 'low': 1e-2, 'high': 0.5},
             },
             'randomforest': {
-                'n_estimators': {'type': 'categorical', 'choices': [100, 200, 300, 500]},
-                'max_depth': {'type': 'int', 'low': 5, 'high': 30, 'none_is_valid':True}, 
-                'max_features': {'type': 'categorical', 'choices': ['sqrt', 'log2', 0.6, 0.8]},
-                'min_samples_split': {'type': 'int', 'low': 2, 'high': 20},
-                'min_samples_leaf': {'type': 'int', 'low': 1, 'high': 10}, 
+                'n_estimators': {'type': 'categorical', 'choices': [50, 100, 200, 500]},
+                'max_depth': {'type': 'int', 'low': 3, 'high': 15, 'none_is_valid': True},
+                'max_features': {'type': 'categorical', 'choices': ['sqrt', 'log2']},
+                'min_samples_split': {'type': 'int', 'low': 2, 'high': 10},
+                'min_samples_leaf': {'type': 'int', 'low': 1, 'high': 5},
                 'criterion': {'type': 'categorical', 'choices': ['gini', 'entropy']} if 'classification' in task_type else \
                             {'type': 'categorical', 'choices': ['squared_error', 'absolute_error']}
             },
             'ridge': { 
-                'alpha': {'type': 'float', 'low': 1e-5, 'high': 100, 'log': True}
+                'alpha': {'type': 'float', 'low': 1e-3, 'high': 1000, 'log': True}
             },
             'svr': { 
                 'C': {'type': 'float', 'low': 1e-2, 'high': 1e3, 'log':True},
@@ -166,11 +166,11 @@ class SklearnOptimizer(BaseOptimizer):
                 'subsample': {'type': 'float', 'low': 0.6, 'high': 1.0}
             },
             'extratrees': {
-                'n_estimators': {'type': 'categorical', 'choices': [100, 200, 300, 500]},
-                'max_depth': {'type': 'int', 'low': 5, 'high': 30, 'none_is_valid': True},
-                'min_samples_split': {'type': 'int', 'low': 2, 'high': 20},
-                'min_samples_leaf': {'type': 'int', 'low': 1, 'high': 10},
-                'max_features': {'type': 'categorical', 'choices': ['sqrt', 'log2', 0.6, 0.8]}
+                'n_estimators': {'type': 'categorical', 'choices': [50, 100, 200, 500]},
+                'max_depth': {'type': 'int', 'low': 3, 'high': 15, 'none_is_valid': True},
+                'min_samples_split': {'type': 'int', 'low': 2, 'high': 10},
+                'min_samples_leaf': {'type': 'int', 'low': 1, 'high': 5},
+                'max_features': {'type': 'categorical', 'choices': ['sqrt', 'log2']}
             },
             'elasticnet': {
                 'alpha': {'type': 'float', 'low': 1e-4, 'high': 10.0, 'log': True},
@@ -254,7 +254,31 @@ class SklearnOptimizer(BaseOptimizer):
         if self.model_name_orig == 'catboost': kwargs['verbose'] = 0 
         elif self.model_name_orig == 'kneighbors': kwargs['n_jobs'] = -1
         elif self.model_name_orig == 'lgbm': kwargs['n_jobs'] = -1; kwargs['verbose'] = -100 
-        elif self.model_name_orig == 'randomforest': kwargs['n_jobs'] = -1
+        elif self.model_name_orig == 'randomforest': 
+            # Optimize Random Forest for better performance
+            n_jobs = min(4, max(1, os.cpu_count() // 2)) if os.cpu_count() else 2  # Use at most 4 cores or half available cores
+            kwargs['n_jobs'] = n_jobs
+            kwargs['random_state'] = self.random_state  # Ensure reproducibility
+            
+            # Add max_features limit for very large feature sets to prevent overfitting and reduce computation
+            # This is set automatically by sklearn but we can optimize it here
+            if 'max_features' not in kwargs:
+                kwargs['max_features'] = 'sqrt'  # Default to sqrt for faster computation
+        elif self.model_name_orig == 'extratrees':
+            # Optimize ExtraTrees with similar settings to Random Forest
+            n_jobs = min(4, max(1, os.cpu_count() // 2)) if os.cpu_count() else 2  # Use at most 4 cores or half available cores
+            kwargs['n_jobs'] = n_jobs
+            kwargs['random_state'] = self.random_state  # Ensure reproducibility
+            
+            # Add max_features limit for very large feature sets
+            if 'max_features' not in kwargs:
+                kwargs['max_features'] = 'sqrt'  # Default to sqrt for faster computation
+        elif self.model_name_orig == 'ridge':
+            # Optimize Ridge regression for numerical stability
+            if 'solver' not in kwargs:
+                kwargs['solver'] = 'auto'  # Let sklearn choose the best solver
+            if 'max_iter' not in kwargs:
+                kwargs['max_iter'] = 1000  # Increase max iterations for convergence
         elif self.model_name_orig == 'xgboost': kwargs['verbosity'] = 0 
         
         if self.task_type != 'regression' and self.model_name_orig == 'xgboost':
@@ -306,7 +330,9 @@ class SklearnOptimizer(BaseOptimizer):
         # --- MODIFICATION START: Suppress warnings during HPO CV ---
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
-            warnings.filterwarnings("ignore", category=FutureWarning) 
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            # Suppress LinearAlgebraWarning for ill-conditioned matrices in Ridge/KernelRidge
+            warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning) 
             
             if self.cv is not None and self.cv > 1:
                 model_kwargs = self._prepare_model_kwargs(params_from_trial, for_cv_fold=True)
@@ -406,6 +432,7 @@ class SklearnOptimizer(BaseOptimizer):
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
             warnings.filterwarnings("ignore", category=FutureWarning)
+            warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
             self.best_model_.fit(X_train, _y_train)
         # --- MODIFICATION END ---
 
@@ -415,6 +442,7 @@ class SklearnOptimizer(BaseOptimizer):
         # --- MODIFICATION START: Suppress warnings during prediction ---
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
+            warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
             predictions = self.best_model_.predict(X)
         # --- MODIFICATION END ---
         return predictions
@@ -447,6 +475,7 @@ class SklearnOptimizer(BaseOptimizer):
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning); warnings.simplefilter("ignore", FutureWarning)
+            warnings.simplefilter("ignore", np.linalg.LinAlgWarning)
             for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X_train_full_for_cv, y_ravel)):
                 print(f"  Generating predictions for CV OOF fold {fold_idx + 1}/{self.cv}...")
                 X_train, X_val = X_train_full_for_cv[train_idx], X_train_full_for_cv[val_idx]

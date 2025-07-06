@@ -39,7 +39,26 @@ logging.getLogger('rdkit').setLevel(logging.WARNING)
 logging.basicConfig(level=logging.INFO)
 
 # --- START OF FIX: Ensure the project root is in the path ---
-project_root = os.path.dirname(os.path.abspath(__file__))
+def find_project_root(start_path=None):
+    """Find the project root directory by looking for key files like core/ directory"""
+    if start_path is None:
+        start_path = os.path.dirname(os.path.abspath(__file__))
+    
+    current_path = start_path
+    
+    # Look for project root indicators
+    while current_path != os.path.dirname(current_path):  # Stop at filesystem root
+        # Check if this directory contains core/ and other key directories
+        if (os.path.exists(os.path.join(current_path, 'core')) and
+            os.path.exists(os.path.join(current_path, 'models')) and
+            os.path.exists(os.path.join(current_path, 'utils'))):
+            return current_path
+        current_path = os.path.dirname(current_path)
+    
+    # If not found, use the directory containing this script
+    return start_path
+
+project_root = find_project_root()
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 # --- END OF FIX ---
@@ -203,7 +222,28 @@ def main(config_path: str, dry_run: bool = False):
     """Main training function"""
     
     console.rule("[bold]🚀 Interncraft Training-Only Pipeline[/bold]")
+    
+    # Handle config file path resolution
+    if not os.path.isabs(config_path):
+        # Try relative to current working directory first
+        if os.path.exists(config_path):
+            config_path = os.path.abspath(config_path)
+        # If not found, try relative to project root
+        elif os.path.exists(os.path.join(project_root, config_path)):
+            config_path = os.path.join(project_root, config_path)
+        # If still not found, try relative to script directory
+        elif os.path.exists(os.path.join(os.path.dirname(__file__), config_path)):
+            config_path = os.path.join(os.path.dirname(__file__), config_path)
+    
     console.print(f"Loading training configuration from: [cyan]{config_path}[/cyan]")
+    
+    if not os.path.exists(config_path):
+        console.print(f"[bold red]❌ Configuration file not found: {config_path}[/bold red]")
+        console.print(f"[dim]Searched in:")
+        console.print(f"  - Current directory: {os.getcwd()}")
+        console.print(f"  - Project root: {project_root}")
+        console.print(f"  - Script directory: {os.path.dirname(__file__)}[/dim]")
+        sys.exit(1)
     
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
@@ -254,15 +294,22 @@ if __name__ == "__main__":
 Examples:
   python run_training_only.py                          # Use default config
   python run_training_only.py --config my_config.yaml  # Use custom config
+  python run_training_only.py my_config.yaml           # Use custom config (positional)
   python run_training_only.py --dry-run                # Preview without training
+  python run_training_only.py my_config.yaml --dry-run # Preview with custom config
         """
     )
     
     parser.add_argument(
+        'config_file',
+        nargs='?',
+        help="Path to the training configuration YAML file (can be relative or absolute)"
+    )
+    
+    parser.add_argument(
         '--config', 
-        type=str, 
-        default="config_training_only.yaml",
-        help="Path to the training configuration YAML file (default: config_training_only.yaml)"
+        type=str,
+        help="Path to the training configuration YAML file (alternative to positional argument)"
     )
     
     parser.add_argument(
@@ -273,8 +320,32 @@ Examples:
     
     args = parser.parse_args()
     
-    if not os.path.exists(args.config):
-        console.print(f"[bold red]❌ Configuration file not found: {args.config}[/bold red]")
-        sys.exit(1)
+    # Determine config file path
+    config_path = None
+    if args.config_file:
+        config_path = args.config_file
+    elif args.config:
+        config_path = args.config
+    else:
+        # Try default config in multiple locations
+        default_configs = [
+            "config_training_only.yaml",
+            os.path.join(project_root, "config_training_only.yaml"),
+            os.path.join(project_root, "examples", "configs", "config_training_only.yaml")
+        ]
+        
+        for default_config in default_configs:
+            if os.path.exists(default_config):
+                config_path = default_config
+                break
+        
+        if not config_path:
+            console.print(f"[bold red]❌ No configuration file specified and no default found![/bold red]")
+            console.print(f"[dim]Searched for defaults in:")
+            for dc in default_configs:
+                console.print(f"  - {dc}")
+            console.print(f"[/dim]")
+            console.print(f"[bold]Usage:[/bold] python {sys.argv[0]} <config_file> [--dry-run]")
+            sys.exit(1)
     
-    main(args.config, args.dry_run) 
+    main(config_path, args.dry_run) 

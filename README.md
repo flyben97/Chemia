@@ -20,7 +20,7 @@
 
 ## 📚 Table of Contents
 
-*   [**Chapter 1: Getting to Know CRANE**](#chapter-1-getting-to-know-crane)
+*   [**Chapter 1: Getting to Know CHEMIA**](#chapter-1-getting-to-know-chemia)
     *   [1.1 Core Features](#11-core-features)
     *   [1.2 Project Structure](#12-project-structure)
 *   [**Chapter 2: Five-Minute Quick Start**](#chapter-2-five-minute-quick-start)
@@ -50,7 +50,7 @@
 
 ---
 
-## Chapter 1: Getting to Know CRANE
+## Chapter 1: Getting to Know CHEMIA
 
 ### 1.1 Core Features
 
@@ -88,7 +88,7 @@ chemia/
 
 ## Chapter 2: Five-Minute Quick Start
 
-Let's quickly experience the power of CRANE with a simple example.
+Let's quickly experience the power of CHEMIA with a simple example.
 
 ### 2.1 Prepare Your Data
 
@@ -198,7 +198,7 @@ Congratulations! You have successfully launched a complete machine learning trai
 1.  **Clone the repository**:
     ```bash
     git clone https://github.com/flyben97/Chemia.git
-    cd crane
+    cd chemia
     ```
 
 2.  **Install dependencies**:
@@ -296,7 +296,7 @@ The core of CHEMIA is its powerful YAML configuration system. The `examples/conf
 
 ### 6.2 Automated Feature Engineering
 
-CRANE automatically generates high-quality molecular features from SMILES strings:
+CHEMIA automatically generates high-quality molecular features from SMILES strings:
 
 *   **Morgan Fingerprints**: Circular fingerprints with customizable radius and bit length.
 *   **MACCS Keys**: 166-bit structural keys.

@@ -1,6 +1,6 @@
-# INTERNCRANE 模型堆叠完整教程
+# INTERNCHEMIA 模型堆叠完整教程
 
-> 📚 深入学习INTERNCRANE模型堆叠技术，从基础概念到高级应用
+> 📚 深入学习INTERNCHEMIA模型堆叠技术，从基础概念到高级应用
 
 ## 目录
 
