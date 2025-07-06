@@ -35,7 +35,7 @@ training:
     - "gpr"           # Gaussian Process Regression
     # - "krr"           # Kernel Ridge Regression
     # - "svr"           # Support Vector Regression
-    - "ann"           # PyTorch-based Artificial Neural Network
+    # - "ann"           # PyTorch-based Artificial Neural Network
   
   # Hyperparameter optimization settings
   n_trials: 50              # Increased for better optimization

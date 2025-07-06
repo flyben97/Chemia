@@ -73,8 +73,8 @@ def run_all_models_on_data(X_train_main, y_train, X_val, y_val, X_test, y_test,
     if gnn_available and _has_smiles_columns(config):
         gnn_models = ['gcn', 'gat', 'mpnn', 'afp', 'graph_transformer', 'ensemble_gnn']
     
-    reg_models = common + ['kernelridge', 'ridge', 'svr', 'ann'] + gnn_models
-    cls_models = common + ['logisticregression', 'svc', 'ann'] + gnn_models
+    reg_models = common + ['kernelridge', 'ridge', 'svr', 'ann', 'gbdt', 'extratrees', 'gpr'] + gnn_models
+    cls_models = common + ['logisticregression', 'svc', 'ann', 'gbdt', 'extratrees', 'gpr'] + gnn_models
     model_map = {'regression': reg_models, 'binary_classification': cls_models, 'multiclass_classification': cls_models}
     available_models = model_map.get(task_type)
     if available_models is None: raise ValueError(f"Unsupported task_type: {task_type}")

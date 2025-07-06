@@ -332,7 +332,11 @@ class SklearnOptimizer(BaseOptimizer):
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
             warnings.filterwarnings("ignore", category=FutureWarning)
             # Suppress LinearAlgebraWarning for ill-conditioned matrices in Ridge/KernelRidge
-            warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning) 
+            try:
+                warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
+            except AttributeError:
+                # LinAlgWarning was removed in newer numpy versions
+                pass 
             
             if self.cv is not None and self.cv > 1:
                 model_kwargs = self._prepare_model_kwargs(params_from_trial, for_cv_fold=True)
@@ -432,7 +436,11 @@ class SklearnOptimizer(BaseOptimizer):
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
             warnings.filterwarnings("ignore", category=FutureWarning)
-            warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
+            try:
+                warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
+            except AttributeError:
+                # LinAlgWarning was removed in newer numpy versions
+                pass
             self.best_model_.fit(X_train, _y_train)
         # --- MODIFICATION END ---
 
@@ -442,7 +450,11 @@ class SklearnOptimizer(BaseOptimizer):
         # --- MODIFICATION START: Suppress warnings during prediction ---
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
-            warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
+            try:
+                warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
+            except AttributeError:
+                # LinAlgWarning was removed in newer numpy versions
+                pass
             predictions = self.best_model_.predict(X)
         # --- MODIFICATION END ---
         return predictions
@@ -475,7 +487,11 @@ class SklearnOptimizer(BaseOptimizer):
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning); warnings.simplefilter("ignore", FutureWarning)
-            warnings.simplefilter("ignore", np.linalg.LinAlgWarning)
+            try:
+                warnings.simplefilter("ignore", np.linalg.LinAlgWarning)
+            except AttributeError:
+                # LinAlgWarning was removed in newer numpy versions
+                pass
             for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X_train_full_for_cv, y_ravel)):
                 print(f"  Generating predictions for CV OOF fold {fold_idx + 1}/{self.cv}...")
                 X_train, X_val = X_train_full_for_cv[train_idx], X_train_full_for_cv[val_idx]
