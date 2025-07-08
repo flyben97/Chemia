@@ -1,5 +1,5 @@
 # ===================================================================
-#              CRAFT - Training with Rich Feature Engineering
+#              Chemia - Training with Rich Feature Engineering
 # ===================================================================
 # Configuration that demonstrates extensive feature generation
 # including molecular descriptors, fingerprints, and precomputed features.

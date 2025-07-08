@@ -1,5 +1,5 @@
 # ===================================================================
-#      CRAFT - Full End-to-End Workflow Configuration v2.0
+#      Chemia - Full End-to-End Workflow Configuration v2.0
 # ===================================================================
 # This file orchestrates the entire process:
 # 1. Train multiple models on a reaction dataset.

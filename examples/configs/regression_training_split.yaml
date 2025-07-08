@@ -1,5 +1,5 @@
 # ===================================================================
-#          CRAFT - Regression Training with Train/Valid/Test Split
+#          Chemia - Regression Training with Train/Valid/Test Split
 # ===================================================================
 # Configuration for regression model training using explicit
 # train/validation/test split for development and evaluation.

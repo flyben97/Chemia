@@ -1,5 +1,5 @@
 # ===================================================================
-#            CRAFT - Classification Training with K-Fold CV
+#            Chemia - Classification Training with K-Fold CV
 # ===================================================================
 # Configuration for classification model training using 5-fold 
 # cross-validation with stratified sampling.

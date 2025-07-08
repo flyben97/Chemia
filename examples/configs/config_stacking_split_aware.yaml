@@ -1,4 +1,4 @@
-# CRAFT 模型堆叠配置 - Split-Aware模式示例
+# Chemia 模型堆叠配置 - Split-Aware模式示例
 # 这个配置文件展示如何使用split_aware功能，让堆叠验证数据与原实验的数据拆分策略保持一致
 
 stacking:

@@ -1,57 +1,125 @@
-# CRAFT: Chemical Reaction Analysis and Feature-based Training
-# Core dependencies for machine learning framework
+# CHEMIA: Chemical Reaction Analysis and Feature-based Training
+# Improved dependency configuration - Added version upper bounds and missing dependencies
 
-# Core scientific computing
-numpy>=1.21.0
-pandas>=1.3.0
-scipy>=1.7.0
+# ======================================================================
+# Core Scientific Computing
+# ======================================================================
+numpy>=1.21.0,<2.0
+pandas>=1.3.0,<3.0
+scipy>=1.7.0,<2.0
 
-# Machine Learning - Core
-scikit-learn>=1.0.2
+# ======================================================================
+# Machine Learning Core
+# ======================================================================
+scikit-learn>=1.0.2,<2.0
 
-# Machine Learning - Gradient Boosting
-xgboost>=1.6.0
-lightgbm>=3.3.0
-catboost>=1.0.4
+# ======================================================================
+# Gradient Boosting Algorithms
+# ======================================================================
+xgboost>=1.6.0,<4.0
+lightgbm>=3.3.0,<5.0
+catboost>=1.0.4,<2.0
 
-# Deep Learning - PyTorch ecosystem
-# NOTE: Please install PyTorch manually based on your system configuration
-# Visit: https://pytorch.org/get-started/locally/
-# Recommended versions:
-# torch>=1.11.0
-# torch-geometric>=2.0.4
-# torch-cluster>=1.6.0
-# torch-scatter>=2.0.9
-# torch-sparse>=0.6.13
+# ======================================================================
+# Deep Learning - PyTorch Ecosystem
+# ======================================================================
+# Important: Please install PyTorch manually according to your system
+# 
+# GPU version (recommended):
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# 
+# CPU version:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+# 
+# Graph Neural Networks (optional):
+# pip install torch_geometric torch_cluster torch_scatter torch_sparse
 #
-# Example installation commands:
-# For CPU only: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-# For CUDA 11.8: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-# For PyG: pip install torch_geometric torch_cluster torch_scatter torch_sparse
+# If already installed, you can enable the following comments:
+# torch>=1.11.0,<3.0
+# torchvision>=0.12.0,<1.0
+# torchaudio>=0.11.0,<3.0
+# torch-geometric>=2.0.4,<3.0
+# torch-cluster>=1.6.0,<2.0
+# torch-scatter>=2.0.9,<3.0
+# torch-sparse>=0.6.13,<1.0
 
-# Chemical informatics
+# ======================================================================
+# Chemical Informatics
+# ======================================================================
 rdkit>=2022.03.1
 
-# Hyperparameter optimization
-optuna>=3.0.0
+# ======================================================================
+# Hyperparameter Optimization
+# ======================================================================
+optuna>=3.0.0,<5.0
 
-# Data processing and utilities
-pyyaml>=6.0
-joblib>=1.1.0
+# ======================================================================
+# Data Processing and Utilities
+# ======================================================================
+pyyaml>=6.0,<7.0
+joblib>=1.1.0,<2.0
+tqdm>=4.62.0,<5.0
 
-# Progress and visualization
-rich>=12.0.0
-tqdm>=4.62.0
+# Add missing system dependencies
+typing-extensions>=4.0.0,<5.0
+packaging>=21.0,<25.0
 
-# Optional: Enhanced features
-# Uncomment if you want additional features
-# matplotlib>=3.5.0
-# seaborn>=0.11.0
-# plotly>=5.0.0
-# jupyterlab>=3.0.0
+# ======================================================================
+# User Interface and Visualization
+# ======================================================================
+rich>=12.0.0,<14.0
 
-# Development and testing (optional)
-# pytest>=7.0.0
-# pytest-cov>=3.0.0
-# flake8>=4.0.0
-# black>=22.0.0
+# Visualization packages (recommended)
+matplotlib>=3.5.0,<4.0
+seaborn>=0.11.0,<1.0
+plotly>=5.0.0,<6.0
+
+# ======================================================================
+# Development and Testing Tools (Optional)
+# ======================================================================
+# Uncomment to install development tools
+# pytest>=7.0.0,<9.0
+# pytest-cov>=3.0.0,<5.0
+# flake8>=4.0.0,<8.0
+# black>=22.0.0,<25.0
+# jupyterlab>=3.0.0,<5.0
+
+# ======================================================================
+# Compatibility Notes
+# ======================================================================
+# 
+# Python version support: 3.8-3.12
+# 
+# Tested environments:
+# - Ubuntu 20.04/22.04
+# - Windows 10/11
+# - macOS 11+
+# 
+# Performance optimization recommendations:
+# - Set environment variables for multi-threading:
+#   export OMP_NUM_THREADS=4
+#   export MKL_NUM_THREADS=4
+# 
+# Troubleshooting:
+# - If installation fails, try upgrading pip: pip install --upgrade pip
+# - For RDKit installation issues, use conda: conda install rdkit -c conda-forge
+# - For PyTorch installation, visit: https://pytorch.org/get-started/locally/
+
+# ======================================================================
+# Installation Guide
+# ======================================================================
+#
+# Basic installation (core functionality only):
+# pip install -r requirements_improved.txt
+#
+# Complete installation (including visualization):
+# pip install -r requirements_improved.txt matplotlib seaborn plotly
+#
+# Development environment installation:
+# pip install -r requirements_improved.txt pytest flake8 black jupyterlab
+#
+# Recommended installation order:
+# 1. Install basic dependencies first
+# 2. Manually install PyTorch (choose based on your system)
+# 3. Install optional visualization packages
+# 4. Finally install development tools 

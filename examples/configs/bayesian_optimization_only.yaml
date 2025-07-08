@@ -1,5 +1,5 @@
 # ===================================================================
-#              CRAFT - Bayesian Optimization Only Configuration
+#              Chemia - Bayesian Optimization Only Configuration
 # ===================================================================
 # Configuration for running Bayesian optimization using a pre-trained
 # model to find optimal reaction conditions.

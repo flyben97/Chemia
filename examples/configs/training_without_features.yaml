@@ -1,5 +1,5 @@
 # ===================================================================
-#              CRAFT - Training without Extra Feature Engineering
+#              Chemia - Training without Extra Feature Engineering
 # ===================================================================
 # Configuration that uses only basic molecular fingerprints
 # without additional descriptors or complex features.

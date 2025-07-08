@@ -1,5 +1,5 @@
 # ===================================================================
-#      CRAFT - Optimization Only Configuration v1.0
+#      Chemia - Optimization Only Configuration v1.0
 # ===================================================================
 # This configuration file is for running Bayesian optimization
 # on an already trained model without training new models.

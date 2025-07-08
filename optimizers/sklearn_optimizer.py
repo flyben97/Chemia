@@ -14,6 +14,7 @@ from models.sklearn_models import (
 )
 from sklearn.metrics import r2_score, f1_score, mean_squared_error, mean_absolute_error, accuracy_score, precision_score, recall_score
 from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.preprocessing import StandardScaler
 import numpy as np
 import lightgbm 
 import xgboost as xgb 
@@ -141,10 +142,11 @@ class SklearnOptimizer(BaseOptimizer):
                 'alpha': {'type': 'float', 'low': 1e-3, 'high': 1000, 'log': True}
             },
             'svr': { 
-                'C': {'type': 'float', 'low': 1e-2, 'high': 1e3, 'log':True},
-                'epsilon': {'type': 'float', 'low': 0.01, 'high': 0.5, 'log':True},
-                'kernel': {'type': 'categorical', 'choices': ['linear', 'poly', 'rbf']},
-                'gamma': {'type': 'float', 'low': 1e-4, 'high': 1e2, 'log': True}
+                'C': {'type': 'float', 'low': 0.1, 'high': 100, 'log':True}, 
+                'epsilon': {'type': 'float', 'low': 0.01, 'high': 0.2},  
+                'kernel': {'type': 'categorical', 'choices': ['linear', 'rbf']}, 
+                'gamma': {'type': 'float', 'low': 1e-3, 'high': 10, 'log': True},  
+                'max_iter': {'type': 'int', 'low': 1000, 'high': 10000}  
             },
             'logisticregression': {
                 'C': {'type': 'float', 'low': 0.01, 'high': 100.0, 'log': True},
@@ -204,6 +206,12 @@ class SklearnOptimizer(BaseOptimizer):
         super().__init__(model_class, current_param_grid, n_trials, random_state, cv, task_type, num_classes)
         self.models_without_random_state = ['kneighbors', 'kernelridge', 'ridge', 'svr', 'svc', 'logisticregression']
         self.model_run_output_dir = None  # Will be set by trainer_setup.py for CatBoost
+        
+        # 为需要数据标准化的模型添加 scaler
+        self.scaler = None
+        if self.model_name_orig in ['svr', 'svc', 'kernelridge']:
+            self.scaler = StandardScaler()
+        self.data_is_scaled = False
 
     def _prepare_model_kwargs(self, params_from_trial, for_cv_fold=False): 
 
@@ -256,7 +264,8 @@ class SklearnOptimizer(BaseOptimizer):
         elif self.model_name_orig == 'lgbm': kwargs['n_jobs'] = -1; kwargs['verbose'] = -100 
         elif self.model_name_orig == 'randomforest': 
             # Optimize Random Forest for better performance
-            n_jobs = min(4, max(1, os.cpu_count() // 2)) if os.cpu_count() else 2  # Use at most 4 cores or half available cores
+            cpu_count = os.cpu_count()
+            n_jobs = min(4, max(1, cpu_count // 2)) if cpu_count else 2  # Use at most 4 cores or half available cores
             kwargs['n_jobs'] = n_jobs
             kwargs['random_state'] = self.random_state  # Ensure reproducibility
             
@@ -266,7 +275,8 @@ class SklearnOptimizer(BaseOptimizer):
                 kwargs['max_features'] = 'sqrt'  # Default to sqrt for faster computation
         elif self.model_name_orig == 'extratrees':
             # Optimize ExtraTrees with similar settings to Random Forest
-            n_jobs = min(4, max(1, os.cpu_count() // 2)) if os.cpu_count() else 2  # Use at most 4 cores or half available cores
+            cpu_count = os.cpu_count()
+            n_jobs = min(4, max(1, cpu_count // 2)) if cpu_count else 2  # Use at most 4 cores or half available cores
             kwargs['n_jobs'] = n_jobs
             kwargs['random_state'] = self.random_state  # Ensure reproducibility
             
@@ -279,6 +289,19 @@ class SklearnOptimizer(BaseOptimizer):
                 kwargs['solver'] = 'auto'  # Let sklearn choose the best solver
             if 'max_iter' not in kwargs:
                 kwargs['max_iter'] = 1000  # Increase max iterations for convergence
+        elif self.model_name_orig == 'svr':
+            # Optimize SVR for better performance and prevent hanging
+            if 'cache_size' not in kwargs:
+                kwargs['cache_size'] = 1000  # Increase cache size for faster computation
+            if 'tol' not in kwargs:
+                kwargs['tol'] = 1e-4  # Set stricter tolerance for better convergence
+            if 'shrinking' not in kwargs:
+                kwargs['shrinking'] = True  # Enable shrinking heuristic
+            # 确保有足够的迭代次数
+            if 'max_iter' not in kwargs:
+                kwargs['max_iter'] = 50000  # Increase default max_iter
+            elif kwargs.get('max_iter', 0) < 5000:
+                kwargs['max_iter'] = max(kwargs['max_iter'], 5000)  # Minimum 5000 iterations
         elif self.model_name_orig == 'xgboost': kwargs['verbosity'] = 0 
         
         if self.task_type != 'regression' and self.model_name_orig == 'xgboost':
@@ -294,10 +317,44 @@ class SklearnOptimizer(BaseOptimizer):
             
         return kwargs
 
+    def _preprocess_data_for_training(self, X_train, X_val=None, fit_scaler=True):
+        """
+        为需要数据标准化的模型预处理数据
+        
+        Args:
+            X_train: 训练数据
+            X_val: 验证数据（可选）
+            fit_scaler: 是否拟合scaler
+            
+        Returns:
+            预处理后的数据
+        """
+        if self.scaler is None:
+            return X_train, X_val
+        
+        if fit_scaler:
+            X_train_scaled = self.scaler.fit_transform(X_train)
+        else:
+            X_train_scaled = self.scaler.transform(X_train)
+            
+        X_val_scaled = None
+        if X_val is not None:
+            X_val_scaled = self.scaler.transform(X_val)
+            
+        return X_train_scaled, X_val_scaled
+
     def objective(self, trial, X_train, y_train, X_val, y_val):
         self.current_trial_number_for_cleanup = trial.number
 
         params_from_trial = self._suggest_params(trial) 
+        
+        # Special handling for SVR on large datasets
+        if self.model_name_orig == 'svr' and X_train.shape[0] > 5000:
+            # For large datasets, force linear kernel and adjust parameters
+            params_from_trial['kernel'] = 'linear'
+            params_from_trial['C'] = min(params_from_trial.get('C', 1.0), 10.0)  # Cap C value
+            if 'gamma' in params_from_trial:
+                del params_from_trial['gamma']  # gamma not used for linear kernel
         
         if self.model_name_for_params in ['kernelridge', 'svc'] and params_from_trial.get('kernel') == 'poly':
             if 'degree' not in params_from_trial : 
@@ -324,6 +381,9 @@ class SklearnOptimizer(BaseOptimizer):
         _y_train = y_train.ravel() 
         _y_val = y_val.ravel()
 
+        # 为需要标准化的模型预处理数据
+        X_train_processed, X_val_processed = self._preprocess_data_for_training(X_train, X_val, fit_scaler=True)
+
         fold_scores_list = []
         trial_model = None  # Store the model from this trial
 
@@ -333,9 +393,11 @@ class SklearnOptimizer(BaseOptimizer):
             warnings.filterwarnings("ignore", category=FutureWarning)
             # Suppress LinearAlgebraWarning for ill-conditioned matrices in Ridge/KernelRidge
             try:
-                warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
-            except AttributeError:
-                # LinAlgWarning was removed in newer numpy versions
+                # 安全地获取 LinAlgWarning，如果不存在则使用 Warning 作为默认值
+                linalg_warning = getattr(np.linalg, 'LinAlgWarning', Warning)
+                warnings.filterwarnings("ignore", category=linalg_warning)
+            except (AttributeError, ImportError):
+                # LinAlgWarning was removed in newer numpy versions or not accessible
                 pass 
             
             if self.cv is not None and self.cv > 1:
@@ -348,6 +410,12 @@ class SklearnOptimizer(BaseOptimizer):
                 for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X_train, _y_train)):
                     X_fold_train, X_fold_val = X_train[train_idx], X_train[val_idx]
                     y_fold_train, y_fold_val = _y_train[train_idx], _y_train[val_idx]
+                    
+                    # 为每个fold独立进行数据标准化
+                    if self.scaler is not None:
+                        fold_scaler = StandardScaler()
+                        X_fold_train = fold_scaler.fit_transform(X_fold_train)
+                        X_fold_val = fold_scaler.transform(X_fold_val)
                     
                     current_model_kwargs_for_fit = model_kwargs.copy() 
                     model = self.model_class(**current_model_kwargs_for_fit) 
@@ -391,10 +459,10 @@ class SklearnOptimizer(BaseOptimizer):
             else: # No CV path - train on full train set, validate on validation set
                 model_kwargs = self._prepare_model_kwargs(params_from_trial, for_cv_fold=False) 
                 model = self.model_class(**model_kwargs)
-                model.fit(X_train, _y_train) 
+                model.fit(X_train_processed, _y_train) 
                 trial_model = model  # Store this model for potential reuse
                 
-                y_pred = model.predict(X_val)
+                y_pred = model.predict(X_val_processed)
                 if self.task_type == 'regression':
                     mean_score = r2_score(_y_val, y_pred)
                 else: 
@@ -418,6 +486,10 @@ class SklearnOptimizer(BaseOptimizer):
         if self.hpo_trained_model is not None and self.cv is None:
             # In train_valid_test mode, reuse the model trained during HPO
             self.best_model_ = self.hpo_trained_model
+            # 确保 scaler 已经拟合
+            if self.scaler is not None and not self.data_is_scaled:
+                self.scaler.fit(X_train)
+                self.data_is_scaled = True
             return
         
         # Otherwise, train a new model (this happens in CV mode)
@@ -430,32 +502,53 @@ class SklearnOptimizer(BaseOptimizer):
             del model_kwargs_final['early_stopping_round']
             
         _y_train = y_train.ravel()
+        
+        # 预处理数据
+        X_train_processed, _ = self._preprocess_data_for_training(X_train, fit_scaler=True)
+        self.data_is_scaled = True
+        
         self.best_model_ = self.model_class(**model_kwargs_final)
         
         # --- MODIFICATION START: Suppress warnings during final fit ---
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
             warnings.filterwarnings("ignore", category=FutureWarning)
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            # 抑制SVR收敛警告
+            from sklearn.exceptions import ConvergenceWarning
+            warnings.filterwarnings("ignore", category=ConvergenceWarning)
             try:
-                warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
-            except AttributeError:
-                # LinAlgWarning was removed in newer numpy versions
+                import numpy.linalg
+                warnings.filterwarnings("ignore", category=getattr(numpy.linalg, 'LinAlgWarning', Warning))
+            except (AttributeError, ImportError):
+                # LinAlgWarning was removed in newer numpy versions or not available
                 pass
-            self.best_model_.fit(X_train, _y_train)
+            self.best_model_.fit(X_train_processed, _y_train)
         # --- MODIFICATION END ---
 
     def predict(self, X):
         if self.best_model_ is None: raise ValueError("Model has not been fitted. Call fit() first.")
         
+        # 预处理数据（如果需要）
+        if self.scaler is not None and self.data_is_scaled:
+            X_processed = self.scaler.transform(X)
+        else:
+            X_processed = X
+        
         # --- MODIFICATION START: Suppress warnings during prediction ---
         with warnings.catch_warnings(): 
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            from sklearn.exceptions import ConvergenceWarning
+            warnings.filterwarnings("ignore", category=ConvergenceWarning)
             try:
-                warnings.filterwarnings("ignore", category=np.linalg.LinAlgWarning)
-            except AttributeError:
-                # LinAlgWarning was removed in newer numpy versions
+                import numpy.linalg
+                warnings.filterwarnings("ignore", category=getattr(numpy.linalg, 'LinAlgWarning', Warning))
+            except (AttributeError, ImportError):
+                # LinAlgWarning was removed in newer numpy versions or not available
                 pass
-            predictions = self.best_model_.predict(X)
+            predictions = self.best_model_.predict(X_processed)
         # --- MODIFICATION END ---
         return predictions
 
@@ -488,9 +581,11 @@ class SklearnOptimizer(BaseOptimizer):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning); warnings.simplefilter("ignore", FutureWarning)
             try:
-                warnings.simplefilter("ignore", np.linalg.LinAlgWarning)
-            except AttributeError:
-                # LinAlgWarning was removed in newer numpy versions
+                # 安全地获取 LinAlgWarning，如果不存在则使用 Warning 作为默认值
+                linalg_warning = getattr(np.linalg, 'LinAlgWarning', Warning)
+                warnings.simplefilter("ignore", linalg_warning)
+            except (AttributeError, ImportError):
+                # LinAlgWarning was removed in newer numpy versions or not accessible
                 pass
             for fold_idx, (train_idx, val_idx) in enumerate(kf.split(X_train_full_for_cv, y_ravel)):
                 print(f"  Generating predictions for CV OOF fold {fold_idx + 1}/{self.cv}...")
@@ -498,7 +593,7 @@ class SklearnOptimizer(BaseOptimizer):
                 y_train, y_val = y_ravel[train_idx], y_ravel[val_idx]
 
                 model, fit_params = self.model_class(**model_kwargs.copy()), {}
-                # ... (fit params logic is the same)
+
                 if self.model_name_orig == 'xgboost': fit_params.update({'eval_set': [(X_val, y_val)], 'verbose': False})
                 elif self.model_name_orig == 'lgbm':
                     if 'early_stopping_round' in model_kwargs: model = self.model_class(**{k:v for k,v in model_kwargs.items() if k != 'early_stopping_round'})
