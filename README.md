@@ -2,6 +2,8 @@
   <img src="images/chemia_logo.png" alt="Chemia Logo" width="300"/>
   <p>A comprehensive ML framework for molecular property prediction, reaction optimization, and materials design. Supports multiple molecular representations, pretrained models, and diverse ML algorithms.</p>
   <a href="https://github.com/flyben97/Chemia">github.com/flyben97/Chemia</a>
+  <br/>
+  <sub><a href="README.md">English</a> | <a href="README_zh-CN.md">中文</a></sub>
 </div>
 
 ## ✨ Key Features
@@ -44,7 +46,7 @@
 ### 1. Install
 
 ```bash
-git clone <repository> && cd Chemia
+git clone https://github.com/flyben97/Chemia.git && cd Chemia
 
 # Conda
 conda create -n chemia python=3.10 && conda activate chemia
