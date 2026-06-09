@@ -7,7 +7,7 @@ from sklearn.ensemble import (
 )
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
-from sklearn.kernel_ridge import KernelRidge 
+from sklearn.kernel_ridge import KernelRidge
 from sklearn.linear_model import (
     Ridge, LogisticRegression, ElasticNet, Lasso, BayesianRidge,
     SGDRegressor, SGDClassifier
@@ -17,6 +17,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor, GaussianProcessCl
 import xgboost as xgb
 from catboost import CatBoostRegressor, CatBoostClassifier
 from lightgbm import LGBMRegressor, LGBMClassifier
+from pytorch_tabnet.tab_model import TabNetRegressor, TabNetClassifier
 
 # Aliases for consistency
 XGBoostRegressor = xgb.XGBRegressor

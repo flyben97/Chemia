@@ -9,7 +9,7 @@ dependencies:
   # Python - Specify version range
   - python>=3.8,<3.13
 
-  # Core scientific computing - Add reasonable upper bounds
+  # Core scientific computing
   - numpy>=1.21.0,<2.0
   - pandas>=1.3.0,<3.0
   - scipy>=1.7.0,<2.0
@@ -17,27 +17,11 @@ dependencies:
   # Machine learning core
   - scikit-learn>=1.0.2,<2.0
 
-  # Add missing system dependencies
+  # System dependencies
   - typing_extensions>=4.0.0
   - packaging>=21.0
 
-  # PyTorch ecosystem - Recommend installing complete suite
-  # Note: Please choose appropriate version for your system
-  # GPU version (recommended):
-  # conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
-  # CPU version:
-  # conda install pytorch torchvision torchaudio cpuonly -c pytorch
-  
-  # If PyTorch is already installed, you can enable the following lines:
-  # - pytorch>=1.11.0,<3.0
-  # - torchvision>=0.12.0
-  # - torchaudio>=0.11.0
-
-  # Graph Neural Networks (if needed)
-  # conda install pyg -c pyg
-  # - pytorch-geometric
-
-  # Chemical informatics
+  # Chemical informatics (install via conda for better compatibility)
   - rdkit>=2022.03.1
 
   # Data processing
@@ -45,7 +29,7 @@ dependencies:
   - joblib>=1.1.0,<2.0
   - tqdm>=4.62.0,<5.0
 
-  # Visualization - Complete installation
+  # Visualization (conda versions for better integration)
   - matplotlib>=3.5.0,<4.0
   - seaborn>=0.11.0,<1.0
 
@@ -53,13 +37,22 @@ dependencies:
   - jupyter>=1.0.0
   - jupyterlab>=3.0.0,<5.0
 
+  # PyTorch (CPU version by default)
+  # For GPU support, use: pytorch::pytorch::*=*cuda* instead
+  - pytorch::pytorch>=1.11.0
+  - pytorch::torchvision>=0.12.0
+  - pytorch::torchaudio>=0.11.0
+
   # Pip dependencies
   - pip>=21.0
   - pip:
-    # Machine Learning - Gradient Boosting (add version upper bounds)
+    # Machine Learning - Gradient Boosting
     - xgboost>=1.6.0,<4.0
     - lightgbm>=3.3.0,<5.0
     - catboost>=1.0.4,<2.0
+    
+    # PyTorch TabNet - Neural Network for tabular data
+    - pytorch-tabnet>=4.0.0,<5.0
     
     # Hyperparameter optimization
     - optuna>=3.0.0,<5.0
@@ -70,19 +63,17 @@ dependencies:
     # Additional visualization
     - plotly>=5.0.0,<6.0
     
+    # Web UI (optional)
+    - streamlit>=1.28.0,<2.0
+    
     # Development tools (optional)
     - pytest>=7.0.0,<9.0
     - pytest-cov>=3.0.0,<5.0
     - flake8>=4.0.0,<8.0
     - black>=22.0.0,<25.0
 
-# Environment variables
+# Environment variables for performance optimization
 variables:
-  # Set reasonable thread count
   OMP_NUM_THREADS: "4"
   MKL_NUM_THREADS: "4"
-  
-# Post-installation scripts (optional)
-# post_install:
-#   - echo "CHEMIA environment setup complete!"
-#   - echo "Remember to install PyTorch manually for your system" 
+  NUMBA_NUM_THREADS: "4" 

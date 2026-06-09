@@ -43,26 +43,26 @@ class ANNOptimizer(BaseOptimizer):
             4: {'low': 8, 'high': 64},      # L4: small
             5: {'low': 8, 'high': 32},      # L5: smallest (closer to output)
         }
-        
+
         hidden_layers = []
         last_units = float('inf')
-        
+
         for i in range(n_layers):
             config = layer_configs.get(i, {'low': 8, 'high': 32})  # Default for layers beyond 5
             low, high = config['low'], min(config['high'], last_units)
             if low > high: low = high
-            
+
             param_name = f'n_units_l{i}'
             n_units = trial.suggest_int(param_name, low, high, step=8)
             hidden_layers.append(n_units)
             last_units = n_units
-            
+
         return hidden_layers
 
     def _create_hidden_layers_config(self, trial_or_params):
         """Create hidden layers configuration, handling both trial objects and parameter dictionaries."""
         is_trial = not isinstance(trial_or_params, dict)
-        
+
         if is_trial:
             # During optimization: suggest n_layers first, then suggest layer-specific parameters
             n_layers = trial_or_params.suggest_int('n_layers', self.param_grid['n_layers']['low'], self.param_grid['n_layers']['high'])
@@ -78,7 +78,7 @@ class ANNOptimizer(BaseOptimizer):
                 else:
                     # Fallback if parameter is missing (shouldn't happen with proper saved params)
                     hidden_layers.append(128)  # Default value
-        
+
         return hidden_layers
 
     def objective(self, trial, X_train, y_train, X_val, y_val):
@@ -92,13 +92,13 @@ class ANNOptimizer(BaseOptimizer):
                     base_params[param_name] = trial.suggest_float(param_name, param_info['low'], param_info['high'], log=param_info.get('log', False))
                 elif param_info['type'] == 'categorical':
                     base_params[param_name] = trial.suggest_categorical(param_name, param_info['choices'])
-        
+
         hidden_layers_config = self._create_hidden_layers_config(trial)
         dropout_rate, weight_decay, learning_rate, epochs, patience = base_params['dropout_rate'], base_params['weight_decay'], base_params['learning_rate'], base_params['epochs'], base_params['patience']
         y_train_prepared, y_target_type_torch, y_val_prepared = self._prepare_y_data(y_train, y_val)
         fold_scores_list = []
         trial_model = None  # Store the model from this trial
-        
+
         def train_and_evaluate_fold(model, optimizer, X_train_t, y_train_t, X_val_t, y_val_np):
             best_val_loss, patience_counter, best_model_state = float('inf'), 0, None
             for epoch in range(epochs):
@@ -117,7 +117,7 @@ class ANNOptimizer(BaseOptimizer):
                 elif self.task_type == 'binary_classification': score = f1_score(y_val_np, (torch.sigmoid(y_pred_logits).numpy() > 0.5).astype(int), average='binary', zero_division='warn')
                 else: score = f1_score(y_val_np, torch.argmax(y_pred_logits, dim=1).numpy(), average='weighted', zero_division='warn')
             return score, model
-            
+
         if self.cv is not None and self.cv > 1:
             kf = self._get_cv_splitter(); y_for_kf_split = y_train_prepared.ravel() if self.task_type != 'regression' else y_train_prepared
             for train_idx, val_idx in kf.split(X_train, y_for_kf_split):
@@ -135,25 +135,25 @@ class ANNOptimizer(BaseOptimizer):
             score, trained_model = train_and_evaluate_fold(model, optimizer, X_train_t, y_train_t, X_val_t, y_val_prepared)
             trial_model = trained_model  # Store this model for potential reuse
             fold_scores_list.append(score)
-            
+
         mean_score = np.mean(fold_scores_list) if fold_scores_list else (-np.inf if self.task_type == 'regression' else 0.0)
-        
+
         # --- FIXED: Store the best trial model for reuse in train_valid_test mode ---
         if trial_model is not None and (not hasattr(self, '_best_trial_score') or mean_score > self._best_trial_score):
             self._best_trial_score = mean_score
             self.hpo_trained_model = trial_model
-            
+
         trial.set_user_attr("fold_scores", fold_scores_list); return mean_score
 
     def fit(self, X_train, y_train):
         if self.best_params_ is None: raise ValueError("Optimization has not been run. Call optimize() first.")
-        
+
         # --- FIXED: Check if we have a model from HPO phase that can be reused ---
         if self.hpo_trained_model is not None and self.cv is None:
             # In train_valid_test mode, reuse the model trained during HPO
             self.best_model_ = self.hpo_trained_model
             return
-            
+
         # Otherwise, train a new model (this happens in CV mode)
         params = self.best_params_; hidden_layers_config = self._create_hidden_layers_config(params)
         dropout_rate, weight_decay, learning_rate, epochs = params['dropout_rate'], params['weight_decay'], params['learning_rate'], params['epochs']
@@ -192,7 +192,7 @@ class ANNOptimizer(BaseOptimizer):
             if self.task_type == 'regression': return logits.numpy()
             elif self.task_type == 'binary_classification': return (torch.sigmoid(logits).numpy() > 0.5).astype(int)
             else: return torch.argmax(logits, dim=1).numpy()
-            
+
     def predict_proba(self, X):
         if self.best_model_ is None: raise ValueError("Model has not been fitted. Call fit() first.")
         if not (self.task_type == 'binary_classification' or self.task_type == 'multiclass_classification'): raise AttributeError("predict_proba is only for classification tasks.")
@@ -202,12 +202,12 @@ class ANNOptimizer(BaseOptimizer):
             if self.task_type == 'binary_classification': probs = torch.sigmoid(logits).numpy(); return np.hstack([1 - probs, probs])
             elif self.task_type == 'multiclass_classification': return torch.softmax(logits, dim=1).numpy()
             return None
-            
+
     def get_cv_predictions(self, X_train_full_for_cv, y_train_full_for_cv):
         if self.best_params_ is None: raise ValueError("Best parameters not found. Run optimize() first.")
         if self.cv is None or self.cv < 2:
             print("CV was not used, cannot get CV predictions for ANN."); return None
-        
+
         params = self.best_params_; hidden_layers_config = self._create_hidden_layers_config(params)
         dropout_rate, weight_decay, learning_rate, epochs, patience = params['dropout_rate'], params['weight_decay'], params['learning_rate'], params['epochs'], params['patience']
         y_train_prepared, y_target_type_torch, _ = self._prepare_y_data(y_train_full_for_cv)
@@ -220,7 +220,7 @@ class ANNOptimizer(BaseOptimizer):
             num_target_classes = self.num_classes if self.num_classes and self.num_classes >= 2 else 2
             if self.task_type == 'binary_classification': num_target_classes = 2
             oof_probas = np.zeros((len(y_train_prepared), num_target_classes))
-        
+
         # --- MODIFICATION: Store metrics for each fold ---
         fold_metrics_list = []
         y_for_kf_split = y_train_prepared.ravel() if self.task_type != 'regression' else y_train_prepared
@@ -234,7 +234,7 @@ class ANNOptimizer(BaseOptimizer):
             fold_model = ComplexANN(X_fold_train.shape[1], hidden_layers_config, self.ann_output_size, self.task_type, dropout_rate).to(self.device)
             optimizer = optim.Adam(fold_model.parameters(), lr=learning_rate, weight_decay=weight_decay)
             X_fold_train_t, y_fold_train_t, X_fold_val_t = torch.tensor(X_fold_train, dtype=torch.float32).to(self.device), torch.tensor(y_fold_train_np, dtype=y_target_type_torch).to(self.device), torch.tensor(X_fold_val, dtype=torch.float32).to(self.device)
-            
+
             best_val_loss, patience_counter, best_model_state = float('inf'), 0, None
             for _ in range(epochs):
                 fold_model.train(); optimizer.zero_grad(); outputs = fold_model(X_fold_train_t); loss = self.criterion(outputs, y_fold_train_t); loss.backward(); optimizer.step()
@@ -245,7 +245,7 @@ class ANNOptimizer(BaseOptimizer):
                 else: patience_counter += 1
                 if patience_counter >= patience: break
             if best_model_state: fold_model.load_state_dict(best_model_state)
-            
+
             fold_model.eval()
             with torch.no_grad():
                 logits = fold_model(X_fold_val_t).cpu()

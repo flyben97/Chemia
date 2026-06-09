@@ -1,0 +1,38 @@
+# FreeSolv Free Solvation Energy Regression
+data:
+  source_mode: single_file
+  single_file_config:
+    main_file_path: data/FreeSolv.csv
+    smiles_col: smiles
+    target_col: expt
+
+task_type: regression
+
+features:
+  generators:
+    - name: transformer_embedding
+      config:
+        model_type: unimolv2_310m
+    - name: rdkit_fingerprint
+      config:
+        type: morgan
+        nBits: 2048
+        radius: 2
+
+split_config:
+  split_mode: hold_out
+  hold_out:
+    test_size: 0.2
+    random_state: 42
+
+training:
+  models_to_run:
+    - xgboost
+    - ann
+    - tabnet
+    - lgbm
+    - catboost
+    - randomforest
+    - ridge
+  n_trials: 50
+  random_state: 42

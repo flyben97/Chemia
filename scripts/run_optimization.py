@@ -1,20 +1,26 @@
 # run_optimization.py
 
 import os
+
 import yaml
 import logging
 from datetime import datetime
 from rich.logging import RichHandler
 from rich.console import Console
 import argparse
-import json
 
-# Import from our modules
+
+# --- 标准 CLI 初始化 ---
+from utils.cli_setup import standard_cli_setup
+
+standard_cli_setup()
+# --- END ---
+
 from utils.predictor_api import Predictor
 from optimization.space_loader import SearchSpaceLoader
 from optimization.optimizer import BayesianReactionOptimizer
 from utils.io_handler import (
-    load_model_from_path, 
+    load_model_from_path,
     load_scaler_from_path,
     load_label_encoder_from_path, # <-- Import the new loader
     load_config_from_path,
@@ -60,62 +66,63 @@ def main(config_path: str):
 
             model_dir = os.path.join(source_dir, 'models', full_model_name)
             data_splits_dir = os.path.join(source_dir, 'data_splits')
-            
+
             train_config_path = os.path.join(source_dir, 'run_config.json')
             model_path = find_model_file(model_dir, full_model_name)
             scaler_path = os.path.join(data_splits_dir, 'processed_dataset_scaler.joblib')
             encoder_path = os.path.join(data_splits_dir, 'processed_dataset_label_encoder.joblib')
-            
+
         elif mode == 'custom_artifacts':
             cfg = opt_config['custom_artifacts_mode']
             base_dir = cfg['base_dir']
-            
+
             train_config_path = os.path.join(base_dir, cfg['training_config_filename'])
             model_path = os.path.join(base_dir, cfg['model_filename'])
             scaler_path = os.path.join(base_dir, cfg['scaler_filename']) if cfg.get('scaler_filename') else None
             encoder_path = os.path.join(base_dir, cfg['encoder_filename']) if cfg.get('encoder_filename') else None
-        
+
         else:
             raise ValueError(f"Invalid mode '{mode}' in optimization config. Choose 'run_directory' or 'custom_artifacts'.")
 
         logging.info("Loading artifacts...")
         train_config = load_config_from_path(train_config_path)
         task_type = train_config.get('task_type', 'regression')
-        
+
         model = load_model_from_path(model_path, task_type)
         scaler = load_scaler_from_path(scaler_path) if scaler_path else None
         label_encoder = load_label_encoder_from_path(encoder_path) if (task_type != 'regression' and encoder_path) else None
-        
+
         # 3. Initialize the Core Components
         logging.info("-" * 50)
         logging.info("Initializing components...")
-        
+
         predictor = Predictor(
-            model=model, 
-            scaler=scaler, 
-            label_encoder=label_encoder, 
-            run_config=train_config, 
+            model=model,
+            scaler=scaler,
+            label_encoder=label_encoder,
+            run_config=train_config,
             output_dir=output_dir
         )
-        
+
         # --- MODIFICATION: Pass the entire components block to the loader ---
         space_loader = SearchSpaceLoader(opt_config['reaction_components'])
-        
+
         optimizer = BayesianReactionOptimizer(
             predictor=predictor,
             space_loader=space_loader, # The loader now knows about both fixed and search spaces
-            opt_config=opt_config['bayesian_optimization']
+            opt_config=opt_config['bayesian_optimization'],
+            output_dir="output"  # Default output directory for CSV files
         )
-        
+
         # 4. Run the Optimization
         logging.info("-" * 50)
         top_results = optimizer.run()
-        
+
         # 5. Save Final Report
         logging.info("=" * 50)
         logging.info("Top Optimized Conditions:")
         logging.info("\n" + top_results.to_string())
-        
+
         # Get top_k from config for dynamic filename
         top_k = opt_config['bayesian_optimization'].get('top_k_results', 10)
         output_csv_path = os.path.join(output_dir, f"top_{top_k}_optimized_conditions.csv")
@@ -129,8 +136,8 @@ def main(config_path: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run Bayesian Optimization for chemical reactions using a CHEMIA model.")
     parser.add_argument(
-        '--config', 
-        type=str, 
+        '--config',
+        type=str,
         default="config_optimization.yaml",
         help="Path to the optimization configuration YAML file."
     )

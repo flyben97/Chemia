@@ -3,26 +3,26 @@ import optuna
 import numpy as np
 from abc import ABC, abstractmethod
 # from utils.metrics import compute_metrics # REMOVE TOP-LEVEL IMPORT
-import logging 
-import warnings 
+import logging
+import warnings
 from rich.console import Console
 default_console_opt = Console()
 
 class BaseOptimizer(ABC):
     # ... (__init__, objective, _suggest_params, optimize methods are unchanged) ...
-    def __init__(self, model_class, param_grid, n_trials=100, random_state=42, cv=None, 
+    def __init__(self, model_class, param_grid, n_trials=100, random_state=42, cv=None,
                  task_type='regression', num_classes=None):
         self.model_class = model_class
         self.param_grid = param_grid
         self.n_trials = n_trials
         self.random_state = random_state
-        self.cv = cv 
+        self.cv = cv
         self.task_type = task_type
-        self.num_classes = num_classes 
+        self.num_classes = num_classes
         self.best_params_ = None
-        self.best_score_ = None 
-        self.best_model_ = None 
-        self.best_trial_fold_scores_ = [] 
+        self.best_score_ = None
+        self.best_model_ = None
+        self.best_trial_fold_scores_ = []
         self.console = default_console_opt
 
     @abstractmethod
@@ -85,7 +85,7 @@ class BaseOptimizer(ABC):
                 self.console.print(f"[dim]{log_message}[/dim]")
             else:
                 print(log_message)
-        
+
         # --- MODIFICATION: Removed n_jobs=-1 for stability testing ---
         def safe_objective_wrapper(trial):
             try:
@@ -101,7 +101,7 @@ class BaseOptimizer(ABC):
             except Exception as e:
                 self.console.print(f"[red]Error in objective function for trial {trial.number}: {e}[/red]")
                 return -np.inf if direction == 'maximize' else np.inf
-        
+
         study.optimize(
             func=safe_objective_wrapper,
             n_trials=self.n_trials,
@@ -135,7 +135,7 @@ class BaseOptimizer(ABC):
             self.optimize_best_trial_number_placeholder = study.best_trial.number
             self.best_trial_fold_scores_ = study.best_trial.user_attrs.get("fold_scores", [])
         return self.best_params_, self.best_score_
-        
+
     def evaluate(self, X_train, y_train, X_val, y_val, X_test, y_test, console=None):
             # --- 延迟导入 ---
             from utils.metrics import compute_metrics
@@ -144,7 +144,7 @@ class BaseOptimizer(ABC):
             effective_console = console if console is not None else self.console
 
             if self.best_model_ is None:
-                if self.best_params_ is not None and self.best_params_: 
+                if self.best_params_ is not None and self.best_params_:
                     effective_console.print("[dim]Best model not fitted yet for evaluation. Fitting with best parameters found...[/dim]")
                     self.fit(X_train, y_train)
                 else:
@@ -156,18 +156,18 @@ class BaseOptimizer(ABC):
             # --- MODIFICATION START: Suppress known warnings ---
             with warnings.catch_warnings():
                 warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")
-                
+
                 if self.task_type == 'regression':
                     y_train_pred = self.predict(X_train)
                     y_test_pred = self.predict(X_test) if X_test is not None and X_test.size > 0 else np.array([])
                     if X_val is not None and X_val.size > 0:
                         y_val_pred = self.predict(X_val)
-                else: 
-                    y_train_pred = self.predict(X_train) 
+                else:
+                    y_train_pred = self.predict(X_train)
                     y_test_pred = self.predict(X_test) if X_test is not None and X_test.size > 0 else np.array([])
                     if X_val is not None and X_val.size > 0:
                         y_val_pred = self.predict(X_val)
-                        
+
                     if hasattr(self, "predict_proba") and callable(getattr(self, "predict_proba")):
                         try:
                             y_train_pred_proba = self.predict_proba(X_train)
@@ -178,7 +178,7 @@ class BaseOptimizer(ABC):
                         except (AttributeError, NotImplementedError) as e:
                             effective_console.print(f"[yellow]Warning: predict_proba call failed for {self.__class__.__name__}: {e}[/yellow]")
             # --- MODIFICATION END ---
-            
+
             return compute_metrics(y_train_true=y_train, y_train_pred=y_train_pred,
                                 y_test_true=y_test, y_test_pred=y_test_pred,
                                 task_type=self.task_type, num_classes=self.num_classes,
@@ -187,10 +187,10 @@ class BaseOptimizer(ABC):
                                 console=effective_console)
 
     @abstractmethod
-    def predict(self, X): 
+    def predict(self, X):
         pass
-    
-    def predict_proba(self, X): 
+
+    def predict_proba(self, X):
         if not (self.task_type == 'binary_classification' or self.task_type == 'multiclass_classification'):
             raise AttributeError(f"predict_proba is not applicable for task_type '{self.task_type}'")
         if self.best_model_ is None:
@@ -199,7 +199,7 @@ class BaseOptimizer(ABC):
             effective_console = self.console
             effective_console.print(f"[yellow]Warning: Model {self.best_model_.__class__.__name__} may not have a predict_proba method or it's not enabled (e.g. SVC with probability=False).[/yellow]")
             raise NotImplementedError(f"The model {self.best_model_.__class__.__name__} does not have a predict_proba method or it's not configured for probabilities.")
-        
+
         # --- MODIFICATION START: Suppress known warnings ---
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning, message="X does not have valid feature names")

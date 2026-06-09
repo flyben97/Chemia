@@ -7,14 +7,14 @@ Can be directly imported and used in other Python code without command line or c
 
 Usage example:
     from prediction_api import load_model, predict, predict_single, quick_predict
-    
+
     # Load model
     predictor = load_model("output/my_experiment", "xgb")
-    
+
     # Predict single sample
     result = predict_single(predictor, {"SMILES": "CCO"})
     print(result)
-    
+
     # Predict multiple samples
     samples = [
         {"SMILES": "CCO"},
@@ -26,19 +26,16 @@ Usage example:
 
 import os
 import sys
-import warnings
+
 import contextlib
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Any, Union, Optional
 
-# 添加项目根目录到路径
-project_root = os.path.dirname(os.path.abspath(__file__))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
-# 抑制警告
-warnings.filterwarnings("ignore")
+# --- 标准 CLI 初始化（对作为脚本直接运行时生效） ---
+from utils.cli_setup import standard_cli_setup
+standard_cli_setup()
+# --- END ---
 
 from utils.io_handler import (
     load_model_from_path, load_scaler_from_path, load_label_encoder_from_path,
@@ -48,14 +45,14 @@ from core.run_manager import process_dataframe
 
 class CHEMIAPredictor:
     """CHEMIA model predictor class"""
-    
+
     def __init__(self, model, training_config, scaler=None, label_encoder=None):
         self.model = model
         self.training_config = training_config
         self.scaler = scaler
         self.label_encoder = label_encoder
         self.task_type = training_config.get('task_type', 'regression')
-    
+
     @contextlib.contextmanager
     def _suppress_output(self):
         """Context manager to suppress output"""
@@ -67,7 +64,7 @@ class CHEMIAPredictor:
         finally:
             sys.stdout, sys.stderr = original_stdout, original_stderr
             devnull.close()
-    
+
     def _process_input_data(self, data: Union[Dict, List[Dict], pd.DataFrame]) -> pd.DataFrame:
         """Process input data, convert to DataFrame format"""
         if isinstance(data, dict):
@@ -81,18 +78,28 @@ class CHEMIAPredictor:
             return data.copy()
         else:
             raise ValueError(f"Unsupported data type: {type(data)}")
-    
+
     def _generate_features(self, df: pd.DataFrame) -> np.ndarray:
         """Generate features"""
-        # Get configuration
-        common_cfg = self.training_config.get('data', {}).get('single_file_config', {})
+        # Get configuration (support different data source modes)
+        data_config = self.training_config.get('data', {})
+        source_mode = data_config.get('source_mode', 'single_file')
+
+        if source_mode == 'single_file':
+            common_cfg = data_config.get('single_file_config', {})
+        elif source_mode == 'pre_split_cv':
+            common_cfg = data_config.get('pre_split_cv_config', {})
+        elif source_mode == 'pre_split_t_v_t':
+            common_cfg = data_config.get('pre_split_t_v_t_config', {})
+        else:
+            raise ValueError(f"Unsupported data source mode: {source_mode}")
         feature_gen_cfg = self.training_config.get('features', {})
-        
+
         # Add dummy target column (real target values not needed for prediction)
         target_col = common_cfg.get('target_col', 'target')
         if target_col not in df.columns:
             df[target_col] = 0
-        
+
         # Generate features (suppress output)
         with self._suppress_output():
             X, _, _, _ = process_dataframe(
@@ -101,23 +108,23 @@ class CHEMIAPredictor:
                 feature_gen_cfg=feature_gen_cfg,
                 output_dir="."
             )
-        
+
         # Apply feature scaling
         if self.scaler is not None:
             X = self.scaler.transform(X)
-        
+
         return X
-    
+
     def predict(self, data: Union[Dict, List[Dict], pd.DataFrame]) -> Dict[str, Any]:
         """
         Make predictions
-        
+
         Args:
             data: Input data, can be:
                 - dict: Feature dictionary for single sample
                 - list[dict]: List of feature dictionaries for multiple samples
                 - pd.DataFrame: DataFrame containing features
-        
+
         Returns:
             dict: Dictionary containing prediction results, format:
                 {
@@ -129,15 +136,15 @@ class CHEMIAPredictor:
         """
         # Process input data
         df = self._process_input_data(data)
-        
+
         # Generate features
         X = self._generate_features(df)
-        
+
         # Make predictions
         predictions = self.model.predict(X)
         if not isinstance(predictions, np.ndarray):
             predictions = np.array(predictions)
-        
+
         # Get classification probabilities (if classification task)
         probabilities = None
         if self.task_type != 'regression':
@@ -150,7 +157,7 @@ class CHEMIAPredictor:
                             probabilities = np.array(prob_result) if not isinstance(prob_result, np.ndarray) else prob_result
             except Exception:
                 pass  # If unable to get probabilities, continue execution
-        
+
         # Decode classification labels (if label encoder exists)
         if self.task_type != 'regression' and self.label_encoder is not None:
             try:
@@ -164,27 +171,27 @@ class CHEMIAPredictor:
                 }
             except Exception:
                 pass  # If decoding fails, return original prediction values
-        
+
         return {
             'predictions': predictions,
             'probabilities': probabilities,
             'task_type': self.task_type,
             'n_samples': len(predictions)
         }
-    
+
     def predict_single(self, sample: Dict[str, Any]) -> Union[float, str, int]:
         """
         Predict single sample, directly return prediction value
-        
+
         Args:
             sample: Feature dictionary for single sample
-        
+
         Returns:
             Prediction value (scalar)
         """
         result = self.predict(sample)
         predictions = result['predictions']
-        
+
         if len(predictions) == 1:
             return predictions[0]
         else:
@@ -193,14 +200,14 @@ class CHEMIAPredictor:
 def load_model(experiment_dir: str, model_name: str) -> CHEMIAPredictor:
     """
     Load trained CHEMIA model
-    
+
     Args:
         experiment_dir: Experiment directory path
         model_name: Model name (e.g., 'xgb', 'lgbm', 'catboost')
-    
+
     Returns:
         CHEMIAPredictor: Predictor object
-    
+
     Raises:
         FileNotFoundError: If model files cannot be found
         ValueError: If model loading fails
@@ -208,85 +215,85 @@ def load_model(experiment_dir: str, model_name: str) -> CHEMIAPredictor:
     # Check experiment directory
     if not os.path.exists(experiment_dir):
         raise FileNotFoundError(f"Experiment directory does not exist: {experiment_dir}")
-    
+
     # Load training configuration
     config_path = os.path.join(experiment_dir, "run_config.json")
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Configuration file does not exist: {config_path}")
-    
+
     training_config = load_config_from_path(config_path)
     task_type = training_config.get('task_type', 'regression')
-    
+
     # Load model
     full_model_name = get_full_model_name(model_name)
     model_dir = os.path.join(experiment_dir, 'models', full_model_name)
-    
+
     if not os.path.exists(model_dir):
         raise FileNotFoundError(f"Model directory does not exist: {model_dir}")
-    
+
     model_path = find_model_file(model_dir, full_model_name)
     model = load_model_from_path(model_path, task_type)
-    
+
     # Load preprocessing tools
     data_splits_dir = os.path.join(experiment_dir, 'data_splits')
-    
+
     # Load feature scaler
     scaler = None
     scaler_path = os.path.join(data_splits_dir, "processed_dataset_scaler.joblib")
     if os.path.exists(scaler_path):
         scaler = load_scaler_from_path(scaler_path)
-    
+
     # Load label encoder (classification tasks)
     label_encoder = None
     if task_type != 'regression':
         encoder_path = os.path.join(data_splits_dir, "processed_dataset_label_encoder.joblib")
         if os.path.exists(encoder_path):
             label_encoder = load_label_encoder_from_path(encoder_path)
-    
+
     return CHEMIAPredictor(model, training_config, scaler, label_encoder)
 
-def load_model_from_files(model_path: str, config_path: str, 
-                         scaler_path: Optional[str] = None, 
+def load_model_from_files(model_path: str, config_path: str,
+                         scaler_path: Optional[str] = None,
                          encoder_path: Optional[str] = None) -> CHEMIAPredictor:
     """
     Load model from direct file paths
-    
+
     Args:
         model_path: Model file path
         config_path: Configuration file path
         scaler_path: Scaler file path (optional)
         encoder_path: Label encoder file path (optional)
-    
+
     Returns:
         CHEMIAPredictor: Predictor object
     """
     # Load configuration
     training_config = load_config_from_path(config_path)
     task_type = training_config.get('task_type', 'regression')
-    
+
     # Load model
     model = load_model_from_path(model_path, task_type)
-    
+
     # Load preprocessing tools
     scaler = None
     if scaler_path and os.path.exists(scaler_path):
         scaler = load_scaler_from_path(scaler_path)
-    
+
     label_encoder = None
     if encoder_path and os.path.exists(encoder_path):
         label_encoder = load_label_encoder_from_path(encoder_path)
-    
+
     return CHEMIAPredictor(model, training_config, scaler, label_encoder)
 
 # Convenience functions
 def predict(predictor: CHEMIAPredictor, data: Union[Dict, List[Dict], pd.DataFrame]) -> Dict[str, Any]:
     """
     Use predictor to make predictions
-    
+
     Args:
         predictor: CHEMIAPredictor object
         data: Input data
-    
+
     Returns:
         Prediction results dictionary
     """
@@ -295,11 +302,11 @@ def predict(predictor: CHEMIAPredictor, data: Union[Dict, List[Dict], pd.DataFra
 def predict_single(predictor: CHEMIAPredictor, sample: Dict[str, Any]) -> Union[float, str, int]:
     """
     Predict single sample
-    
+
     Args:
         predictor: CHEMIAPredictor object
         sample: Feature dictionary for single sample
-    
+
     Returns:
         Prediction value (scalar)
     """
@@ -308,12 +315,12 @@ def predict_single(predictor: CHEMIAPredictor, sample: Dict[str, Any]) -> Union[
 def quick_predict(experiment_dir: str, model_name: str, data: Union[Dict, List[Dict], pd.DataFrame]) -> Dict[str, Any]:
     """
     Complete model loading and prediction in one step
-    
+
     Args:
         experiment_dir: Experiment directory path
         model_name: Model name
         data: Input data
-    
+
     Returns:
         Prediction results dictionary
     """
@@ -325,11 +332,11 @@ if __name__ == "__main__":
     # Example: How to use this API
     print("CHEMIA Prediction API Example Usage")
     print("-" * 50)
-    
+
     # 1. Load model
     print("1. Load model:")
     print("predictor = load_model('output/my_experiment', 'xgb')")
-    
+
     # 2. Predict single sample
     print("\n2. Predict single sample:")
     print("""
@@ -343,7 +350,7 @@ sample = {
 result = predict_single(predictor, sample)
 print(f"Prediction value: {result}")
     """)
-    
+
     # 3. Predict multiple samples
     print("\n3. Predict multiple samples:")
     print("""
@@ -354,10 +361,10 @@ data = [
 results = predict(predictor, data)
 print(f"Prediction results: {results['predictions']}")
     """)
-    
+
     # 4. One-step prediction
     print("\n4. One-step prediction:")
     print("""
 results = quick_predict('output/my_experiment', 'xgb', sample)
 print(f"Prediction results: {results}")
-    """) 
+    """)

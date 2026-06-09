@@ -1,0 +1,39 @@
+# ClinTox — Clinical Toxicity (2 targets)
+data:
+  source_mode: single_file
+  single_file_config:
+    main_file_path: data/ClinTox.csv
+    smiles_col: smiles
+    target_cols:
+      - FDA_APPROVED
+      - CT_TOX
+
+task_type: binary_classification
+
+features:
+  generators:
+    - name: transformer_embedding
+      config:
+        model_type: unimolv2_310m
+    - name: rdkit_fingerprint
+      config:
+        type: morgan
+        nBits: 2048
+        radius: 2
+
+split_config:
+  split_mode: hold_out
+  hold_out:
+    test_size: 0.2
+    random_state: 42
+
+training:
+  models_to_run:
+    - xgboost
+    - ann
+    - tabnet
+    - lgbm
+    - catboost
+    - randomforest
+  n_trials: 50
+  random_state: 42

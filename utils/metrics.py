@@ -17,9 +17,9 @@ def compute_metrics(y_train_true, y_train_pred, y_test_true, y_test_pred,
                     console=None):
     """Compute relevant metrics based on task type."""
     from typing import Dict, Any, Union
-    
+
     effective_console = console if console is not None else default_console_metrics
-    
+
     y_train_true = np.array(y_train_true).ravel()
     y_train_pred = np.array(y_train_pred).ravel()
     y_test_true = np.array(y_test_true).ravel()
@@ -27,14 +27,14 @@ def compute_metrics(y_train_true, y_train_pred, y_test_true, y_test_pred,
 
     # Use explicit typing to allow mixed types in the metrics dictionary
     metrics: Dict[str, Any] = {
-        'y_train_pred': y_train_pred, 
-        'y_test_pred': y_test_pred,   
+        'y_train_pred': y_train_pred,
+        'y_test_pred': y_test_pred,
     }
-    if y_train_pred_proba is not None and len(y_train_pred_proba) > 0: 
+    if y_train_pred_proba is not None and len(y_train_pred_proba) > 0:
         metrics['y_train_pred_proba'] = y_train_pred_proba
-    if y_test_pred_proba is not None and len(y_test_pred_proba) > 0: 
+    if y_test_pred_proba is not None and len(y_test_pred_proba) > 0:
         metrics['y_test_pred_proba'] = y_test_pred_proba
-    
+
     # --- ADDED: Handle validation data if provided ---
     if y_val_true is not None and y_val_pred is not None and len(y_val_true) > 0:
         y_val_true_processed = np.array(y_val_true).ravel()
@@ -59,7 +59,7 @@ def compute_metrics(y_train_true, y_train_pred, y_test_true, y_test_pred,
 
     elif task_type == 'binary_classification' or task_type == 'multiclass_classification':
         avg_method = 'binary' if task_type == 'binary_classification' and num_classes == 2 else 'weighted'
-        
+
         metrics['train_accuracy'] = accuracy_score(y_train_true, y_train_pred)
         metrics['test_accuracy'] = accuracy_score(y_test_true, y_test_pred)
         metrics['train_precision'] = precision_score(y_train_true, y_train_pred, average=avg_method, zero_division='warn')
@@ -68,7 +68,7 @@ def compute_metrics(y_train_true, y_train_pred, y_test_true, y_test_pred,
         metrics['test_recall'] = recall_score(y_test_true, y_test_pred, average=avg_method, zero_division='warn')
         metrics['train_f1'] = f1_score(y_train_true, y_train_pred, average=avg_method, zero_division='warn')
         metrics['test_f1'] = f1_score(y_test_true, y_test_pred, average=avg_method, zero_division='warn')
-        
+
         if 'y_val_pred' in metrics: # <<< ADDED
             val_true = metrics['y_val_true']  # Use the processed version from metrics
             val_pred = metrics['y_val_pred']
@@ -80,26 +80,33 @@ def compute_metrics(y_train_true, y_train_pred, y_test_true, y_test_pred,
         has_train_proba = 'y_train_pred_proba' in metrics
         has_test_proba = 'y_test_pred_proba' in metrics
         has_val_proba = 'y_val_pred_proba' in metrics # <<< ADDED
-        
-        # --- ADDED: AUC logic for validation set ---
-        if has_val_proba and 'y_val_true' in metrics:
-            val_true_for_auc = metrics['y_val_true']
+
+        # --- ADDED: AUC logic for train/test/validation sets ---
+        def _compute_auc(y_true, y_proba, prefix):
+            if y_proba is None or len(y_proba) == 0:
+                return
             if task_type == 'binary_classification':
-                val_proba_pos = metrics['y_val_pred_proba'][:, 1] if metrics['y_val_pred_proba'].ndim == 2 and metrics['y_val_pred_proba'].shape[1] == 2 else metrics['y_val_pred_proba']
-                unique_val_labels = np.unique(val_true_for_auc)
-                if len(unique_val_labels) > 1:
-                    metrics['val_auc'] = roc_auc_score(val_true_for_auc, val_proba_pos)
+                proba_pos = y_proba[:, 1] if y_proba.ndim == 2 and y_proba.shape[1] == 2 else y_proba
+                unique_labels = np.unique(y_true)
+                if len(unique_labels) > 1:
+                    metrics[f'{prefix}_auc'] = roc_auc_score(y_true, proba_pos)
                 else:
-                    metrics['val_auc'] = np.nan
+                    metrics[f'{prefix}_auc'] = np.nan
             elif task_type == 'multiclass_classification' and num_classes is not None and num_classes > 2:
-                unique_val_labels_mc = np.unique(val_true_for_auc)
-                if len(unique_val_labels_mc) > 1:
-                     metrics['val_auc_ovr_weighted'] = roc_auc_score(val_true_for_auc, metrics['y_val_pred_proba'], multi_class='ovr', average='weighted', labels=np.arange(num_classes))
+                unique_labels = np.unique(y_true)
+                if len(unique_labels) > 1:
+                    metrics[f'{prefix}_auc_ovr_weighted'] = roc_auc_score(y_true, y_proba, multi_class='ovr', average='weighted', labels=np.arange(num_classes))
                 else:
-                     metrics['val_auc_ovr_weighted'] = np.nan
-        # Note: The existing AUC logic for train/test is assumed to be correct and is omitted here for brevity.
+                    metrics[f'{prefix}_auc_ovr_weighted'] = np.nan
+
+        if has_train_proba:
+            _compute_auc(y_train_true, y_train_pred_proba, 'train')
+        if has_test_proba:
+            _compute_auc(y_test_true, y_test_pred_proba, 'test')
+        if has_val_proba and 'y_val_true' in metrics:
+            _compute_auc(metrics['y_val_true'], y_val_pred_proba, 'val')
 
     else:
         raise ValueError(f"Unsupported task_type for metrics: {task_type}")
-        
+
     return metrics

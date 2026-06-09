@@ -1,0 +1,38 @@
+# BACE Classification
+# Predict BACE (β-secretase) inhibitor activity (active/inactive)
+data:
+  source_mode: single_file
+  single_file_config:
+    main_file_path: data/BACE.csv
+    smiles_col: mol
+    target_col: Class
+
+task_type: binary_classification
+
+features:
+  generators:
+    - name: transformer_embedding
+      config:
+        model_type: unimolv2_310m
+    - name: rdkit_fingerprint
+      config:
+        type: morgan
+        nBits: 2048
+        radius: 2
+
+split_config:
+  split_mode: hold_out
+  hold_out:
+    test_size: 0.2
+    random_state: 42
+
+training:
+  models_to_run:
+    - xgboost
+    - ann
+    - tabnet
+    - lgbm
+    - catboost
+    - randomforest
+  n_trials: 50
+  random_state: 42

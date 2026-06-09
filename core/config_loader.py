@@ -9,7 +9,7 @@ def _validate_smiles_col(cfg: Dict[str, Any], mode_name: str):
     """Helper function to validate the smiles_col configuration."""
     if 'smiles_col' not in cfg:
         raise ValueError(f"Config error: `data.{mode_name}.smiles_col` is required.")
-    
+
     smiles_col_spec = cfg.get('smiles_col')
     if not isinstance(smiles_col_spec, (str, list)):
         raise ValueError(f"Config error: `data.{mode_name}.smiles_col` must be a string or a list of strings.")
@@ -28,7 +28,7 @@ def _validate_feature_generators(features_cfg: Dict[str, Any], smiles_cols: List
         per_col_cfg = features_cfg['per_smiles_col_generators']
         if not isinstance(per_col_cfg, dict):
             raise ValueError("Config error: `features.per_smiles_col_generators` must be a dictionary.")
-        
+
         for col_name, generators in per_col_cfg.items():
             if col_name not in smiles_cols:
                 raise ValueError(f"Config error: The column '{col_name}' specified in `per_smiles_col_generators` is not found in the `data.smiles_col` list: {smiles_cols}")
@@ -53,20 +53,26 @@ def load_config(config_path: str) -> dict:
     except yaml.YAMLError as e:
         console.print(f"[bold red]Error parsing YAML file: {e}[/bold red]")
         raise
-    
+
     # --- Data Source Validation ---
     data_cfg = config.get('data', {})
     source_mode = data_cfg.get('source_mode')
-    
+
     if not source_mode:
         raise ValueError("Config error: `data.source_mode` must be specified.")
-    
+
     smiles_cols_list = []
-    
+
     if source_mode == 'single_file':
         cfg = data_cfg.get('single_file_config', {})
         if not cfg.get('main_file_path'):
             raise ValueError("Config error: For 'single_file' mode, `data.single_file_config.main_file_path` is required.")
+        if not cfg.get('target_col') and not cfg.get('target_cols'):
+            raise ValueError("Config error: For 'single_file' mode, `target_col` or `target_cols` is required.")
+        if cfg.get('target_cols'):
+            tcs = cfg['target_cols']
+            if not isinstance(tcs, list) or not all(isinstance(c, str) for c in tcs):
+                raise ValueError("Config error: `target_cols` must be a list of strings.")
         _validate_smiles_col(cfg, 'single_file_config')
         smiles_col_spec = cfg['smiles_col']
     elif source_mode == 'pre_split_cv':
@@ -90,6 +96,12 @@ def load_config(config_path: str) -> dict:
         raise ValueError(f"Invalid `data.source_mode`: {source_mode}. Must be 'single_file', 'pre_split_cv', 'pre_split_t_v_t', or 'features_only'.")
 
     smiles_cols_list = [smiles_col_spec] if isinstance(smiles_col_spec, str) else smiles_col_spec
+
+    # --- Task Type Validation ---
+    task_type = config.get('task_type')
+    valid_task_types = ['regression', 'binary_classification', 'multiclass_classification']
+    if task_type not in valid_task_types:
+        raise ValueError(f"Invalid `task_type`: {task_type}. Must be one of {valid_task_types}.")
 
     # --- Feature Generation Validation ---
     features_cfg = config.get('features', {})

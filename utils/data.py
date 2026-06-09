@@ -10,7 +10,7 @@ def encode_labels(y, task_type='regression', console=None):
     """
     Encodes the target variable y. For classification, it uses LabelEncoder.
     For regression, it ensures the output is a 2D column vector.
-    
+
     Returns the processed y and the fitted label_encoder instance (or None for regression).
     """
     if console is None:
@@ -37,7 +37,7 @@ def encode_labels(y, task_type='regression', console=None):
                 console.print(f"  [dim]Label encoding completed (details unavailable: {e})[/dim]")
     else:
         raise ValueError(f"Unsupported task_type: {task_type}")
-        
+
     return y_processed, label_encoder
 
 def split_data(X, y, train_size=0.6, valid_size=0.2, test_size=0.2, random_state=42, task_type='regression'):
@@ -53,11 +53,11 @@ def split_data(X, y, train_size=0.6, valid_size=0.2, test_size=0.2, random_state
         raise ValueError("valid_size must be non-negative.")
 
     stratify_option = y if task_type in ['binary_classification', 'multiclass_classification'] and y is not None and len(np.unique(y)) > 1 else None
-    
+
     X_temp, X_test, y_temp, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state, shuffle=True, stratify=stratify_option
     )
-    
+
     if valid_size == 0:
         X_train, y_train = X_temp, y_temp
         X_val = np.empty((0, X.shape[1]), dtype=X.dtype)
@@ -68,5 +68,5 @@ def split_data(X, y, train_size=0.6, valid_size=0.2, test_size=0.2, random_state
         X_train, X_val, y_train, y_val = train_test_split(
             X_temp, y_temp, test_size=valid_ratio_of_temp, random_state=random_state, shuffle=True, stratify=stratify_temp_option
         )
-        
+
     return X_train, X_val, X_test, y_train, y_val, y_test

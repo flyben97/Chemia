@@ -1,0 +1,49 @@
+# Tox21 — 12 Nuclear Receptor & Stress Response Assays
+data:
+  source_mode: single_file
+  single_file_config:
+    main_file_path: data/tox21.csv
+    smiles_col: smiles
+    target_cols:
+      - NR-AR
+      - NR-AR-LBD
+      - NR-AhR
+      - NR-Aromatase
+      - NR-ER
+      - NR-ER-LBD
+      - NR-PPAR-gamma
+      - SR-ARE
+      - SR-ATAD5
+      - SR-HSE
+      - SR-MMP
+      - SR-p53
+
+task_type: binary_classification
+
+features:
+  generators:
+    - name: transformer_embedding
+      config:
+        model_type: unimolv2_310m
+    - name: rdkit_fingerprint
+      config:
+        type: morgan
+        nBits: 2048
+        radius: 2
+
+split_config:
+  split_mode: hold_out
+  hold_out:
+    test_size: 0.2
+    random_state: 42
+
+training:
+  models_to_run:
+    - xgboost
+    - ann
+    - tabnet
+    - lgbm
+    - catboost
+    - randomforest
+  n_trials: 50
+  random_state: 42

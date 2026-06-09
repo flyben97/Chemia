@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  chemia:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chemia:latest
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PYTHONPATH=/app
+      - OMP_NUM_THREADS=4
+    volumes:
+      - ./data:/app/data:ro
+      - ./output:/app/output
+      - ./examples/configs:/app/examples/configs:ro
+      - ./batch_results:/app/batch_results
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: >
+      scripts/run_training_only.py
+      --config examples/configs/bace_classification.yaml
+
+  chemia-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chemia:latest
+    environment:
+      - CUDA_VISIBLE_DEVICES=
+      - PYTHONPATH=/app
+      - OMP_NUM_THREADS=4
+    volumes:
+      - ./data:/app/data:ro
+      - ./output:/app/output
+      - ./examples/configs:/app/examples/configs:ro
+      - ./batch_results:/app/batch_results
+    command: >
+      scripts/run_training_only.py
+      --config examples/configs/bace_classification.yaml
+    profiles:
+      - cpu

@@ -1,350 +1,289 @@
-#!/usr/bin/env python3
+# utils/smiles_validator.py
 """
-SMILES Validation Module
-
-This module provides functions to validate SMILES strings in datasets,
-ensuring that columns specified as SMILES actually contain valid molecular representations.
+SMILES 验证器 - 验证和检测 SMILES 列
+SMILES Validator - Validate and detect SMILES columns
 """
 
 import pandas as pd
 import numpy as np
-from typing import List, Dict, Optional, Tuple, Any
-import warnings
+from typing import List, Dict, Tuple, Any
+from rdkit import Chem
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-
-# Try to import RDKit for SMILES validation
-try:
-    from rdkit import Chem
-    from rdkit.Chem import rdMolDescriptors
-    RDKIT_AVAILABLE = True
-except ImportError:
-    RDKIT_AVAILABLE = False
-    warnings.warn("RDKit not available. SMILES validation will be limited.")
 
 console = Console()
 
-def is_valid_smiles(smiles: str) -> bool:
-    """
-    Check if a single SMILES string is valid
-    
-    Args:
-        smiles: SMILES string to validate
-        
-    Returns:
-        bool: True if valid, False otherwise
-    """
-    if not isinstance(smiles, str):
-        return False
-    
-    if not smiles or smiles.strip() == "":
-        return False
-    
-    # Basic format checks
-    smiles = smiles.strip()
-    
-    # Check for obviously invalid characters or patterns
-    if any(char in smiles for char in ['\n', '\r', '\t']):
-        return False
-    
-    # If RDKit is available, use it for proper validation
-    if RDKIT_AVAILABLE:
-        try:
-            mol = Chem.MolFromSmiles(smiles)
-            return mol is not None
-        except Exception:
-            return False
-    else:
-        # Basic validation without RDKit
-        # Check for basic SMILES characters
-        valid_chars = set("CNOPSFClBrI0123456789()[]@+-=#$%./\\")
-        return all(c in valid_chars for c in smiles)
 
-def validate_smiles_column(df: pd.DataFrame, column_name: str, 
-                          sample_size: int = 100, 
-                          min_valid_ratio: float = 0.8) -> Dict[str, Any]:
+def validate_smiles(smiles_str: str) -> bool:
     """
-    Validate a SMILES column in a DataFrame
-    
-    Args:
-        df: DataFrame containing the column
-        column_name: Name of the column to validate
-        sample_size: Number of samples to check (for performance)
-        min_valid_ratio: Minimum ratio of valid SMILES required
-        
-    Returns:
-        dict: Validation results including statistics and invalid samples
-    """
-    results = {
-        'column_name': column_name,
-        'total_samples': len(df),
-        'valid_count': 0,
-        'invalid_count': 0,
-        'empty_count': 0,
-        'valid_ratio': 0.0,
-        'is_valid_column': False,
-        'invalid_samples': [],
-        'sample_size_checked': 0,
-        'error_message': None
-    }
-    
-    # Check if column exists
-    if column_name not in df.columns:
-        results['error_message'] = f"Column '{column_name}' not found in DataFrame"
-        return results
-    
-    # Get the column data
-    column_data = df[column_name]
-    
-    # Sample data for validation (for performance on large datasets)
-    if len(column_data) > sample_size:
-        sample_indices = np.random.choice(len(column_data), size=sample_size, replace=False)
-        sample_data = column_data.iloc[sample_indices]
-        sample_df_subset = df.iloc[sample_indices]
-    else:
-        sample_data = column_data
-        sample_df_subset = df
-    
-    results['sample_size_checked'] = len(sample_data)
-    
-    # Validate each SMILES in the sample
-    for idx, smiles in enumerate(sample_data):
-        original_idx = sample_df_subset.index[idx]
-        
-        # Check for empty/null values
-        if pd.isna(smiles) or smiles == "" or smiles is None:
-            results['empty_count'] += 1
-            results['invalid_samples'].append({
-                'index': original_idx,
-                'value': str(smiles),
-                'error': 'Empty or null value'
-            })
-            continue
-        
-        # Validate SMILES
-        if is_valid_smiles(smiles):
-            results['valid_count'] += 1
-        else:
-            results['invalid_count'] += 1
-            results['invalid_samples'].append({
-                'index': original_idx,
-                'value': str(smiles)[:50] + "..." if len(str(smiles)) > 50 else str(smiles),
-                'error': 'Invalid SMILES format'
-            })
-    
-    # Calculate statistics
-    total_checked = results['valid_count'] + results['invalid_count'] + results['empty_count']
-    if total_checked > 0:
-        results['valid_ratio'] = results['valid_count'] / total_checked
-        results['is_valid_column'] = results['valid_ratio'] >= min_valid_ratio
-    
-    return results
+    验证单个 SMILES 字符串是否有效
 
-def validate_smiles_columns(df: pd.DataFrame, smiles_columns: List[str],
-                           sample_size: int = 100,
+    Args:
+        smiles_str: SMILES 字符串
+
+    Returns:
+        是否有效
+    """
+    if not isinstance(smiles_str, str):
+        return False
+
+    try:
+        mol = Chem.MolFromSmiles(smiles_str)
+        return mol is not None
+    except Exception:
+        return False
+
+
+def validate_smiles_columns(df: pd.DataFrame,
+                           smiles_cols: List[str],
+                           sample_size: int = 200,
                            min_valid_ratio: float = 0.8,
-                           show_details: bool = True) -> Tuple[bool, Dict[str, Any]]:
+                           show_details: bool = True,
+                           random_state: int = None) -> Tuple[bool, Dict[str, Any]]:
     """
-    Validate multiple SMILES columns in a DataFrame
-    
+    验证 SMILES 列的有效性
+
     Args:
-        df: DataFrame to validate
-        smiles_columns: List of column names that should contain SMILES
-        sample_size: Number of samples to check per column
-        min_valid_ratio: Minimum ratio of valid SMILES required
-        show_details: Whether to show detailed validation results
-        
+        df: 数据框
+        smiles_cols: SMILES 列名列表
+        sample_size: 验证的样本数
+        min_valid_ratio: 最小有效比例
+        show_details: 是否显示详细信息
+
     Returns:
-        tuple: (all_valid, detailed_results_dict)
+        (所有列都有效, 验证结果字典)
     """
-    if not RDKIT_AVAILABLE:
-        console.print("[yellow]⚠️  Warning: RDKit not available. SMILES validation will be basic.[/yellow]")
-    
-    all_results = {}
+    validation_results = {}
     all_valid = True
-    
-    console.print(f"\n[bold cyan]🔍 Validating SMILES columns...[/bold cyan]")
-    
-    for column in smiles_columns:
-        console.print(f"  • Checking column: [magenta]{column}[/magenta]")
-        
-        results = validate_smiles_column(df, column, sample_size, min_valid_ratio)
-        all_results[column] = results
-        
-        if results['error_message']:
-            console.print(f"    [red]❌ {results['error_message']}[/red]")
-            all_valid = False
-            continue
-        
-        if results['is_valid_column']:
-            console.print(f"    [green]✅ Valid ({results['valid_count']}/{results['sample_size_checked']} samples, {results['valid_ratio']:.1%})[/green]")
-        else:
-            console.print(f"    [red]❌ Invalid ({results['valid_count']}/{results['sample_size_checked']} samples, {results['valid_ratio']:.1%})[/red]")
-            all_valid = False
-    
-    # Show detailed results if requested
-    if show_details and not all_valid:
-        console.print(f"\n[bold red]❌ SMILES Validation Failed![/bold red]")
-        
-        # Create detailed report
-        for column, results in all_results.items():
-            if not results['is_valid_column'] and not results['error_message']:
-                console.print(f"\n[bold yellow]⚠️  Issues in column '{column}':[/bold yellow]")
-                
-                # Show invalid samples
-                invalid_samples = results['invalid_samples'][:10]  # Show first 10 invalid samples
-                if invalid_samples:
-                    table = Table(title=f"Invalid SMILES in '{column}' (showing first 10)")
-                    table.add_column("Row Index", style="cyan")
-                    table.add_column("Value", style="red")
-                    table.add_column("Error", style="yellow")
-                    
-                    for sample in invalid_samples:
-                        table.add_row(
-                            str(sample['index']),
-                            sample['value'],
-                            sample['error']
-                        )
-                    
-                    console.print(table)
-                
-                # Show recommendations
-                console.print(f"\n[bold blue]💡 Recommendations for '{column}':[/bold blue]")
-                if results['empty_count'] > 0:
-                    console.print(f"  • Remove or fill {results['empty_count']} empty/null values")
-                if results['invalid_count'] > 0:
-                    console.print(f"  • Fix {results['invalid_count']} invalid SMILES strings")
-                console.print(f"  • Expected format: Valid SMILES strings (e.g., 'CCO', 'c1ccccc1')")
-    
-    return all_valid, all_results
 
-def suggest_potential_smiles_columns(df: pd.DataFrame, 
-                                   threshold: float = 0.7) -> List[str]:
-    """
-    Suggest which columns might contain SMILES based on content analysis
-    
-    Args:
-        df: DataFrame to analyze
-        threshold: Minimum ratio of valid SMILES to consider a column
-        
-    Returns:
-        list: Column names that might contain SMILES
-    """
-    potential_columns = []
-    
-    console.print(f"\n[bold cyan]🔍 Analyzing columns for potential SMILES content...[/bold cyan]")
-    
-    for column in df.columns:
-        # Skip obviously non-SMILES columns
-        if df[column].dtype in ['int64', 'float64', 'bool']:
+    for col in smiles_cols:
+        if col not in df.columns:
+            validation_results[col] = {
+                'is_valid_column': False,
+                'error_message': f'列 "{col}" 不存在于数据框中',
+                'valid_count': 0,
+                'sample_size_checked': 0,
+                'valid_ratio': 0.0
+            }
+            all_valid = False
             continue
-        
-        # Check a sample of the column
-        sample_size = min(50, len(df))
-        sample_data = df[column].head(sample_size)
-        
+
+        # 获取样本
+        sample_size_actual = min(sample_size, len(df))
+        rng = np.random.default_rng(random_state)
+        sample_indices = rng.choice(len(df), size=sample_size_actual, replace=False)
+        sample_data = df.iloc[sample_indices][col]
+
+        # 验证 SMILES
         valid_count = 0
-        total_count = 0
-        
-        for value in sample_data:
-            if pd.notna(value) and value != "":
-                total_count += 1
-                if is_valid_smiles(str(value)):
+        for smiles in sample_data:
+            if validate_smiles(smiles):
+                valid_count += 1
+
+        valid_ratio = valid_count / sample_size_actual if sample_size_actual > 0 else 0
+        is_valid = valid_ratio >= min_valid_ratio
+
+        validation_results[col] = {
+            'is_valid_column': is_valid,
+            'error_message': None if is_valid else f'有效 SMILES 比例过低: {valid_ratio:.1%}',
+            'valid_count': valid_count,
+            'sample_size_checked': sample_size_actual,
+            'valid_ratio': valid_ratio
+        }
+
+        if not is_valid:
+            all_valid = False
+
+        if show_details:
+            status = "✓" if is_valid else "✗"
+            console.print(f"  {status} {col}: {valid_count}/{sample_size_actual} 有效 ({valid_ratio:.1%})")
+
+    return all_valid, validation_results
+
+
+def suggest_potential_smiles_columns(df: pd.DataFrame, random_state: int = None) -> List[str]:
+    """
+    建议可能的 SMILES 列
+
+    Args:
+        df: 数据框
+
+    Returns:
+        可能的 SMILES 列名列表
+    """
+    potential_cols = []
+
+    # 基于列名的启发式方法
+    smiles_keywords = ['smiles', 'smi', 'mol', 'structure', 'canonical', 'smilesstring']
+
+    for col in df.columns:
+        col_lower = col.lower()
+
+        # 检查列名
+        if any(keyword in col_lower for keyword in smiles_keywords):
+            potential_cols.append(col)
+            continue
+
+        # 检查列内容 (采样)
+        if df[col].dtype == 'object':
+            sample_size = min(100, len(df))
+            rng = np.random.default_rng(random_state)
+            sample_indices = rng.choice(len(df), size=sample_size, replace=False)
+            sample_data = df.iloc[sample_indices][col]
+
+            # 检查是否看起来像 SMILES
+            valid_count = 0
+            for value in sample_data:
+                if isinstance(value, str) and validate_smiles(value):
                     valid_count += 1
-        
-        if total_count > 0:
-            valid_ratio = valid_count / total_count
-            if valid_ratio >= threshold:
-                potential_columns.append(column)
-                console.print(f"  • [green]{column}[/green]: {valid_ratio:.1%} valid SMILES")
-    
-    return potential_columns
 
-def create_smiles_validation_report(df: pd.DataFrame, 
-                                  smiles_columns: List[str],
-                                  output_path: Optional[str] = None) -> str:
+            # 如果超过 50% 的样本是有效 SMILES，则认为是 SMILES 列
+            if valid_count / sample_size > 0.5:
+                potential_cols.append(col)
+
+    return potential_cols
+
+
+def detect_smiles_columns(df: pd.DataFrame,
+                         confidence_threshold: float = 0.7,
+                         random_state: int = None) -> List[str]:
     """
-    Create a comprehensive SMILES validation report
-    
+    自动检测 SMILES 列
+
     Args:
-        df: DataFrame to validate
-        smiles_columns: List of SMILES column names
-        output_path: Optional path to save the report
-        
-    Returns:
-        str: Report content
-    """
-    all_valid, results = validate_smiles_columns(df, smiles_columns, show_details=False)
-    
-    report_lines = []
-    report_lines.append("SMILES Validation Report")
-    report_lines.append("=" * 50)
-    report_lines.append(f"Generated on: {pd.Timestamp.now()}")
-    report_lines.append(f"Dataset shape: {df.shape}")
-    report_lines.append(f"SMILES columns checked: {len(smiles_columns)}")
-    report_lines.append("")
-    
-    for column, result in results.items():
-        report_lines.append(f"Column: {column}")
-        report_lines.append("-" * 30)
-        if result['error_message']:
-            report_lines.append(f"Error: {result['error_message']}")
-        else:
-            report_lines.append(f"Total samples: {result['total_samples']}")
-            report_lines.append(f"Samples checked: {result['sample_size_checked']}")
-            report_lines.append(f"Valid SMILES: {result['valid_count']}")
-            report_lines.append(f"Invalid SMILES: {result['invalid_count']}")
-            report_lines.append(f"Empty values: {result['empty_count']}")
-            report_lines.append(f"Valid ratio: {result['valid_ratio']:.1%}")
-            report_lines.append(f"Column status: {'VALID' if result['is_valid_column'] else 'INVALID'}")
-        report_lines.append("")
-    
-    report_lines.append(f"Overall validation: {'PASSED' if all_valid else 'FAILED'}")
-    
-    report_content = "\n".join(report_lines)
-    
-    if output_path:
-        with open(output_path, 'w') as f:
-            f.write(report_content)
-        console.print(f"[green]✅ Report saved to: {output_path}[/green]")
-    
-    return report_content
+        df: 数据框
+        confidence_threshold: 置信度阈值
 
-# Example usage functions
-def quick_smiles_check(df: pd.DataFrame, smiles_columns: List[str]) -> bool:
+    Returns:
+        检测到的 SMILES 列名列表
     """
-    Quick SMILES validation check (returns True/False)
-    
+    detected_cols = []
+
+    for col in df.columns:
+        if df[col].dtype != 'object':
+            continue
+
+        # 采样检查
+        sample_size = min(100, len(df))
+        rng = np.random.default_rng(random_state)
+        sample_indices = rng.choice(len(df), size=sample_size, replace=False)
+        sample_data = df.iloc[sample_indices][col]
+
+        # 计算有效 SMILES 的比例
+        valid_count = 0
+        for value in sample_data:
+            if isinstance(value, str) and validate_smiles(value):
+                valid_count += 1
+
+        confidence = valid_count / sample_size if sample_size > 0 else 0
+
+        if confidence >= confidence_threshold:
+            detected_cols.append(col)
+
+    return detected_cols
+
+
+def standardize_smiles(smiles_str: str) -> str:
+    """
+    标准化 SMILES 字符串
+
     Args:
-        df: DataFrame to check
-        smiles_columns: List of SMILES column names
-        
-    Returns:
-        bool: True if all columns are valid, False otherwise
-    """
-    all_valid, _ = validate_smiles_columns(df, smiles_columns, show_details=False)
-    return all_valid
+        smiles_str: SMILES 字符串
 
-if __name__ == "__main__":
-    # Example usage
-    print("SMILES Validator Module")
-    print("Import this module to use SMILES validation functions")
-    
-    # Test with sample data
-    sample_data = {
-        'valid_smiles': ['CCO', 'c1ccccc1', 'CC(=O)O', 'CCC'],
-        'invalid_smiles': ['invalid', '123', '', 'not_smiles'],
-        'mixed_column': ['CCO', 'invalid', 'c1ccccc1', ''],
-        'numbers': [1, 2, 3, 4]
+    Returns:
+        标准化的 SMILES 字符串，如果无效则返回原字符串
+    """
+    try:
+        mol = Chem.MolFromSmiles(smiles_str)
+        if mol is not None:
+            return Chem.MolToSmiles(mol)
+    except Exception:
+        pass
+
+    return smiles_str
+
+
+def standardize_smiles_column(df: pd.DataFrame, col: str) -> pd.Series:
+    """
+    标准化 SMILES 列
+
+    Args:
+        df: 数据框
+        col: 列名
+
+    Returns:
+        标准化后的 Series
+    """
+    return df[col].apply(standardize_smiles)
+
+
+def get_smiles_statistics(df: pd.DataFrame, col: str) -> Dict[str, Any]:
+    """
+    获取 SMILES 列的统计信息
+
+    Args:
+        df: 数据框
+        col: 列名
+
+    Returns:
+        统计信息字典
+    """
+    stats = {
+        'total_count': len(df),
+        'non_null_count': df[col].notna().sum(),
+        'null_count': df[col].isna().sum(),
+        'valid_smiles_count': 0,
+        'invalid_smiles_count': 0,
+        'unique_smiles_count': 0,
+        'average_length': 0.0
     }
-    
-    test_df = pd.DataFrame(sample_data)
-    
-    print("\nTesting with sample data:")
-    print(test_df)
-    
-    # Test validation
-    all_valid, results = validate_smiles_columns(test_df, ['valid_smiles', 'invalid_smiles', 'mixed_column'])
-    
-    print(f"\nValidation result: {'PASSED' if all_valid else 'FAILED'}") 
+
+    # 计算有效/无效 SMILES
+    valid_smiles = []
+    for smiles in df[col].dropna():
+        if isinstance(smiles, str):
+            if validate_smiles(smiles):
+                stats['valid_smiles_count'] += 1
+                valid_smiles.append(smiles)
+            else:
+                stats['invalid_smiles_count'] += 1
+
+    stats['unique_smiles_count'] = len(set(valid_smiles))
+
+    # 计算平均长度
+    if valid_smiles:
+        stats['average_length'] = np.mean([len(s) for s in valid_smiles])
+
+    return stats
+
+
+def validate_and_clean_smiles(df: pd.DataFrame,
+                             smiles_cols: List[str],
+                             remove_invalid: bool = False) -> pd.DataFrame:
+    """
+    验证并清理 SMILES 列
+
+    Args:
+        df: 数据框
+        smiles_cols: SMILES 列名列表
+        remove_invalid: 是否删除包含无效 SMILES 的行
+
+    Returns:
+        清理后的数据框
+    """
+    df_clean = df.copy()
+
+    if remove_invalid:
+        # 删除包含无效 SMILES 的行
+        for col in smiles_cols:
+            if col in df_clean.columns:
+                valid_mask = df_clean[col].apply(
+                    lambda x: isinstance(x, str) and validate_smiles(x)
+                )
+                df_clean = df_clean[valid_mask]
+    else:
+        # 标准化 SMILES
+        for col in smiles_cols:
+            if col in df_clean.columns:
+                df_clean[col] = standardize_smiles_column(df_clean, col)
+
+    return df_clean
