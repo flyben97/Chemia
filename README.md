@@ -1,3 +1,5 @@
+
+
 <div align="center">
   <img src="images/chemia_logo.png" alt="Chemia Logo" width="300"/>
   <p>A comprehensive ML framework for molecular property prediction, reaction optimization, and materials design. Supports multiple molecular representations, pretrained models, and diverse ML algorithms.</p>
@@ -33,7 +35,7 @@
 ### 🔄 Checkpoint/Resume
 
 - `--resume` skips completed tasks after a crash
-- Atomic progress writes to `batch_progress.json`
+- Atomic progress writes to `batch_results/batch_progress.json` by default
 
 ### 🐳 Docker
 
